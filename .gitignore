@@ -1,0 +1,10 @@
+# 설치된 외부 라이브러리 폴더 제외
+node_modules/
+
+# 빌드 결과물 제외
+dist/
+
+# 환경 변수 및 로그 파일 제외
+.env
+.env.local
+npm-debug.log*

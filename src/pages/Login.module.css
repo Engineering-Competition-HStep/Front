@@ -1,0 +1,126 @@
+/* Login.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, var(--bg-gradient-start), var(--bg-gradient-end));
+  position: relative;
+}
+
+.topLogo {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+}
+
+.logoImage {
+  height: 24px;
+  width: auto;
+}
+
+.bubbleContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.bubble {
+  background-color: var(--color-white);
+  padding: 10px 20px;
+  border-radius: 20px;
+  color: var(--color-text-gray);
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 48px;
+  color: var(--color-primary);
+  margin: 0 0 10px 0;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--color-secondary);
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-white);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 5px;
+}
+
+.linkLeft {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.linkCenter {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.linkText {
+  color: var(--color-text-gray);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.plainText {
+  color: var(--color-text-gray);
+  font-size: 14px;
+}
+
+.loginButton {
+  background-color: var(--color-button-disabled);
+  color: var(--color-white);
+  border: none;
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.profileIcon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+.EyeIconImage {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-left: 5px;
+}

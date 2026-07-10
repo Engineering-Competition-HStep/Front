@@ -1,0 +1,23 @@
+/* src/styles/global.css */
+:root {
+  /* 배경 그라데이션 색상 */
+  --bg-gradient-start: #f4f9ff;
+  --bg-gradient-end: #e6f0fa;
+  
+  /* 메인 텍스트 및 로고 색상 */
+  --color-primary: #1a498b;
+  --color-secondary: #007bff;
+  
+  /* 기본 텍스트 및 아이콘 색상 */
+  --color-text-gray: #888;
+  --color-icon-gray: #666;
+  
+  /* 기본 배경 및 버튼 색상 */
+  --color-white: #ffffff;
+  --color-button-disabled: #a0a0a0;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+}

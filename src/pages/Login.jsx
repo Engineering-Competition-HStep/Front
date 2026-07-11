@@ -7,7 +7,7 @@ import EyeOffIcon from '../assets/Eye_off.svg';
 
 import styles from './Login.module.css';
 
-function Login() {
+function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
   const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -65,7 +65,13 @@ function Login() {
         </div>
 
         <div className={styles.linkLeft}>
-          <a href="#" className={styles.linkText}>학번/비밀번호를 잊으셨나요?</a>
+          <span 
+            className={styles.linkText} 
+            onClick={onNavigateToFindPassword}
+            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            비밀번호를 잊으셨나요?
+          </span>
         </div>
 
         <button type="submit" className={styles.loginButton}>
@@ -74,7 +80,12 @@ function Login() {
 
         <div className={styles.linkCenter}>
           <span className={styles.plainText}>HSTEP가 처음이신가요? </span>
-          <a href="#" className={styles.linkText}>회원가입 하러가기</a>
+          <span 
+            className={styles.linkText} 
+            onClick={onNavigateToSignup}
+            style={{ cursor: 'pointer', textDecoration: 'underline' }}>
+            회원가입 하러가기
+          </span>
         </div>
       </form>
     </div>

@@ -1,4 +1,10 @@
 /* src/styles/global.css */
+
+@font-face {
+    font-family: 'SBAggroL';    
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroL.woff') format('woff');    font-weight: normal;
+    font-style: normal;
+}
 :root {
   /* 배경 그라데이션 색상 */
   --bg-gradient-start: #f4f9ff;
@@ -20,4 +26,6 @@
 body {
   margin: 0;
   font-family: sans-serif;
+  -webkit-font-smoothing: antialiased; /* 글씨 외곽선을 부드럽게 처리합니다 */
+  -moz-osx-font-smoothing: grayscale;
 }

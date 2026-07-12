@@ -9,6 +9,9 @@ import passwordIconEdit from '../assets/passwordIcon_edit.svg';
 // 입력 완료 아이콘
 import profileIconCompleted from '../assets/login_profile_completed.svg';
 import passwordIconCompleted from '../assets/passwordIcon_completed.svg';
+// 로그인 실패 아이콘
+import profileIconError from '../assets/login_profile_error.svg';
+import passwordIconError from '../assets/passwordIcon_error.svg';
 // 비밀번호 표시 아이콘
 import EyeIcon from '../assets/Eye.svg';
 import EyeOffIcon from '../assets/Eye_off.svg';
@@ -24,8 +27,25 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
   const [isIdFocused, setIsIdFocused] = useState(false);
   const [isPwFocused, setIsPwFocused] = useState(false);
 
+  // 로그인 실패 상태 확인 변수
+  const [hasError, setHasError] = useState(false);
+
   const handleLogin = (e) => {
     e.preventDefault();
+
+    // TODO: 백엔드(DB) 연동 시 여기에 API 통신 코드가 들어감
+    // fetch('/api/login') 등을 통해 성공/실패 여부를 응답받고,
+    // 실패로 판정되면 setHasError(true)를 실행
+
+    // 임시 테스트 로그(아이디가 123이 아니면 로그인 실패)
+    if (studentId !== '123') {
+      setHasError(true);
+      alert('로그인 실패: 아이디 또는 비밀번호를 확인해주세요.');
+    } else {
+      setHasError(false);
+      alert('로그인 성공!');
+    }
+
     console.log('로그인 시도:', { studentId, password });
   };
 
@@ -51,9 +71,11 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
         <div className={`${styles.inputGroup} ${isIdFocused ? styles.inputGroupFocused : ''}`}>
           <img 
             src={
-              isIdFocused 
-                ? profileIconEdit 
-                : (studentId.length > 0 ? profileIconCompleted : profileIcon)
+              hasError 
+                ? profileIconError
+                : isIdFocused 
+                  ? profileIconEdit 
+                  : (studentId.length > 0 ? profileIconCompleted : profileIcon)
             } 
             alt='아이디 아이콘' 
             className={styles.profileIcon} 
@@ -63,7 +85,10 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
             type="text"
             placeholder="학번을 입력하세요."
             value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
+            onChange={(e) => {
+              setStudentId(e.target.value);
+              setHasError(false); // 로그인 실패 이후 다시 입력 시 에러 아이콘 해제
+            }}
             onFocus={() => setIsIdFocused(true)}
             onBlur={() => setIsIdFocused(false)}
             className={styles.input}
@@ -74,20 +99,24 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
         <div className={`${styles.inputGroup} ${isPwFocused ? styles.inputGroupFocused : ''}`}>
           <img 
             src={
-              isPwFocused 
-                ? passwordIconEdit 
-                : (password.length > 0 ? passwordIconCompleted : passwordIcon)
+              hasError 
+                ? passwordIconError
+                : isPwFocused 
+                  ? passwordIconEdit 
+                  : (password.length > 0 ? passwordIconCompleted : passwordIcon)
             } 
             alt='비밀번호 아이콘' 
             className={styles.profileIcon} 
           />
-          {/* 세로 구분선 */}
           <div className={`${styles.verticalBar} ${isPwFocused ? styles.verticalBarActive : ''}`}></div>
           <input
             type={showPassword ? 'text' : 'password'}
             placeholder="비밀번호를 입력하세요."
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setHasError(false); // 로그인 실패 후 다시 입력 시 에러 아이콘 해제
+            }}
             onFocus={() => setIsPwFocused(true)}
             onBlur={() => setIsPwFocused(false)}
             className={styles.input}

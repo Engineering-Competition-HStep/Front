@@ -36,9 +36,9 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
       </div>
       
       <div className={styles.bubbleContainer}>
-        <div className={styles.bubble}>내 분야는 어떤걸 하지?</div>
-        <div className={styles.bubble}>어떤 활동이 나한테 도움이 되려나?</div>
-        <div className={styles.bubble}>내 트랙으로는 어디 회사를 갈 수가 있는거지?</div>
+        <div className={`${styles.bubble} ${styles.bubble1}`}>내 분야는 어떤걸 하지?</div>
+        <div className={`${styles.bubble} ${styles.bubble2}`}>어떤 활동이 나한테 도움이 되려나?</div>
+        <div className={`${styles.bubble} ${styles.bubble3}`}>내 트랙으로는 어디 회사를 갈 수가 있는거지?</div>
       </div>
 
       <div className={styles.header}>

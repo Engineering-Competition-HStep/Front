@@ -23,18 +23,47 @@
 .bubbleContainer {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
+  gap: 8px;
+  z-index: 5;
+  align-self: flex-start;
+  margin-left: calc(50%);
   margin-bottom: 20px;
-  gap: 10px;
 }
 
+
 .bubble {
-  background-color: var(--color-white);
-  padding: 10px 20px;
-  border-radius: 20px;
-  color: var(--color-text-gray);
-  font-size: 14px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  height: 51px;
+  display: flex;
+  align-items: center;
+  padding: 0 25px;
+  box-shadow: 0px 8px 8px rgba(0, 132, 255, 0.04);
+  border-radius: 100px;
+
+  font-family: 'Pretendard', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 29px;
+  backdrop-filter: blur(11.2px);
+
+  white-space: nowrap;
+  box-sizing: border-box;
+  width: max-content;
+}
+
+.bubble1 {
+  background: #F7FAFD;
+  color: #BAC8D5; /* 가장 투명한 글씨 (약 30% 불투명도) */
+}
+
+.bubble2 {
+  background: #FBFCFE;
+  color: #849CB2; /* 중간 투명도 글씨 (약 65% 불투명도) */
+}
+
+.bubble3 {
+  background: #FEFEFE;
+  color: #567694; /* 가장 선명한 글씨 (100% 불투명도) */
 }
 
 .header {

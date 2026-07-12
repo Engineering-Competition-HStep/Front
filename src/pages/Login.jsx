@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import HSTEPLogo from '../assets/HSTEP_logo.svg';
+// 기본 로그인 아이콘
 import profileIcon from '../assets/login_profile.svg';
 import passwordIcon from '../assets/passwordIcon.svg';
+// 포커스 활성화 아이콘
+import profileIconEdit from '../assets/login_profile_edit.svg';
+import passwordIconEdit from '../assets/passwordIcon_edit.svg';
+// 입력 완료 아이콘
+import profileIconCompleted from '../assets/login_profile_completed.svg';
+import passwordIconCompleted from '../assets/passwordIcon_completed.svg';
+// 비밀번호 표시 아이콘
 import EyeIcon from '../assets/Eye.svg';
 import EyeOffIcon from '../assets/Eye_off.svg';
 
@@ -12,13 +20,16 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // 입력창 포커스 추적하는 상태
+  const [isIdFocused, setIsIdFocused] = useState(false);
+  const [isPwFocused, setIsPwFocused] = useState(false);
+
   const handleLogin = (e) => {
     e.preventDefault();
     console.log('로그인 시도:', { studentId, password });
   };
 
   return (
-    // style 대신 className을 사용합니다.
     <div className={styles.container}>
       <div className={styles.topLogo}>
         <img src={HSTEPLogo} alt="HSTEP 로고" className={styles.logoImage} />
@@ -36,24 +47,49 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
       </div>
 
       <form onSubmit={handleLogin} className={styles.form}>
-        <div className={styles.inputGroup}>
-          <img src={profileIcon} alt='아이디 아이콘' className={styles.profileIcon} />
+        {/* 학번 입력 블럭 */}
+        <div className={`${styles.inputGroup} ${isIdFocused ? styles.inputGroupFocused : ''}`}>
+          <img 
+            src={
+              isIdFocused 
+                ? profileIconEdit 
+                : (studentId.length > 0 ? profileIconCompleted : profileIcon)
+            } 
+            alt='아이디 아이콘' 
+            className={styles.profileIcon} 
+          />
+          <div className={`${styles.verticalBar} ${isIdFocused ? styles.verticalBarActive : ''}`}></div>
           <input
             type="text"
             placeholder="학번을 입력하세요."
             value={studentId}
             onChange={(e) => setStudentId(e.target.value)}
+            onFocus={() => setIsIdFocused(true)}
+            onBlur={() => setIsIdFocused(false)}
             className={styles.input}
           />
         </div>
 
-        <div className={styles.inputGroup}>
-          <img src={passwordIcon} alt='비밀번호 아이콘' className={styles.profileIcon} />
+        {/* 비밀번호 입력 블럭 */}
+        <div className={`${styles.inputGroup} ${isPwFocused ? styles.inputGroupFocused : ''}`}>
+          <img 
+            src={
+              isPwFocused 
+                ? passwordIconEdit 
+                : (password.length > 0 ? passwordIconCompleted : passwordIcon)
+            } 
+            alt='비밀번호 아이콘' 
+            className={styles.profileIcon} 
+          />
+          {/* 세로 구분선 */}
+          <div className={`${styles.verticalBar} ${isPwFocused ? styles.verticalBarActive : ''}`}></div>
           <input
             type={showPassword ? 'text' : 'password'}
             placeholder="비밀번호를 입력하세요."
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onFocus={() => setIsPwFocused(true)}
+            onBlur={() => setIsPwFocused(false)}
             className={styles.input}
           />
           <img 

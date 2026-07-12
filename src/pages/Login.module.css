@@ -77,6 +77,24 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+.inputGroupFocused {
+  border: 1px solid #0084FF !important;
+  box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.1) !important;
+}
+
+.verticalBar {
+  width: 2px;
+  height: 16px;
+  background-color: transparent;
+  margin: 0 12px;
+  border-radius: 1px;
+  transition: background-color 0.2s ease;
+}
+
+.verticalBarActive {
+background-color: #0084FF;
+}
+
 .input {
   flex: 1;
   border: none;

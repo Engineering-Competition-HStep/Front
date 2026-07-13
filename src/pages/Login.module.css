@@ -175,6 +175,15 @@ background-color: #0084FF;
     background-color: #0070d9;
 }
 
+.errorMessage {
+  font-family: 'Pretendard';
+  color: #FF0000;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: -10px;
+}
+
 .profileIcon {
   width: 20px;
   height: 20px;

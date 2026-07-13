@@ -160,6 +160,12 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
           로그인
         </button>
 
+        {hasError && (
+          <p className={styles.errorMessage}>
+            학번 or 비밀번호가 맞지 않습니다. 다시 확인해주세요.
+          </p>)
+        }
+
         <div className={styles.linkCenter}>
           <span className={styles.plainText}>HSTEP가 처음이신가요? </span>
           <span 

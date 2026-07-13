@@ -32,6 +32,9 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
 
   const passwordRef = useRef(null);
 
+  // 학번, 비밀번호 입력창 텍스트 있는지 확인하는 변수
+  const isFormValid = studentId.length > 0 && password.length > 0
+
   const handleLogin = (e) => {
     e.preventDefault();
 
@@ -149,7 +152,11 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
           </span>
         </div>
 
-        <button type="submit" className={styles.loginButton}>
+        <button 
+          type="submit" 
+          className={`${styles.loginButton} ${isFormValid ? styles.loginButtonActive : ''}`}
+          disabled={!isFormValid}
+        >
           로그인
         </button>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import HSTEPLogo from '../assets/HSTEP_logo.svg';
 // 기본 로그인 아이콘
 import profileIcon from '../assets/login_profile.svg';
@@ -29,6 +29,8 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
 
   // 로그인 실패 상태 확인 변수
   const [hasError, setHasError] = useState(false);
+
+  const passwordRef = useRef(null);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -91,6 +93,13 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
             }}
             onFocus={() => setIsIdFocused(true)}
             onBlur={() => setIsIdFocused(false)}
+            // 엔터 키 누를 때 비번 창으로 이동
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault(); // 엔터 쳤을 때 로그인 되는 것을 막음
+                passwordRef.current.focus(); // 비밀번호 창으로 커서를 이동
+              }
+            }}
             className={styles.input}
           />
         </div>
@@ -119,6 +128,7 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
             }}
             onFocus={() => setIsPwFocused(true)}
             onBlur={() => setIsPwFocused(false)}
+            ref={passwordRef}
             className={styles.input}
           />
           <img 

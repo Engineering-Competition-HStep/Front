@@ -110,6 +110,7 @@ margin-bottom: 20px; /* 선 높이 조절 */
 
 /* 입력 필드 그룹 */
 .inputGroup {
+  position: relative;
 margin-bottom: 25px;
 text-align: left;
 }
@@ -123,15 +124,8 @@ margin-bottom: 8px;
 }
 
 .required {
-color: red;
+color: #FF0000;
 margin-left: 2px;
-}
-
-.errorText {
-font-size: 12px;
-color: red;
-margin-left: 10px;
-font-weight: normal;
 }
 
 /* 텍스트 입력창 */
@@ -143,15 +137,27 @@ border-radius: 8px;
 font-size: 15px;
 box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
 background-color: #ffffff;
+caret-color: #0084FF;
+outline: none;
 }
+
+input:focus {
+    outline: none;
+}
+
 .input::placeholder {
 color: #aaa;
+}
+
+.inputError {
+color: #FF0000 !important;
+caret-color: #FF0000 !important;
 }
 
 /* 학년 선택 라디오 버튼 영역 */
 .radioGroup {
 display: flex;
-gap: 20px;
+gap: 30px;
 margin-top: 10px;
 }
 
@@ -161,7 +167,20 @@ align-items: center;
 font-size: 15px;
 color: #333;
 cursor: pointer;
+line-height: 18px;
 }
+
+.hiddenRadio {
+    display: none;
+}
+
+.customRadioIcon {
+width: 18px;
+height: 18px;
+flex-shrink: 0;
+margin-right: 8px; /* 글씨와의 간격 */
+}
+
 
 .radioInput {
 margin-right: 8px;

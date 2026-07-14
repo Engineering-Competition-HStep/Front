@@ -8,6 +8,9 @@ import mailIcon from '../assets/mail_certify_icon.svg';
 import mailIconFocus from '../assets/mail_certify_icon_focus.svg';
 import completeIcon from '../assets/signup_complete_icon.svg';
 import completeIconFocus from '../assets/signup_complete_icon_focus.svg';
+// 학년 선택 라디오 아이콘
+import gradeIcon from '../assets/grade.svg';
+import gradeChoiceIcon from '../assets/grade_choice.svg';
 
 function Signup({ onBackToLogin }) {
   const [currentStep, setCurrentStep] = useState(1) // 1: 회원가입, 2: 메일인증, 3: 완료
@@ -16,11 +19,13 @@ function Signup({ onBackToLogin }) {
     { id: 2, label: '메일인증', icon: mailIcon, iconFocus: mailIconFocus },
     { id: 3, label: '가입완료', icon: completeIcon, iconFocus: completeIconFocus },
   ]
-  // 사용자가 입력한 데이터를 담을 공간(상태)들입니다.
+  // 사용자가 입력한 데이터를 담을 공간
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  // 비밀번호 입력수 확인하는 변수
+  const isPasswordError = password.length > 0 && (password.length < 8 || password.length > 12);
   const [grade, setGrade] = useState('1'); // 기본값 1학년
   const [track1, setTrack1] = useState('');
   const [track2, setTrack2] = useState('');
@@ -28,11 +33,11 @@ function Signup({ onBackToLogin }) {
   // 이메일 상태
   const [email, setEmail] = useState('');
 
-  // 폼 제출(다음으로 버튼 클릭) 시 실행될 함수입니다.
+  // 폼 제출(다음으로 버튼 클릭) 시 실행될 함수
   const handleNextStep = (e) => {
     e.preventDefault();
     console.log('다음 단계로 넘어갈 데이터:', { name, studentId, password, grade, track1, track2 });
-    // TODO: 이메일 인증 단계 화면으로 넘어가거나 API 전송 로직을 작성합니다.
+    // TODO: 이메일 인증 단계 화면으로 넘어가거나 API 전송 로직을 작성
     if (currentStep < 3) setCurrentStep(currentStep + 1)
   };
 
@@ -109,15 +114,19 @@ function Signup({ onBackToLogin }) {
           <div className={styles.inputGroup}>
             <label className={styles.label}>비밀번호<span className={styles.required}>*</span></label>
             <input
-              type="password"
+              type="text"
               placeholder="8~12자로 만들어주세요."
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={styles.input}
+              className={`${styles.input} ${isPasswordError ? styles.inputError : ''}`}
               // required
               // minLength={8}
               // maxLength={12}
             />
+
+            {password && (password.length < 8 || password.length > 12) && (
+              <span style={{ color: 'red', fontSize: '12px', position: 'absolute', top: '100%', left: '0', marginTop: '4px' }}>비밀번호는 8~12자로 작성해주세요.</span>
+            )}
           </div>
 
           {/* 비밀번호 재확인 입력 */}
@@ -133,7 +142,7 @@ function Signup({ onBackToLogin }) {
             />
             {/* 비밀번호가 다를 때만 보여주는 경고 문구 추가 */}
             {password && passwordConfirm && password !== passwordConfirm && (
-              <span style={{ color: 'red', fontSize: '12px', marginTop: '5px', display: 'block' }}>비밀번호가 일치하지 않습니다.</span>
+              <span style={{ color: 'red', fontSize: '12px', position: 'absolute', top: '100%', left: '0', marginTop: '4px' }}>비밀번호가 일치하지 않습니다.</span>
             )}
           </div>
 
@@ -149,7 +158,12 @@ function Signup({ onBackToLogin }) {
                     value={g}
                     checked={grade === g}
                     onChange={(e) => setGrade(e.target.value)}
-                    className={styles.radioInput}
+                    className={styles.hiddenRadio}
+                  />
+                  <img 
+                    src={grade === g ? gradeChoiceIcon : gradeIcon} 
+                    alt="선택 아이콘" 
+                    className={styles.customRadioIcon} 
                   />
                   {g} 학년
                 </label>
@@ -161,7 +175,6 @@ function Signup({ onBackToLogin }) {
           <div className={styles.inputGroup}>
             <label className={styles.label}>
               소속 트랙<span className={styles.required}>*</span>
-              <span className={styles.errorText}>이름에는 기호를 사용할 수 없습니다. (임시 안내문)</span>
             </label>
             <select 
               className={styles.selectInput}

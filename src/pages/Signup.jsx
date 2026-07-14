@@ -183,7 +183,7 @@ function Signup({ onBackToLogin }) {
               // required
             >
               {/* 추후 트랙 테이블 연동 */}
-              <option value="" disabled>1트랙 선택</option>
+              <option value="" disabled>1트랙</option>
               <option value="AI">AI 응용 트랙</option>
               <option value="WEB">웹 개발 트랙</option>
               <option value="GAME">게임 개발 트랙</option>
@@ -195,7 +195,7 @@ function Signup({ onBackToLogin }) {
               onChange={(e) => setTrack2(e.target.value)}
               // required
             >
-              <option value="" disabled>2트랙 선택</option>
+              <option value="" disabled>2트랙</option>
               <option value="AI">AI 응용 트랙</option>
               <option value="WEB">웹 개발 트랙</option>
               <option value="GAME">게임 개발 트랙</option>

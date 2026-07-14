@@ -198,10 +198,10 @@ box-sizing: border-box;
 background-color: #ffffff;
 color: #666;
 appearance: none; /* 기본 화살표 숨기기 */
-background-image: url('data:image/svg+xml;utf8,');
+background-size: 20px;
+background-image: url('../assets/Dropdown_button.svg');
 background-repeat: no-repeat;
-background-position-x: 95%;
-background-position-y: 50%;
+background-position: right 15px center;
 margin-bottom: 10px; /* 1트랙, 2트랙 사이 간격 */
 }
 

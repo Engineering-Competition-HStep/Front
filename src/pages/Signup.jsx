@@ -33,9 +33,27 @@ function Signup({ onBackToLogin }) {
   // 이메일 상태
   const [email, setEmail] = useState('');
 
+  // 에러 문구 표시 여부 관리 상태 변수
+  const [showSubmitError, setShowSubmitError] = useState(false);
+  const isStep1Valid = 
+    name.trim().length > 0 &&
+    studentId.trim().length > 0 &&
+    password.length >= 8 && password.length <= 12 &&
+    password === passwordConfirm &&
+    track1 !== '' &&
+    track2 !== '';
+
   // 폼 제출(다음으로 버튼 클릭) 시 실행될 함수
   const handleNextStep = (e) => {
     e.preventDefault();
+    
+    // 입력창 모두 입력했는지 유효성 검사
+    if (currentStep === 1 && !isStep1Valid) {
+      setShowSubmitError(true);
+      return; 
+    }
+    setShowSubmitError(false);
+
     console.log('다음 단계로 넘어갈 데이터:', { name, studentId, password, grade, track1, track2 });
     // TODO: 이메일 인증 단계 화면으로 넘어가거나 API 전송 로직을 작성
     if (currentStep < 3) setCurrentStep(currentStep + 1)
@@ -93,7 +111,6 @@ function Signup({ onBackToLogin }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={styles.input}
-              // required
             />
           </div>
 
@@ -106,7 +123,6 @@ function Signup({ onBackToLogin }) {
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
               className={styles.input}
-              // required
             />
           </div>
 
@@ -119,9 +135,8 @@ function Signup({ onBackToLogin }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={`${styles.input} ${isPasswordError ? styles.inputError : ''}`}
-              // required
-              // minLength={8}
-              // maxLength={12}
+              minLength={8}
+              maxLength={12}
             />
 
             {password && (password.length < 8 || password.length > 12) && (
@@ -138,7 +153,6 @@ function Signup({ onBackToLogin }) {
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
               className={styles.input}
-              // required
             />
             {/* 비밀번호가 다를 때만 보여주는 경고 문구 추가 */}
             {password && passwordConfirm && password !== passwordConfirm && (
@@ -180,7 +194,6 @@ function Signup({ onBackToLogin }) {
               className={styles.selectInput}
               value={track1}
               onChange={(e) => setTrack1(e.target.value)}
-              // required
             >
               {/* 추후 트랙 테이블 연동 */}
               <option value="" disabled>1트랙</option>
@@ -193,7 +206,6 @@ function Signup({ onBackToLogin }) {
               className={styles.selectInput}
               value={track2}
               onChange={(e) => setTrack2(e.target.value)}
-              // required
             >
               <option value="" disabled>2트랙</option>
               <option value="AI">AI 응용 트랙</option>
@@ -205,6 +217,12 @@ function Signup({ onBackToLogin }) {
           <button type="submit" className={styles.submitButton}>
             다음으로
           </button>
+
+          {showSubmitError && !isStep1Valid && (
+            <span className={styles.submitErrorMessage}>
+              필수 항목 작성이 안되었습니다. 확인해주세요.
+            </span>
+          )}
           
           {/* [임시] 로그인 화면으로 돌아가는 버튼 추가 */}
           <button type="button" onClick={onBackToLogin} className={styles.backButton}>
@@ -230,7 +248,6 @@ function Signup({ onBackToLogin }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={styles.emailInput}
-                  /* required */
                 />
                 <button 
                   type="button" 

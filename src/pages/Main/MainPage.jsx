@@ -10,7 +10,7 @@ import Home_roadmap from "../../assets/Home_roadmap.svg";
 import Home_notice from "../../assets/Home_notice.svg";
 import Home_rectangle from "../../assets/Home_rectangle.svg";
 
-// 💡 새롭게 추가된 취업 공고 회사 로고 및 화살표 이미지들 임포트
+// 취업 공고 회사 로고 및 화살표 이미지들
 import Home_gooksundang from "../../assets/Home_gooksundang.png";
 import Home_adidas_logo from "../../assets/Home_adidas_logo.png";
 import Home_toss_logo from "../../assets/Home_toss_logo.png";
@@ -19,7 +19,9 @@ import Home_cj_logo from "../../assets/Home_cj_logo.png";
 import Home_left from "../../assets/Home_left.png";
 import Home_right from "../../assets/Home_right.png";
 
-// 💡 jobs 배열의 텍스트 로고 자리를 임포트한 이미지 변수로 교체했습니다.
+// 로드맵 화살표 이미지
+import Home_line from "../../assets/Home_line.png";
+
 const jobs = [
   ["국순당", Home_gooksundang, ["지식정보문화트랙 추천"], "청년 직무 아카데미 교육생 모집", "~11월 24일 23:59"],
   ["아디다스", Home_adidas_logo, ["정보시스템/AI트랙 추천"], "[신입/경력] 각 부문 인재채용", "~2월 9일 23:59"],
@@ -54,7 +56,6 @@ function MainPage() {
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
   
-  // 💡 취업 공고 리스트의 스크롤을 제어하기 위한 참조 변수
   const scrollRef = useRef(null);
 
   const recommended = realEstate
@@ -73,10 +74,9 @@ function MainPage() {
     ? ["부동산인테리어 / 건축회사", "부동산정보회사"]
     : ["공공기관 / 연구기관", "일반회사"];
 
-  // 💡 좌우 화살표 클릭 시 스크롤을 이동시키는 함수
   const scroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = 300; // 한 번 클릭 시 이동할 픽셀 양 (카드 하나 너비 정도)
+      const scrollAmount = 300;
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth"
@@ -91,8 +91,6 @@ function MainPage() {
           --blue: #4d7ff0;
           --blue-dark: #3f73e4;
           --navy: #34435a;
-          --surface-pull: 90px;
-          --surface-offset: -90px;
           min-width: 320px;
           overflow-x: hidden;
           color: var(--navy);
@@ -141,230 +139,199 @@ function MainPage() {
         .hero h1 { margin: 4px 0; color: #fff; font-size: 40px; font-weight: 300; line-height: 1.24; }
         .hero h1 strong { font-weight: 800; }
         .hero p.copy { margin: 12px 0 28px; color: #e8efff; font-size: 14px; font-weight: 300; }
-        .outline-btn {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          height: 36px;
-          padding: 0 12px;
-          border: 1px solid rgba(255,255,255,.62);
-          border-radius: 0;
-          background: transparent;
-          color: #fff;
-          font-size: 12px;
-        }
-        .hero-art-img {
-          position: absolute;
-          z-index: 1;
-          right: max(24px, calc((100% - 1476px) / 2));
-          bottom: 0;
-          width: min(43.333vw, 832px);
-          min-width: 0;
-          max-width: none;
-          transform: none;
-        }
+        .outline-btn { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; border: 1px solid rgba(255,255,255,.62); border-radius: 0; background: transparent; color: #fff; font-size: 12px; }
+        .hero-art-img { position: absolute; z-index: 1; right: max(24px, calc((100% - 1476px) / 2)); bottom: 0; width: min(43.333vw, 832px); min-width: 0; max-width: none; transform: none; }
 
         .spacing-160 { margin-top: 120px; }
         .section-title { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 36px; }
-        .title-row { display: flex; align-items: center; gap: 8px; }
-        .section-icon { width: 30px; height: 30px; object-fit: contain; }
-        .section-title h2 { margin: 0; color: #252d3a; font-size: 28px; font-weight: 700; line-height: 1.2; }
-        .section-title p { margin: 9px 0 0; color: #5f718a; font-size: 15px; font-weight: 500; }
-        .section-title p strong { color: #34435a; font-weight: 700; }
+        .title-row { display: flex; align-items: center; gap: 10px; }
+        .section-icon { width: 36px; height: 36px; object-fit: contain; }
+        .section-title h2 { margin: 0; color: #252d3a; font-size: 32px; font-weight: 700; line-height: 1.2; }
+        .section-title p { margin: 9px 0 0; color: #5f718a; font-size: 16px; font-weight: 500; }
         .more { border: 0; background: none; color: #8792a1; font-size: 14px; }
 
-        /* 취업 공고 영역 및 화살표 스타일 */
-        .jobs-section { margin-top: 120px; position: relative; }
-        .carousel-wrapper { position: relative; }
-        .nav-arrow {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 10;
-          background: none;
-          border: none;
-          padding: 0;
-          cursor: pointer;
-          transition: transform 0.2s;
-        }
+        .jobs-section { margin-top: 120px; position: relative; width: 100vw; margin-left: calc(50% - 50vw); }
+        .carousel-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
+        .blur-edge { position: absolute; top: 0; bottom: 0; width: 150px; z-index: 5; pointer-events: none; }
+        .blur-left { left: 0; background: linear-gradient(to right, rgba(255,255,255,1) 10%, rgba(255,255,255,0)); }
+        .blur-right { right: 0; background: linear-gradient(to left, rgba(255,255,255,1) 10%, rgba(255,255,255,0)); }
+        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; background: none; border: none; padding: 0; cursor: pointer; transition: transform 0.2s; pointer-events: auto; }
         .nav-arrow:hover { transform: translateY(-50%) scale(1.1); }
         .nav-arrow img { width: 44px; height: 44px; object-fit: contain; }
-        .left-arrow { left: 0px; }
-        .right-arrow { right: 0px; }
+        .left-arrow { left: 24px; }
+        .right-arrow { right: 24px; }
         
         .job-strip { 
           display: flex; 
           gap: 20px; 
           overflow-x: auto; 
-          padding: 0 max(24px, calc((100vw - 1196px) / 2)) 20px; 
+          width: 100%;
+          padding: 0 calc(50vw - 1196px / 2) 20px; 
           scrollbar-width: none; 
-          scroll-behavior: smooth; /* 부드러운 스크롤 */
+          scroll-behavior: smooth; 
         }
         .job-strip::-webkit-scrollbar { display: none; }
-        .job-card { display: flex; flex: 0 0 260px; flex-direction: column; min-height: 230px; padding: 22px; border: 1px solid #f0f0f0; border-radius: 12px; background: #fbfbfb; }
-        
-        /* 💡 텍스트 대신 이미지가 들어가므로 크기와 정렬 방식을 조정했습니다 */
+        .job-card { display: flex; flex: 0 0 260px; flex-direction: column; min-height: 230px; padding: 22px; border: 1px solid #f0f0f0; border-radius: 12px; background: #fff; }
         .logo { display: flex; align-items: center; height: 48px; margin-bottom: 12px; }
         .logo img { max-width: 140px; max-height: 100%; object-fit: contain; }
-        
         .company { margin: 16px 0 10px; color: #333; font-size: 15px; font-weight: 700; }
         .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
         .tag { padding: 4px 7px; border-radius: 4px; background: #e8f0fe; color: var(--blue); font-size: 11px; font-weight: 600; }
         .job-title { flex-grow: 1; margin: 0; color: #666; font-size: 13px; line-height: 1.4; }
         .deadline { display: flex; justify-content: space-between; margin-top: auto; color: #999; font-size: 12px; }
 
-        .roadmap-wrapper { position: relative; margin-top: 120px; }
-        .tabs { display: flex; gap: 24px; margin: 0; }
-        .tab {
-          padding: 10px 8px 8px;
-          border: 0;
-          border-bottom: 3px solid transparent;
-          background: transparent;
-          color: #999;
-          font-size: 22px;
-          font-weight: 700;
-        }
-        .tab.active { border-color: var(--blue); color: var(--blue); }
 
+        /* [조절 포인트] 로드맵 전체 위치: 값을 키울수록 회색 패널을 포함한 섹션 전체가 아래로 내려갑니다. */
+        .roadmap-wrapper { position: relative; margin-top: 120px; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 24px; align-items: flex-end; padding-left: 5px; }
+        
+
+        /* 선택 탭은 부담스럽지 않도록 크기·굵기 변화만 작게 유지 */
+        .tab { padding: 10px 4px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #777; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .tab.active { border-color: var(--blue); color: var(--blue); font-size: 22px; font-weight: 600; padding-bottom: 8px; }
+
+
+        /* 💡 2. 로드맵 배경 박스 오류 해결 (겹침, 잘림 현상 제거) */
         .roadmap-box {
           position: relative;
           isolation: isolate;
-          width: 100%;
-          margin-top: var(--surface-pull);
+          width: 100vw;
+          margin-left: calc(50% - 50vw);
+          margin-top: 20px;
         }
-        .roadmap-bg {
+        .roadmap-bg { 
+          position: absolute; 
+          z-index: 0; 
+          top: 0; 
+          left: 0; 
+          display: block; 
+          width: 100%; 
+          height: 100%; 
+          object-fit: cover; 
+          object-position: top left;
+          pointer-events: none; 
+          filter: drop-shadow(0px 8px 24px rgba(0, 0, 0, 0.08)); 
+        }
+        
+        /* Home_rectangle의 외부 그림자는 유지하고, 패널 안쪽에만 은은한 깊이감을 추가 */
+        .roadmap-box::after {
           position: absolute;
-          z-index: 0;
-          top: var(--surface-offset);
-          left: 0;
-          display: block;
-          width: 100%;
-          height: calc(100% + var(--surface-pull));
-          object-fit: fill;
+          z-index: 1;
+          inset: 0;
           pointer-events: none;
-        }
-        .roadmap-box-overlay { position: relative; z-index: 1; padding: 60px 0 100px; }
-        .roadmap-headers,
-        .roadmap-row { display: grid; grid-template-columns: 140px 1fr 1fr; gap: 40px; }
-        .roadmap-headers { margin-bottom: 20px; }
-        .roadmap-row { align-items: center; }
-        .roadmap-label {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 60px;
-          border-radius: 9px;
-          background: #5782eb;
-          box-shadow: 0 6px 16px rgba(66, 133, 244, .28);
-          color: #fff;
-          font-size: 15px;
-          font-weight: 600;
-        }
-        .roadmap-label::after {
-          position: absolute;
-          top: 50%;
-          right: -11px;
-          width: 22px;
-          height: 22px;
-          border-radius: 4px;
-          background: #5782eb;
           content: "";
-          transform: translateY(-50%) rotate(45deg);
+          box-shadow:
+            inset 0 16px 28px rgba(65, 83, 118, 0.13),
+            inset 0 -12px 24px rgba(65, 83, 118, 0.06);
+          -webkit-mask: url('${Home_rectangle}') top left / cover no-repeat;
+          mask: url('${Home_rectangle}') top left / cover no-repeat;
         }
-        .column-title {
-          padding: 9px;
-          border-radius: 7px;
-          background: #648bce;
-          box-shadow: 0 5px 12px rgba(66, 133, 244, .18);
-          color: #fff;
-          text-align: center;
-          font-size: 15px;
-          font-weight: 600;
+
+        .roadmap-box-overlay { 
+          position: relative; 
+          z-index: 2; 
+          padding: 160px 0 130px; 
         }
+        
+        .roadmap-headers,
+        .roadmap-row { 
+          display: grid; 
+          grid-template-columns: 120px 300px 300px; 
+          justify-content: center; 
+          gap: 60px; 
+        }
+
+
+        /* [조절 포인트] 헤더 → 첫 카드 여백: 값을 키울수록 ‘추천 트랙/진로 분야’와 첫 카드가 더 멀어집니다. */
+        .roadmap-headers { margin-bottom: 56px; }
+        .roadmap-row { align-items: center; }
+        
+
+        /* 💡 3. 파란색 박스 높이 연장 (60px -> 100px) */
+        .roadmap-label { 
+          position: relative; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          height: 100px; 
+          border-radius: 9px; 
+          background: #5782eb; 
+          box-shadow: 0 6px 16px rgba(66, 133, 244, 0.35);
+          color: #fff; 
+          font-size: 16px; 
+          font-weight: 600; 
+        }
+        .roadmap-label::after { position: absolute; top: 50%; right: -11px; width: 22px; height: 22px; border-radius: 4px; background: #5782eb; content: ""; transform: translateY(-50%) rotate(45deg); }
+        .column-title { padding: 9px; border-radius: 7px; background: #648bce; box-shadow: 0 5px 12px rgba(66, 133, 244, .18); color: #fff; text-align: center; font-size: 15px; font-weight: 600; }
+        
         .stack-group { display: flex; flex-direction: column; gap: 18px; }
+        
         .roadmap-card {
           position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 48px;
+          min-height: 52px;
           padding: 8px 18px;
-          border: 1px solid #edf0f5;
           border-radius: 7px;
           background: #fff;
-          box-shadow: 0 3px 8px rgba(30, 60, 110, .1);
+          border: 1px solid #edf0f5;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
           color: #34435a;
           text-align: center;
           font-size: 16px;
           font-weight: 600;
         }
-        .recommended { border: 2px solid var(--blue); color: var(--blue); }
-        .recommended::before {
-          position: absolute;
-          top: -27px;
-          left: 0;
-          padding: 4px 12px;
-          border-radius: 999px;
-          background: #a8cbff;
-          color: #fff;
-          content: "가장 추천하는 트랙";
-          font-size: 11px;
-          font-weight: 500;
-        }
+        
+        .recommended { border: 2px solid var(--blue); color: var(--blue); background: #fff; box-shadow: 0 6px 16px rgba(77, 127, 240, 0.15); }
+        .recommended::before { position: absolute; top: -27px; left: 0; padding: 4px 12px; border-radius: 999px; background: #a8cbff; color: #fff; content: "가장 추천하는 트랙"; font-size: 11px; font-weight: 500; }
+        
         .roadmap-row + .roadmap-row { margin-top: 80px; }
+        
         .roadmap-row > .stack-group:nth-child(2) .roadmap-card::after {
           position: absolute;
           top: 50%;
-          right: -72px;
-          width: 50px;
-          border-top: 1px solid #8ba0be;
+          right: -45px;
+          width: 30px;
+          height: 12px;
+          transform: translateY(-50%);
+          background: url('${Home_line}') no-repeat center center;
+          background-size: contain;
           content: "";
+          border: none;
         }
-        .roadmap-row > .stack-group:nth-child(2) .roadmap-card::before {
-          position: absolute;
-          z-index: 1;
-          top: calc(50% - 7px);
-          right: -73px;
-          color: #8ba0be;
-          content: "→";
-          font-size: 14px;
-        }
-        .roadmap-row > .stack-group:nth-child(2) .recommended::before {
-          top: -27px;
-          right: auto;
-          left: 0;
-          content: "가장 추천하는 트랙";
-        }
+        .roadmap-row > .stack-group:nth-child(2) .roadmap-card::before { display: none; }
+        .roadmap-row > .stack-group:nth-child(2) .recommended::before { display: block; top: -27px; right: auto; left: 0; content: "가장 추천하는 트랙"; }
 
-        .notices-wrapper { margin-top: 120px; margin-bottom: 120px; }
+        .notices-wrapper { margin-top: 120px; margin-bottom: 200px; }
         .notice-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
         .notice { display: flex; flex-direction: column; min-height: 130px; padding: 20px 0; border-top: 1px solid #e0e4ea; color: #333; text-decoration: none; }
         .notice-title { display: -webkit-box; flex-grow: 1; margin: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 15px; font-weight: 600; line-height: 1.5; }
         .notice:first-child .notice-title { color: var(--blue); }
         .notice-meta { display: flex; justify-content: space-between; margin-top: 20px; color: #999; font-size: 13px; }
 
-        .footer { padding: 55px 0; background: #f4f5f7; color: #7d858f; font-size: 13px; line-height: 1.6; }
-        .footer-inner { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 35px; }
+        /* [조절 포인트] 푸터 세로 높이: 위·아래 값을 줄일수록 고객센터를 포함한 회색 푸터 전체가 낮아집니다. */
+        .footer { padding: 26px 0; background: #f4f5f7; color: #7d858f; font-size: 13px; line-height: 1.4; }
+        .footer-inner { display: grid; grid-template-columns: 0.65fr 1.05fr 1.7fr; gap: 35px; }
         .footer-cs, .footer-links { padding-right: 30px; border-right: 1px solid #e2e5e9; }
-        .footer h3 { margin: 0 0 18px; color: #3f464e; font-size: 16px; }
-        .footer .time { margin-bottom: 12px; color: #4e555d; font-size: 19px; }
-        .footer ul { margin: 0 0 20px; padding-left: 16px; }
+        .footer h3 { margin: 0 0 12px; color: #3f464e; font-size: 16px; }
+        .footer .time { margin-bottom: 8px; color: #4e555d; font-size: 19px; }
+        .footer ul { margin: 0 0 12px; padding-left: 16px; }
         .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn-group button { padding: 8px 10px; border: 1px solid #d9dde2; border-radius: 4px; background: #fff; color: #5c6570; font-size: 11px; }
-        .footer-links { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; color: #59616b; }
-        .footer-legal p { margin: 0 0 7px; font-size: 12px; }
-        .social { display: flex; gap: 8px; margin: 18px 0; }
+        /* [조절 포인트] 푸터 링크 행간: 값을 줄일수록 가운데 링크 영역과 푸터 전체 높이가 더 압축됩니다. */
+        .footer-links { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; color: #59616b; }
+        .footer-legal p { margin: 0 0 4px; font-size: 12px; }
+        .social { display: flex; gap: 8px; margin: 10px 0; }
         .social span { width: 28px; height: 28px; border-radius: 50%; background: #9299a1; }
 
         @media (max-width: 1000px) {
           .container, .hero-inner { width: min(1196px, calc(100% - 40px)); }
           .links { gap: 20px; }
-          .nav-arrow { display: none; /* 모바일/태블릿에서는 화살표 숨김(터치 스와이프 유도) */ }
+          .nav-arrow, .blur-edge { display: none; }
           .roadmap-headers, .roadmap-row { grid-template-columns: 1fr 1fr; gap: 22px; }
           .roadmap-label { display: none; }
-          .roadmap-row > .stack-group:nth-child(2) .roadmap-card::after,
-          .roadmap-row > .stack-group:nth-child(2) .roadmap-card::before { display: none; }
+          .roadmap-row > .stack-group:nth-child(2) .roadmap-card::after { display: none; }
           .notice-grid { grid-template-columns: repeat(2, 1fr); }
           .footer-inner { grid-template-columns: 1fr; }
           .footer-cs, .footer-links { padding: 0 0 25px; border-right: 0; border-bottom: 1px solid #e2e5e9; }
@@ -377,18 +344,26 @@ function MainPage() {
           .hero-content { max-width: 100%; padding-top: 30px; }
           .hero h1 { font-size: 32px; }
           .hero-art-img { right: -8vw; width: 74vw; opacity: .7; }
-          .roadmap-wrapper, .jobs-section, .notices-wrapper { margin-top: 75px; }
+          .jobs-section, .notices-wrapper { margin-top: 75px; }
+
+          
+          .roadmap-wrapper { margin-top: 60px; }
           .section-title { align-items: flex-start; margin-bottom: 25px; }
-          .section-title h2 { font-size: 25px; }
-          .section-title p { font-size: 14px; }
+          .section-icon { width: 32px; height: 32px; }
+          .section-title h2 { font-size: 29px; }
+          .section-title p { font-size: 15px; }
           .more { display: none; }
           .tabs { gap: 14px; }
           .tab { padding-inline: 4px; font-size: 18px; }
-          .roadmap-box { --surface-pull: 55px; --surface-offset: -55px; margin-top: var(--surface-pull); }
-          .roadmap-bg { top: var(--surface-offset); height: calc(100% + var(--surface-pull)); }
-          .roadmap-box-overlay { padding: 42px 0 70px; }
+          .roadmap-box { margin-top: 20px; }
+          
+          /* [조절 포인트 - 모바일] 로드맵 전체 위치 */
+          .roadmap-box-overlay { padding: 120px 0 130px; }
           .roadmap-headers, .roadmap-row, .notice-grid { grid-template-columns: 1fr; }
-          .roadmap-headers { margin-bottom: 16px; }
+
+
+          /* [조절 포인트 - 모바일] 헤더 → 첫 카드 여백 */
+          .roadmap-headers { margin-bottom: 44px; }
           .roadmap-row + .roadmap-row { margin-top: 55px; }
           .notice-grid { gap: 0; }
           .footer-links { grid-template-columns: 1fr; }
@@ -423,7 +398,6 @@ function MainPage() {
         <img src={Home_header_image} alt="로드맵 일러스트" className="hero-art-img" />
       </section>
 
-      {/* 1. 외부 취업 공고 섹션 (화살표 스크롤 추가) */}
       <section className="jobs-section" id="jobs">
         <div className="container">
           <SectionTitle 
@@ -434,14 +408,15 @@ function MainPage() {
           />
         </div>
         <div className="carousel-wrapper">
-          <button className="nav-arrow left-arrow" onClick={() => scroll("left")} aria-label="이전 공고 보기">
-            <img src={Home_left} alt="이전 화살표" />
-          </button>
+          <div className="blur-edge blur-left">
+            <button className="nav-arrow left-arrow" onClick={() => scroll("left")} aria-label="이전 공고 보기">
+              <img src={Home_left} alt="이전 화살표" />
+            </button>
+          </div>
           
           <div className="job-strip" ref={scrollRef}>
             {jobs.map(([company, logoSrc, tags, title, deadline]) => (
               <article className="job-card" key={company}>
-                {/* 💡 텍스트 대신 임포트한 이미지 렌더링 */}
                 <div className="logo">
                   <img src={logoSrc} alt={`${company} 로고`} />
                 </div>
@@ -453,13 +428,14 @@ function MainPage() {
             ))}
           </div>
 
-          <button className="nav-arrow right-arrow" onClick={() => scroll("right")} aria-label="다음 공고 보기">
-            <img src={Home_right} alt="다음 화살표" />
-          </button>
+          <div className="blur-edge blur-right">
+            <button className="nav-arrow right-arrow" onClick={() => scroll("right")} aria-label="다음 공고 보기">
+              <img src={Home_right} alt="다음 화살표" />
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* 2. 로드맵 섹션 */}
       <section className="roadmap-wrapper" id="roadmap">
         <div className="container">
           <SectionTitle
@@ -507,7 +483,6 @@ function MainPage() {
         </div>
       </section>
 
-      {/* 3. 한성대 공지사항 섹션 */}
       <section className="container notices-wrapper" id="contact">
         <SectionTitle 
           icon={Home_notice} 

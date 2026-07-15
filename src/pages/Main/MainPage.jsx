@@ -4,6 +4,8 @@ import React, { useState, useRef } from "react";
 import Home_logo from "../../assets/Home_logo.svg";
 import Home_header from "../../assets/Home_header.svg";
 import Home_header_image from "../../assets/Home_header_image.svg";
+import Home_search from "../../assets/Home_search.svg";
+import Home_mypage from "../../assets/Home_mypage.svg";
 import HSTEP_logo from "../../assets/HSTEP_logo.svg";
 import Home_advertise from "../../assets/Home_advertise.svg";
 import Home_roadmap from "../../assets/Home_roadmap.svg";
@@ -106,33 +108,40 @@ function MainPage() {
           margin: 0 auto;
         }
 
+        /* 💡 1. 상단 네비게이션 가로줄(border-bottom) 삭제 및 높이/패딩으로 글씨 위치 내림 */
         .nav {
           position: absolute;
           inset: 0 0 auto;
           z-index: 10;
           display: flex;
           align-items: center;
-          height: 64px;
-          padding: 0 20px;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          height: 80px; /* 기존 64px에서 늘려 여유 공간 확보 */
+          padding: 12px 32px 0; /* 위쪽 패딩을 주어 글씨들을 전체적으로 살짝 아래로 내림 */
         }
         .brand { display: flex; align-items: center; }
         .brand img { width: 107px; height: 24px; filter: brightness(0) invert(1); }
-        .links { display: flex; gap: 34px; margin: auto; }
+        
+        .links { display: flex; gap: 40px; margin: auto; }
         .links a {
-          padding: 4px 0;
+          padding-bottom: 8px; /* 글씨와 밑줄 사이의 간격 */
           color: #fff;
-          font-size: 14px;
+          font-size: 15px; /* 글자 크기 미세 조정 */
           font-weight: 400;
           text-decoration: none;
-          opacity: .9;
+          opacity: .8;
+          transition: all 0.2s;
         }
-        .links a:first-child { border-bottom: 1px solid #fff; }
-        .tools { display: flex; gap: 18px; color: #fff; font-size: 21px; line-height: 1; }
+        /* 💡 2. 활성화된 탭(메인홈)에 두꺼운 흰색 밑줄 추가 */
+        .links a:first-child { 
+          font-weight: 700; 
+          opacity: 1; 
+          border-bottom: 3px solid #fff; 
+        }
+        .tools { display: flex; gap: 18px; align-items: center; cursor: pointer; }
 
-        .hero { position: relative; height: min(670px, 34.8958vw); min-height: 477px; overflow: hidden; background: #5683ef; }
-        .hero-bg { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center center; }
-        .hero-overlay { position: absolute; inset: 0; z-index: 1; }
+        .hero { position: relative; height: min(670px, 34.8958vw); min-height: 477px; overflow: hidden; background: #fff; }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center center; }
+        .hero-overlay { position: absolute; inset: 0; z-index: 2; }
         .hero-inner { position: relative; height: 100%; display: flex; align-items: center; }
         .hero-content { position: relative; z-index: 2; max-width: 52%; padding-top: 26px; }
         .welcome { margin: 0; color: #e8efff; font-size: 24px; font-weight: 400; line-height: 1.4; }
@@ -140,7 +149,20 @@ function MainPage() {
         .hero h1 strong { font-weight: 800; }
         .hero p.copy { margin: 12px 0 28px; color: #e8efff; font-size: 14px; font-weight: 300; }
         .outline-btn { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; border: 1px solid rgba(255,255,255,.62); border-radius: 0; background: transparent; color: #fff; font-size: 12px; }
-        .hero-art-img { position: absolute; z-index: 1; right: max(24px, calc((100% - 1476px) / 2)); bottom: 0; width: min(43.333vw, 832px); min-width: 0; max-width: none; transform: none; }
+        .hero-art-img {
+          position: absolute;
+          z-index: 1;
+          right: 10vw;
+          bottom: 0;
+          display: block;
+          width: min(43.333vw, 832px);
+          min-width: 0;
+          max-width: none;
+          pointer-events: none;
+          transform: none;
+          -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000);
+          mask-image: linear-gradient(to right, transparent, #000 4%, #000);
+        }
 
         .spacing-160 { margin-top: 120px; }
         .section-title { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 36px; }
@@ -180,18 +202,12 @@ function MainPage() {
         .job-title { flex-grow: 1; margin: 0; color: #666; font-size: 13px; line-height: 1.4; }
         .deadline { display: flex; justify-content: space-between; margin-top: auto; color: #999; font-size: 12px; }
 
-
-        /* [조절 포인트] 로드맵 전체 위치: 값을 키울수록 회색 패널을 포함한 섹션 전체가 아래로 내려갑니다. */
         .roadmap-wrapper { position: relative; margin-top: 120px; }
         .tabs { display: flex; gap: 30px; margin-bottom: 24px; align-items: flex-end; padding-left: 5px; }
         
-
-        /* 선택 탭은 부담스럽지 않도록 크기·굵기 변화만 작게 유지 */
         .tab { padding: 10px 4px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #777; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .tab.active { border-color: var(--blue); color: var(--blue); font-size: 22px; font-weight: 600; padding-bottom: 8px; }
 
-
-        /* 💡 2. 로드맵 배경 박스 오류 해결 (겹침, 잘림 현상 제거) */
         .roadmap-box {
           position: relative;
           isolation: isolate;
@@ -213,7 +229,6 @@ function MainPage() {
           filter: drop-shadow(0px 8px 24px rgba(0, 0, 0, 0.08)); 
         }
         
-        /* Home_rectangle의 외부 그림자는 유지하고, 패널 안쪽에만 은은한 깊이감을 추가 */
         .roadmap-box::after {
           position: absolute;
           z-index: 1;
@@ -241,13 +256,9 @@ function MainPage() {
           gap: 60px; 
         }
 
-
-        /* [조절 포인트] 헤더 → 첫 카드 여백: 값을 키울수록 ‘추천 트랙/진로 분야’와 첫 카드가 더 멀어집니다. */
         .roadmap-headers { margin-bottom: 56px; }
         .roadmap-row { align-items: center; }
         
-
-        /* 💡 3. 파란색 박스 높이 연장 (60px -> 100px) */
         .roadmap-label { 
           position: relative; 
           display: flex; 
@@ -310,7 +321,6 @@ function MainPage() {
         .notice:first-child .notice-title { color: var(--blue); }
         .notice-meta { display: flex; justify-content: space-between; margin-top: 20px; color: #999; font-size: 13px; }
 
-        /* [조절 포인트] 푸터 세로 높이: 위·아래 값을 줄일수록 고객센터를 포함한 회색 푸터 전체가 낮아집니다. */
         .footer { padding: 26px 0; background: #f4f5f7; color: #7d858f; font-size: 13px; line-height: 1.4; }
         .footer-inner { display: grid; grid-template-columns: 0.65fr 1.05fr 1.7fr; gap: 35px; }
         .footer-cs, .footer-links { padding-right: 30px; border-right: 1px solid #e2e5e9; }
@@ -319,7 +329,6 @@ function MainPage() {
         .footer ul { margin: 0 0 12px; padding-left: 16px; }
         .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn-group button { padding: 8px 10px; border: 1px solid #d9dde2; border-radius: 4px; background: #fff; color: #5c6570; font-size: 11px; }
-        /* [조절 포인트] 푸터 링크 행간: 값을 줄일수록 가운데 링크 영역과 푸터 전체 높이가 더 압축됩니다. */
         .footer-links { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; color: #59616b; }
         .footer-legal p { margin: 0 0 4px; font-size: 12px; }
         .social { display: flex; gap: 8px; margin: 10px 0; }
@@ -343,9 +352,8 @@ function MainPage() {
           .hero { height: 430px; min-height: 0; }
           .hero-content { max-width: 100%; padding-top: 30px; }
           .hero h1 { font-size: 32px; }
-          .hero-art-img { right: -8vw; width: 74vw; opacity: .7; }
+          .hero-art-img { right: -8vw; bottom: 0; width: 74vw; opacity: .7; }
           .jobs-section, .notices-wrapper { margin-top: 75px; }
-
           
           .roadmap-wrapper { margin-top: 60px; }
           .section-title { align-items: flex-start; margin-bottom: 25px; }
@@ -357,12 +365,9 @@ function MainPage() {
           .tab { padding-inline: 4px; font-size: 18px; }
           .roadmap-box { margin-top: 20px; }
           
-          /* [조절 포인트 - 모바일] 로드맵 전체 위치 */
           .roadmap-box-overlay { padding: 120px 0 130px; }
           .roadmap-headers, .roadmap-row, .notice-grid { grid-template-columns: 1fr; }
 
-
-          /* [조절 포인트 - 모바일] 헤더 → 첫 카드 여백 */
           .roadmap-headers { margin-bottom: 44px; }
           .roadmap-row + .roadmap-row { margin-top: 55px; }
           .notice-grid { gap: 0; }
@@ -380,7 +385,10 @@ function MainPage() {
           <a href="#mypage">마이페이지</a>
           <a href="#contact">문의</a>
         </nav>
-        <div className="tools" aria-label="도구"><span>⌕</span><span>☰</span></div>
+        <div className="tools" aria-label="도구">
+          <img src={Home_search} alt="검색" />
+          <img src={Home_mypage} alt="메뉴" />
+        </div>
       </header>
 
       <section className="hero" id="home">

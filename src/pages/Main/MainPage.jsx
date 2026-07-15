@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
+// 기존 아이콘 및 배경 이미지들
 import Home_logo from "../../assets/Home_logo.svg";
 import Home_header from "../../assets/Home_header.svg";
 import Home_header_image from "../../assets/Home_header_image.svg";
@@ -9,19 +10,29 @@ import Home_roadmap from "../../assets/Home_roadmap.svg";
 import Home_notice from "../../assets/Home_notice.svg";
 import Home_rectangle from "../../assets/Home_rectangle.svg";
 
+// 💡 새롭게 추가된 취업 공고 회사 로고 및 화살표 이미지들 임포트
+import Home_gooksundang from "../../assets/Home_gooksundang.png";
+import Home_adidas_logo from "../../assets/Home_adidas_logo.png";
+import Home_toss_logo from "../../assets/Home_toss_logo.png";
+import Home_hyndai_logo from "../../assets/Home_hyndai_logo.svg";
+import Home_cj_logo from "../../assets/Home_cj_logo.png";
+import Home_left from "../../assets/Home_left.png";
+import Home_right from "../../assets/Home_right.png";
+
+// 💡 jobs 배열의 텍스트 로고 자리를 임포트한 이미지 변수로 교체했습니다.
 const jobs = [
-  ["한국청년기업가정신재단", "한국청년기업가정신재단", ["지식정보문화 트랙 추천"], "청년 직무 아카데미 교육생 모집", "~11월 24일 23:59"],
-  ["아디다스", "adidas", ["정보시스템·AI 트랙 추천"], "[신입/경력] 각 부문 인재 채용", "~2월 9일 23:59"],
-  ["토스", "toss", ["행정 트랙 추천"], "[신입/경력] 각 부문 인재 채용", "~7월 14일 23:59"],
-  ["현대오토에버", "HYUNDAI\nAutoEver", ["사이버보안·AI 트랙 추천", "글로벌비즈니스 트랙 추천"], "9월 인재 모집", "~9월 2일 23:59"],
-  ["CJ제일제당", "CJ제일제당", ["기업경영 트랙 추천"], "2026년 3분기 신입 및 경력사원 채용", "~8월 13일 23:59"],
+  ["국순당", Home_gooksundang, ["지식정보문화트랙 추천"], "청년 직무 아카데미 교육생 모집", "~11월 24일 23:59"],
+  ["아디다스", Home_adidas_logo, ["정보시스템/AI트랙 추천"], "[신입/경력] 각 부문 인재채용", "~2월 9일 23:59"],
+  ["토스", Home_toss_logo, ["행정트랙 추천"], "[신입/경력] 각 부문 인재채용", "~7월 14일 23:59"],
+  ["현대 오토에버", Home_hyndai_logo, ["사이버보안/AI트랙 추천", "글로벌비즈니스트랙 추천"], "9월 인재모집", "~9월 2일 23:59"],
+  ["CJ 제일제당", Home_cj_logo, ["기업경영트랙 추천"], "2026년 3분기 신입 및 경력사원 채용", "~8월 13일 23:59"],
 ];
 
 const notices = [
-  ["2026학년도 2학기 교육 안내 및 신입생 안내 (7.13~7.17)", "2026-07-06"],
-  ["[해피투게더] 2026학년도 2학기 미래 직업기술 탐사 모집", "2026-06-29"],
-  ["[학적] 국가고시 합격자 장학금 신청 안내", "2026-05-12"],
-  ["온라인 취업 멘토링 서비스, 새로운 취업생활을 시작해 보세요.", "2026-05-07"],
+  ["2026학년도 2학기 교차 전부(과) 선발 안내 (7.13~7.17)", "2026-07-06"],
+  ["[에피소드] 2026학년도 2학기 외부 임차기숙사 입사생 모집...", "2026-06-29"],
+  ["[양식] 국가고시합격자장학금 신청안내 - 국가전문자격시험 합...", "2026-05-12"],
+  ["[온라인 취업 멘토링 서비스] 슬기로운 취준생활, 코멘토로 지...", "2026-05-07"],
 ];
 
 function SectionTitle({ icon, title, description, action }) {
@@ -34,7 +45,7 @@ function SectionTitle({ icon, title, description, action }) {
         </div>
         <p>{description}</p>
       </div>
-      {action && <button className="more">{action} →</button>}
+      {action && <button className="more">{action}</button>}
     </div>
   );
 }
@@ -42,6 +53,9 @@ function SectionTitle({ icon, title, description, action }) {
 function MainPage() {
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
+  
+  // 💡 취업 공고 리스트의 스크롤을 제어하기 위한 참조 변수
+  const scrollRef = useRef(null);
 
   const recommended = realEstate
     ? ["스마트도시·교통계획 트랙", "기업경영 트랙", "회계·재무경영 트랙"]
@@ -58,6 +72,17 @@ function MainPage() {
   const careersOut = realEstate
     ? ["부동산인테리어 / 건축회사", "부동산정보회사"]
     : ["공공기관 / 연구기관", "일반회사"];
+
+  // 💡 좌우 화살표 클릭 시 스크롤을 이동시키는 함수
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = 300; // 한 번 클릭 시 이동할 픽셀 양 (카드 하나 너비 정도)
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth"
+      });
+    }
+  };
 
   return (
     <main className="hstep">
@@ -148,7 +173,47 @@ function MainPage() {
         .section-title p strong { color: #34435a; font-weight: 700; }
         .more { border: 0; background: none; color: #8792a1; font-size: 14px; }
 
-        .roadmap-wrapper { position: relative; }
+        /* 취업 공고 영역 및 화살표 스타일 */
+        .jobs-section { margin-top: 120px; position: relative; }
+        .carousel-wrapper { position: relative; }
+        .nav-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+        .nav-arrow:hover { transform: translateY(-50%) scale(1.1); }
+        .nav-arrow img { width: 44px; height: 44px; object-fit: contain; }
+        .left-arrow { left: 0px; }
+        .right-arrow { right: 0px; }
+        
+        .job-strip { 
+          display: flex; 
+          gap: 20px; 
+          overflow-x: auto; 
+          padding: 0 max(24px, calc((100vw - 1196px) / 2)) 20px; 
+          scrollbar-width: none; 
+          scroll-behavior: smooth; /* 부드러운 스크롤 */
+        }
+        .job-strip::-webkit-scrollbar { display: none; }
+        .job-card { display: flex; flex: 0 0 260px; flex-direction: column; min-height: 230px; padding: 22px; border: 1px solid #f0f0f0; border-radius: 12px; background: #fbfbfb; }
+        
+        /* 💡 텍스트 대신 이미지가 들어가므로 크기와 정렬 방식을 조정했습니다 */
+        .logo { display: flex; align-items: center; height: 48px; margin-bottom: 12px; }
+        .logo img { max-width: 140px; max-height: 100%; object-fit: contain; }
+        
+        .company { margin: 16px 0 10px; color: #333; font-size: 15px; font-weight: 700; }
+        .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+        .tag { padding: 4px 7px; border-radius: 4px; background: #e8f0fe; color: var(--blue); font-size: 11px; font-weight: 600; }
+        .job-title { flex-grow: 1; margin: 0; color: #666; font-size: 13px; line-height: 1.4; }
+        .deadline { display: flex; justify-content: space-between; margin-top: auto; color: #999; font-size: 12px; }
+
+        .roadmap-wrapper { position: relative; margin-top: 120px; }
         .tabs { display: flex; gap: 24px; margin: 0; }
         .tab {
           padding: 10px 8px 8px;
@@ -161,11 +226,6 @@ function MainPage() {
         }
         .tab.active { border-color: var(--blue); color: var(--blue); }
 
-        /*
-          회색 배경만 탭 쪽으로 90px 끌어올립니다.
-          roadmap-box의 margin-top과 overlay의 padding은 그대로여서,
-          내부 헤더·카드·라벨의 화면상 위치는 전혀 바뀌지 않습니다.
-        */
         .roadmap-box {
           position: relative;
           isolation: isolate;
@@ -277,22 +337,12 @@ function MainPage() {
           content: "가장 추천하는 트랙";
         }
 
+        .notices-wrapper { margin-top: 120px; margin-bottom: 120px; }
         .notice-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
         .notice { display: flex; flex-direction: column; min-height: 130px; padding: 20px 0; border-top: 1px solid #e0e4ea; color: #333; text-decoration: none; }
         .notice-title { display: -webkit-box; flex-grow: 1; margin: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 15px; font-weight: 600; line-height: 1.5; }
         .notice:first-child .notice-title { color: var(--blue); }
         .notice-meta { display: flex; justify-content: space-between; margin-top: 20px; color: #999; font-size: 13px; }
-
-        .jobs-wrapper { margin-bottom: 120px; }
-        .job-strip { display: flex; gap: 20px; overflow-x: auto; padding: 0 0 20px; scrollbar-width: none; }
-        .job-strip::-webkit-scrollbar { display: none; }
-        .job-card { display: flex; flex: 0 0 250px; flex-direction: column; min-height: 230px; padding: 22px; border: 1px solid #f0f0f0; border-radius: 12px; background: #fbfbfb; }
-        .logo { display: flex; align-items: center; height: 42px; color: #222; font-family: Arial, sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -.05em; white-space: pre-line; line-height: 1; }
-        .company { margin: 20px 0 10px; color: #333; font-size: 15px; font-weight: 700; }
-        .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-        .tag { padding: 4px 7px; border-radius: 4px; background: #e8f0fe; color: var(--blue); font-size: 11px; font-weight: 600; }
-        .job-title { flex-grow: 1; margin: 0; color: #666; font-size: 13px; line-height: 1.4; }
-        .deadline { display: flex; justify-content: space-between; margin-top: auto; color: #999; font-size: 12px; }
 
         .footer { padding: 55px 0; background: #f4f5f7; color: #7d858f; font-size: 13px; line-height: 1.6; }
         .footer-inner { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 35px; }
@@ -310,6 +360,7 @@ function MainPage() {
         @media (max-width: 1000px) {
           .container, .hero-inner { width: min(1196px, calc(100% - 40px)); }
           .links { gap: 20px; }
+          .nav-arrow { display: none; /* 모바일/태블릿에서는 화살표 숨김(터치 스와이프 유도) */ }
           .roadmap-headers, .roadmap-row { grid-template-columns: 1fr 1fr; gap: 22px; }
           .roadmap-label { display: none; }
           .roadmap-row > .stack-group:nth-child(2) .roadmap-card::after,
@@ -326,7 +377,7 @@ function MainPage() {
           .hero-content { max-width: 100%; padding-top: 30px; }
           .hero h1 { font-size: 32px; }
           .hero-art-img { right: -8vw; width: 74vw; opacity: .7; }
-          .roadmap-wrapper, .spacing-160 { margin-top: 75px; }
+          .roadmap-wrapper, .jobs-section, .notices-wrapper { margin-top: 75px; }
           .section-title { align-items: flex-start; margin-bottom: 25px; }
           .section-title h2 { font-size: 25px; }
           .section-title p { font-size: 14px; }
@@ -372,12 +423,49 @@ function MainPage() {
         <img src={Home_header_image} alt="로드맵 일러스트" className="hero-art-img" />
       </section>
 
-      <section className="roadmap-wrapper spacing-160" id="roadmap">
+      {/* 1. 외부 취업 공고 섹션 (화살표 스크롤 추가) */}
+      <section className="jobs-section" id="jobs">
+        <div className="container">
+          <SectionTitle 
+            icon={Home_advertise} 
+            title="외부 취업 공고" 
+            description="나에게 맞는 다양한 취업 공고를 만나보세요." 
+            action="+ 취업공고 더 보러가기" 
+          />
+        </div>
+        <div className="carousel-wrapper">
+          <button className="nav-arrow left-arrow" onClick={() => scroll("left")} aria-label="이전 공고 보기">
+            <img src={Home_left} alt="이전 화살표" />
+          </button>
+          
+          <div className="job-strip" ref={scrollRef}>
+            {jobs.map(([company, logoSrc, tags, title, deadline]) => (
+              <article className="job-card" key={company}>
+                {/* 💡 텍스트 대신 임포트한 이미지 렌더링 */}
+                <div className="logo">
+                  <img src={logoSrc} alt={`${company} 로고`} />
+                </div>
+                <h3 className="company">{company}</h3>
+                <div className="tags">{tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>
+                <p className="job-title">{title}</p>
+                <div className="deadline"><span>{deadline}</span><span>→</span></div>
+              </article>
+            ))}
+          </div>
+
+          <button className="nav-arrow right-arrow" onClick={() => scroll("right")} aria-label="다음 공고 보기">
+            <img src={Home_right} alt="다음 화살표" />
+          </button>
+        </div>
+      </section>
+
+      {/* 2. 로드맵 섹션 */}
+      <section className="roadmap-wrapper" id="roadmap">
         <div className="container">
           <SectionTitle
             icon={Home_roadmap}
             title="Roadmap"
-            description={<>한성대학교에 있는 <strong>부동산 트랙</strong>/<strong>지식정보문화 트랙</strong>의 기존 로드맵이에요.</>}
+            description="한성대학교에 있는 부동산 트랙/지식정보문화 트랙의 기존 로드맵이에요."
           />
           <div className="tabs" role="tablist" aria-label="로드맵 트랙">
             <button type="button" role="tab" aria-selected={realEstate} className={`tab ${realEstate ? "active" : ""}`} onClick={() => setTrack("부동산 트랙")}>부동산 트랙</button>
@@ -419,8 +507,14 @@ function MainPage() {
         </div>
       </section>
 
-      <section className="container spacing-160" id="contact">
-        <SectionTitle icon={Home_notice} title="한성대학교 공지사항" description="한성대학교의 일정 소식을 만나보세요." action="더보기" />
+      {/* 3. 한성대 공지사항 섹션 */}
+      <section className="container notices-wrapper" id="contact">
+        <SectionTitle 
+          icon={Home_notice} 
+          title="한성대 공지사항" 
+          description="한성대학교의 일정들을 만나보세요." 
+          action="+ 더보기" 
+        />
         <div className="notice-grid">
           {notices.map(([title, date]) => (
             <a className="notice" href="#notice" key={title}>
@@ -431,45 +525,43 @@ function MainPage() {
         </div>
       </section>
 
-      <section className="container spacing-160 jobs-wrapper" id="jobs">
-        <SectionTitle icon={Home_advertise} title="한눈에 취업 공고" description="나에게 맞는 다양한 취업 공고를 만나보세요." action="취업공고 더 보러가기" />
-        <div className="job-strip">
-          {jobs.map(([company, logo, tags, title, deadline]) => (
-            <article className="job-card" key={company}>
-              <div className="logo">{logo}</div>
-              <h3 className="company">{company}</h3>
-              <div className="tags">{tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>
-              <p className="job-title">{title}</p>
-              <div className="deadline"><span>{deadline}</span><span>→</span></div>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <footer className="footer">
         <div className="container footer-inner">
           <div className="footer-cs">
-            <h3>고객센터</h3>
-            <div className="time">1670-0000 09:00~18:00</div>
+            <h3>고객센터 〉</h3>
+            <div className="time">1670-0876 09:00~18:00</div>
             <ul>
               <li>평일: 전체 문의 상담</li>
-              <li>주말 및 공휴일: 긴급 문의만 상담</li>
+              <li>토요일, 공휴일: 오늘의집 직접배송 주문건 상담</li>
               <li>일요일: 휴무</li>
             </ul>
-            <div className="btn-group"><button>카카오 상담</button><button>이메일 문의</button></div>
+            <div className="btn-group">
+              <button>카톡 상담(평일 09:00~18:00)</button>
+              <button>이메일 문의</button>
+            </div>
           </div>
           <div className="footer-links">
-            <span>회사소개</span><span>이용약관</span>
-            <span>개인정보 처리방침</span><span>공지사항</span>
-            <span>채용문의</span><span>제휴문의</span>
-            <span>자주 묻는 질문</span><span>이메일 무단수집거부</span>
+            <span>회사소개</span><span>회사소개</span>
+            <span>회사소개</span><span>회사소개</span>
+            <span>회사소개</span><span>파트너 개인정보 처리방침</span>
+            <span>개인정보 처리방침</span><span>회사소개</span>
+            <span>회사소개</span><span>회사소개</span>
+            <span>회사소개</span><span>회사소개</span>
+            <span>회사소개</span>
           </div>
           <div className="footer-legal">
-            <p>한성대학교 HSTEP | 서울특별시 성북구 삼선교로16길 116</p>
-            <p>contact@hstep.ac.kr | 사업자등록번호 000-00-00000</p>
-            <p style={{ marginTop: 16 }}>HSTEP은 한성대학교 학생을 위한 진로 로드맵 및 취업 정보 지원 서비스입니다.</p>
+            <p>(주)버킷플레이스 | 대표이사 이승재 | 서울 서초구 서초대로74길 4 삼성생명서초타워 25층, 27층</p>
+            <p>contact@bucketplace.net | 사업자등록번호 119-86-91245 사업자정보확인</p>
+            <p>통신판매업신고번호 제2018-서울서초-0580호</p>
+            <p style={{ marginTop: 16 }}>고객님이 현금결제한 금액에 대해 우리은행과 채무지급보증 계약을 체결하여 안전거래를 보장하고 있습니다. 서비스가입사실확인</p>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', margin: '14px 0' }}>
+              <div style={{ padding: '6px 12px', border: '1px solid #d9dde2', borderRadius: 4, fontSize: 11 }}>오늘의집 서비스 운영<br/>2024. 09. 08 ~ 2027. 09. 07</div>
+            </div>
+            <p style={{ fontSize: 11, color: '#999' }}>
+              (주)버킷플레이스는 통신판매중개자로 거래 당사자가 아니므로, 판매자가 등록한 상품정보 및 거래 등에 대해 책임을 지지 않습니다. 단, (주)버킷플레이스가 판매자로 등록 판매한 상품은 판매자로서 책임을 부담합니다.
+            </p>
             <div className="social"><span /><span /><span /><span /></div>
-            <p>Copyright 2026. HSTEP. All rights reserved.</p>
+            <p>Copyright 2014. bucketplace, Co., Ltd. All rights reserved.</p>
           </div>
         </div>
       </footer>

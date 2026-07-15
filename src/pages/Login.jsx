@@ -45,10 +45,8 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
     // 임시 테스트 로그(아이디가 123이 아니면 로그인 실패)
     if (studentId !== '123') {
       setHasError(true);
-      alert('로그인 실패: 아이디 또는 비밀번호를 확인해주세요.');
     } else {
       setHasError(false);
-      alert('로그인 성공!');
     }
 
     console.log('로그인 시도:', { studentId, password });

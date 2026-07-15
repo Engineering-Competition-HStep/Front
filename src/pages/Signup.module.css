@@ -205,6 +205,32 @@ background-position: right 15px center;
 margin-bottom: 10px; /* 1트랙, 2트랙 사이 간격 */
 }
 
+.goBackButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #849CB2;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 30px auto 12px auto; /* 위쪽 여백 30px, 아래쪽 여백 12px */
+  padding: 0;
+}
+/* 
+.goBackButton:hover {
+  color: #555;
+} */
+
+/* ✨ 수정: 텍스트 화살표 클래스(.arrowIcon)를 지우고, 이미지용 클래스를 추가합니다. */
+.backIconImg {
+  width: 16px; /* 아이콘 크기에 맞게 조절하세요 */
+  height: auto;
+  object-fit: contain;
+}
+
 /* 다음으로 버튼 */
 .submitButton {
 width: 100%;
@@ -216,11 +242,20 @@ border-radius: 8px;
 font-size: 16px;
 font-weight: bold;
 cursor: pointer;
-margin-top: 30px;
+margin-top: 0px;
+transition: background-color 0.3s ease;
 }
 
 .submitButton:hover {
 background-color: #888;
+}
+
+.submitButtonActive {
+    background-color: #0084FF;
+}
+
+.submitButtonActive:hover {
+    background-color: #0073e6;
 }
 
 .submitErrorMessage {

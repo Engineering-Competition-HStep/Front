@@ -11,6 +11,8 @@ import completeIconFocus from '../assets/signup_complete_icon_focus.svg';
 // 학년 선택 라디오 아이콘
 import gradeIcon from '../assets/grade.svg';
 import gradeChoiceIcon from '../assets/grade_choice.svg';
+// 뒤로가기 화살표 아이콘
+import backIcon from '../assets/back_button.svg';
 
 function Signup({ onBackToLogin }) {
   const [currentStep, setCurrentStep] = useState(1) // 1: 회원가입, 2: 메일인증, 3: 완료
@@ -197,9 +199,9 @@ function Signup({ onBackToLogin }) {
             >
               {/* 추후 트랙 테이블 연동 */}
               <option value="" disabled>1트랙</option>
-              <option value="AI">AI 응용 트랙</option>
-              <option value="WEB">웹 개발 트랙</option>
-              <option value="GAME">게임 개발 트랙</option>
+              <option value="BIGDATA">빅테이터 트랙</option>
+              <option value="WEB">웹 공학 트랙</option>
+              <option value="MOBILE">모바일 소프트웨어 트랙</option>
             </select>
             
             <select 
@@ -208,13 +210,21 @@ function Signup({ onBackToLogin }) {
               onChange={(e) => setTrack2(e.target.value)}
             >
               <option value="" disabled>2트랙</option>
-              <option value="AI">AI 응용 트랙</option>
-              <option value="WEB">웹 개발 트랙</option>
-              <option value="GAME">게임 개발 트랙</option>
+              <option value="BIGDATA">빅데이터 트랙</option>
+              <option value="WEB">웹 공학 트랙</option>
+              <option value="MOBILE">모바일 소프트웨어 트랙</option>
             </select>
           </div>
 
-          <button type="submit" className={styles.submitButton}>
+          <button type="button" onClick={onBackToLogin} className={styles.goBackButton}>
+            <img src={backIcon} alt="뒤로가기" className={styles.backIconImg} /> 
+            이전으로
+          </button>
+
+          <button 
+            type="submit" 
+            className={`${styles.submitButton} ${isStep1Valid ? styles.submitButtonActive : ''}`}
+          >
             다음으로
           </button>
 
@@ -224,10 +234,6 @@ function Signup({ onBackToLogin }) {
             </span>
           )}
           
-          {/* [임시] 로그인 화면으로 돌아가는 버튼 추가 */}
-          <button type="button" onClick={onBackToLogin} className={styles.backButton}>
-            로그인 화면으로 돌아가기
-          </button>
         </form>
         )}
 
@@ -259,19 +265,14 @@ function Signup({ onBackToLogin }) {
               </div>
             </div>
 
+              <button type="button" onClick={() => setCurrentStep(1)} className={styles.goBackButton}>
+                <img src={backIcon} alt="뒤로가기" className={styles.backIconImg} /> 
+                이전으로
+              </button>
+
             <button type="submit" className={styles.submitButton}>
               다음으로
             </button>
-
-            {/* 뒤로 가기 및 로그인 화면 복귀 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" onClick={() => setCurrentStep(1)} className={styles.backButton} style={{ marginTop: 0 }}>
-                이전 단계로
-              </button>
-              <button type="button" onClick={onBackToLogin} className={styles.backButton} style={{ marginTop: 0 }}>
-                로그인 화면으로
-              </button>
-            </div>
           </form>
         )}
 

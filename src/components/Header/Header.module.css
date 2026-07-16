@@ -8,7 +8,7 @@ width: 100%;
 .headerInner {
 width: 100%;
 margin: 0 auto;
-height: 70px;
+height: 40px;
 display: flex;
 align-items: center;
 justify-content: space-between;
@@ -49,7 +49,7 @@ font-weight: bold;
 .navItemActive::after {
 content: '';
 position: absolute;
-bottom: -25px; /* 헤더 높이에 맞게 밑줄 위치 조정 */
+bottom: -10px;
 left: 0;
 width: 100%;
 height: 3px;

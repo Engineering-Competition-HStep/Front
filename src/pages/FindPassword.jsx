@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import styles from './Login.module.css'; // 기존 로그인 CSS를 재사용합니다.
+import styles from './FindPassword.module.css';
 
 function FindPassword({ onBackToLogin }) {
   const [email, setEmail] = useState('');
@@ -18,8 +18,8 @@ function FindPassword({ onBackToLogin }) {
         <p className={styles.subtitle}>비밀번호 재설정</p>
       </div>
 
-      <div className={styles.bubbleContainer} style={{ alignItems: 'center', marginBottom: '30px' }}>
-        <div className={styles.bubble}>
+      <div className={styles.bubbleContainer}>
+        <div className={styles.instructionBubble}>
           가입 시 등록한 이메일 주소를 입력해 주세요.
         </div>
       </div>
@@ -38,15 +38,14 @@ function FindPassword({ onBackToLogin }) {
           />
         </div>
 
-        <button type="submit" className={styles.loginButton} style={{ backgroundColor: '#144574' }}>
+        <button type="submit" className={styles.submitButton}>
           재설정 메일 발송
         </button>
 
-        <div className={styles.linkCenter} style={{ marginTop: '30px' }}>
+        <div className={styles.linkCenter}>
           <span 
             className={styles.linkText} 
             onClick={onBackToLogin}
-            style={{ cursor: 'pointer', textDecoration: 'underline' }}
           >
             로그인 화면으로 돌아가기
           </span>

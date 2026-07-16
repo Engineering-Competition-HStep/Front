@@ -5,8 +5,8 @@ import bannerImg from '../../assets/mypage_banner.svg';
 import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 import writeIcon from '../../assets/mypage_writeIcon.svg';
 
-export default function MyPage() {
-  // 나의 평점평균 상태 관리
+export default function MyPage({ onNavigateToRegistration}) {
+  // 나의 학점평균 상태 관리
   const [gpa, setGpa] = useState({
     grade1: '',
     grade2: '',
@@ -109,7 +109,7 @@ export default function MyPage() {
           <section className={styles.gpaSection}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>나의 성적평균</h3>
-              <button className={styles.writeBtn}>
+              <button className={styles.writeBtn} onClick={onNavigateToRegistration}>
                 <img src={writeIcon} alt="작성하기 아이콘" className={styles.writeIcon} />
                 작성하기
               </button>

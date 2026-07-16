@@ -1,0 +1,173 @@
+.pageContainer {
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: 'Pretendard', sans-serif;
+  color: #333;
+}
+
+.mainLayout {
+  max-width: 1000px;
+  margin: 50px auto 100px auto; /* 하단 100px 여백으로 시원하게 */
+  display: flex;
+  gap: 80px;
+  padding: 0 20px;
+  align-items: flex-start;
+}
+
+/* === 왼쪽 사이드바 (스텝 표시기) === */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 50px; /* 스크롤을 내려도 따라다니도록 설정 */
+}
+
+.sidebarSub {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 5px 0;
+}
+
+.sidebarTitle {
+  font-size: 32px;
+  font-weight: bold;
+  color: #222;
+  margin: 0 0 40px 0;
+}
+
+.stepWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.stepNode {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  cursor: pointer;
+}
+
+/* 스텝 사이를 연결하는 세로 선 */
+.stepNode:first-child::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 25px;
+  width: 2px;
+  height: 40px;
+  background-color: #eaeaea;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #eaeaea;
+  background-color: #fff;
+  z-index: 1; /* 선보다 위에 오도록 설정 */
+  transition: all 0.3s ease;
+}
+
+.active .dot {
+  background-color: #0084FF;
+  border-color: #0084FF;
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+}
+
+.stepLabel {
+  font-size: 11px;
+  font-weight: bold;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+
+.stepName {
+  font-size: 16px;
+  font-weight: bold;
+  color: #222;
+}
+
+/* === 오른쪽 메인 컨텐츠 영역 === */
+.contentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+/* 상단 안내 배너 (이전과 동일) */
+.infoBanner {
+  background-color: #F4F9FF; /* 피그마에 맞춰 연한 파란색 배경 */
+  border-radius: 12px;
+  padding: 30px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bannerTitle {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.bannerText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+  margin: 0;
+  z-index: 2;
+  position: relative;
+}
+
+.bannerText strong {
+  font-weight: bold;
+  color: #0084FF;
+}
+
+.bannerIllustration {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 90px;
+  width: auto;
+  z-index: 1;
+}
+
+/* 하단 버튼 */
+.bottomButtonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.actionButton {
+  background-color: #0084FF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 15px 100px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #0073e6;
+}
+
+.actionButton.gray {
+  background-color: #aaa;
+}
+
+.actionButton.gray:hover {
+  background-color: #999;
+}

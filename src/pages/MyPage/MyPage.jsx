@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './MyPage.module.css';
 import Header from '../../components/Header/Header';
+import bannerImg from '../../assets/mypage_banner.svg';
 
 export default function MyPage() {
   // 나의 평점평균 상태 관리
@@ -35,6 +36,7 @@ export default function MyPage() {
   return (
     <div className={styles.pageContainer}>
       
+      {/* 상단 메뉴바 컴포넌트 */}
       <Header activeMenu="mypage" />
 
       {/* 메인 컨텐츠 영역 */}
@@ -92,23 +94,13 @@ export default function MyPage() {
           {/* 상단 파란색 안내 배너 */}
           <div className={styles.infoBanner}>
             <p className={styles.bannerText}>
-              학점 및 경력을 등록해야 <strong>전용 로드맵과 AI채팅</strong>을 사용할 수 있습니다.<br/>
+              <strong>학점 및 경력을 등록</strong>해야 <strong>전용 로드맵</strong>과 <strong>AI채팅</strong>을 사용할 수 있습니다.<br/>
               학교 내의 활동도 등록 가능하며,<br/>
-              자신의 트랙에 맞는 스펙을 넣어야 AI가 정확하게 분석합니다.<br/>
-              나의 트랙에 관련된 나만의 로드맵을 만들어보세요.
+              자신의 <strong>트랙에 맞는 스펙</strong>을 넣어야 AI가 정확하게 분석합니다.<br/>
+              나의 트랙에 관련된 <strong>나만의 로드맵</strong>을 만들어보세요.
             </p>
             {/* 우측 문서 일러스트 (SVG로 임시 구현) */}
-            <div className={styles.bannerIllustration}>
-              <svg width="100" height="90" viewBox="0 0 100 90" fill="none">
-                <rect x="20" y="10" width="50" height="70" rx="4" fill="#ffffff" opacity="0.9" />
-                <line x1="30" y1="30" x2="60" y2="30" stroke="#A3C6E8" strokeWidth="4" strokeLinecap="round" />
-                <line x1="30" y1="45" x2="60" y2="45" stroke="#A3C6E8" strokeWidth="4" strokeLinecap="round" />
-                <line x1="30" y1="60" x2="45" y2="60" stroke="#A3C6E8" strokeWidth="4" strokeLinecap="round" />
-                <path d="M80 40 L60 60 L50 55 L70 35 Z" fill="#84C1FF" />
-                <circle cx="20" cy="80" r="10" fill="#ffffff" opacity="0.5" />
-                <circle cx="80" cy="75" r="8" fill="#ffffff" opacity="0.5" />
-              </svg>
-            </div>
+            <img src={bannerImg} alt="배너 일러스트" className={styles.bannerIllustration} />
           </div>
 
           {/* 나의 평점평균 섹션 */}

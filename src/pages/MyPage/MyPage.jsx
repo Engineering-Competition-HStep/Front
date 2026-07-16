@@ -3,6 +3,7 @@ import styles from './MyPage.module.css';
 import Header from '../../components/Header/Header';
 import bannerImg from '../../assets/mypage_banner.svg';
 import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
+import writeIcon from '../../assets/mypage_writeIcon.svg';
 
 export default function MyPage() {
   // 나의 평점평균 상태 관리
@@ -100,7 +101,7 @@ export default function MyPage() {
               자신의 <strong>트랙에 맞는 스펙</strong>을 넣어야 AI가 정확하게 분석합니다.<br/>
               나의 트랙에 관련된 <strong>나만의 로드맵</strong>을 만들어보세요.
             </p>
-            {/* 우측 문서 일러스트 (SVG로 임시 구현) */}
+            {/* 우측 문서 일러스트 */}
             <img src={bannerImg} alt="배너 일러스트" className={styles.bannerIllustration} />
           </div>
 
@@ -109,7 +110,7 @@ export default function MyPage() {
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>나의 성적평균</h3>
               <button className={styles.writeBtn}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> 
+                <img src={writeIcon} alt="작성하기 아이콘" className={styles.writeIcon} />
                 작성하기
               </button>
             </div>

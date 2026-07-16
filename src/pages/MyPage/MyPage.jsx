@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './MyPage.module.css';
 import Header from '../../components/Header/Header';
 import bannerImg from '../../assets/mypage_banner.svg';
+import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 
 export default function MyPage() {
   // 나의 평점평균 상태 관리
@@ -158,10 +159,7 @@ export default function MyPage() {
               {/* 자격증 */}
               <div>
                 <div className={styles.specItemHeader}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0084FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                  </svg>
+                  <img src={mySpecsIcon} alt="스펙 아이콘" className={styles.specIcon} />
                   <h4 className={styles.specItemTitle}>자격증</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
@@ -176,10 +174,7 @@ export default function MyPage() {
               {/* 수상경력 */}
               <div>
                 <div className={styles.specItemHeader}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0084FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                  </svg>
+                  <img src={mySpecsIcon} alt="스펙 아이콘" className={styles.specIcon} />
                   <h4 className={styles.specItemTitle}>수상경력</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
@@ -199,10 +194,7 @@ export default function MyPage() {
               {/* 자원봉사 */}
               <div>
                 <div className={styles.specItemHeader}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0084FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                  </svg>
+                  <img src={mySpecsIcon} alt="스펙 아이콘" className={styles.specIcon} />
                   <h4 className={styles.specItemTitle}>자원봉사</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
@@ -222,10 +214,7 @@ export default function MyPage() {
               {/* 기타활동 */}
               <div>
                 <div className={styles.specItemHeader}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0084FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                  </svg>
+                  <img src={mySpecsIcon} alt="스펙 아이콘" className={styles.specIcon} />
                   <h4 className={styles.specItemTitle}>기타활동</h4>
                 </div>
                 <div className={styles.specInputWrapper}>

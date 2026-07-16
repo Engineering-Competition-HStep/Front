@@ -9,7 +9,6 @@ export default function Header({ activeMenu }) {
     <header className={styles.header}>
       <div className={styles.headerInner}>
         
-        {/* ✨ 텍스트 대신 HSTEP 로고 이미지 사용 */}
         <img src={HSTEPLogo} alt="HSTEP 로고" className={styles.logoImage} />
         
         <nav className={styles.nav}>
@@ -28,7 +27,7 @@ export default function Header({ activeMenu }) {
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          {/* 햄버거 메뉴 아이콘 */}
+          {/* 메뉴 아이콘 */}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>

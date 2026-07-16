@@ -211,6 +211,7 @@ gap: 60px;
 /* 안내 배너 */
 .infoBanner {
 background-color: #0084FF;
+max-width: 800px;
 border-radius: 12px;
 padding: 30px 40px;
 color: #fff;
@@ -255,7 +256,7 @@ color: #222;
 
 .sectionDesc {
 font-size: 13px;
-color: #888;
+color: #567694;
 margin: 0 0 30px 0;
 }
 
@@ -277,9 +278,12 @@ cursor: pointer;
 background-color: #0073e6;
 }
 
+.gpaSection {
+  max-width: 800px;
+}
+
 /* 나의 평점평균 입력 영역 */
 .gpaContainer {
-max-width: 600px;
 display: flex;
 flex-direction: column;
 gap: 20px;
@@ -341,7 +345,6 @@ margin: 10px 0;
 
 /* 나의 개인스펙 입력 영역 */
 .specContainer {
-max-width: 700px;
 display: flex;
 flex-direction: column;
 gap: 40px;

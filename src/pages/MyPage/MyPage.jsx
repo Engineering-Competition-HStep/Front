@@ -104,39 +104,33 @@ export default function MyPage() {
           </div>
 
           {/* 나의 평점평균 섹션 */}
-          <div>
+          <section className={styles.gpaSection}>
             <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>나의 평점평균</h3>
+              <h3 className={styles.sectionTitle}>나의 성적평균</h3>
               <button className={styles.writeBtn}>
-                {/* 연필 아이콘 */}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9"></path>
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                </svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> 
                 작성하기
               </button>
             </div>
             <p className={styles.sectionDesc}>*종합정보시스템 &gt; 학적 &gt; 학적조회 &gt; 성적사항</p>
 
             <div className={styles.gpaContainer}>
-              {[
-                { label: '1학년', name: 'grade1', placeholder: '1학년 평점평균을 입력해주세요.' },
-                { label: '2학년', name: 'grade2', placeholder: '2학년 평점평균을 입력해주세요.' },
-                { label: '3학년', name: 'grade3', placeholder: '3학년 평점평균을 입력해주세요.' },
-                { label: '4학년', name: 'grade4', placeholder: '4학년 평점평균을 입력해주세요.' },
-              ].map((item) => (
-                <div key={item.name} className={styles.inputRow}>
-                  <div className={styles.gradePill}>{item.label}</div>
-                  <input 
-                    type="text" 
-                    name={item.name}
-                    value={gpa[item.name]}
-                    onChange={handleGpaChange}
-                    placeholder={item.placeholder}
-                    className={styles.underlineInput}
-                  />
-                </div>
-              ))}
+              {['1학년', '2학년', '3학년', '4학년'].map((label, idx) => {
+                const name = `grade${idx + 1}`;
+                return (
+                  <div key={name} className={styles.inputRow}>
+                    <div className={styles.gradePill}>{label}</div>
+                    <input 
+                      type="text" 
+                      name={name}
+                      value={gpa[name]}
+                      onChange={handleGpaChange}
+                      placeholder={`${label} 성적평균을 입력해주세요.`}
+                      className={styles.underlineInput}
+                    />
+                  </div>
+                );
+              })}
               
               <div className={styles.divider}></div>
 
@@ -147,12 +141,12 @@ export default function MyPage() {
                   name="total"
                   value={gpa.total}
                   onChange={handleGpaChange}
-                  placeholder="전체 평점평균을 입력해주세요."
+                  placeholder="전체 성적평균을 입력해주세요."
                   className={`${styles.underlineInput} ${styles.totalInput}`}
                 />
               </div>
             </div>
-          </div>
+          </section>
 
           {/* 나의 개인스펙 섹션 */}
           <div>

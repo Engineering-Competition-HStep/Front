@@ -18,7 +18,7 @@ import EyeOffIcon from '../assets/Eye_off.svg';
 
 import styles from './Login.module.css';
 
-function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
+function Login( {onNavigateToFindPassword, onNavigateToSignup, onLoginSuccess} ) {
   const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -47,6 +47,7 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup} ) {
       setHasError(true);
     } else {
       setHasError(false);
+      onLoginSuccess();
     }
 
     console.log('로그인 시도:', { studentId, password });

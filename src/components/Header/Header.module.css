@@ -62,3 +62,10 @@ gap: 20px;
 color: #333;
 cursor: pointer;
 }
+
+.actionIcon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: block;
+}

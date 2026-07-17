@@ -17,7 +17,7 @@ export default function MyPage({ onNavigateToRegistration}) {
 
   // 나의 개인스펙 상태 관리
   const [specs, setSpecs] = useState({
-    cert: '',
+    cert: 'GTQ 1급 / 2024.5.6',
     award1: '',
     award2: '',
     volunteer1: '',
@@ -67,7 +67,6 @@ export default function MyPage({ onNavigateToRegistration}) {
             </div>
 
             <h2 className={styles.userName}>000</h2>
-            <p className={styles.userDept}>ICT 디자인 학부</p>
             
             <div className={styles.userTracks}>
               시각디자인 트랙<br/>
@@ -105,10 +104,10 @@ export default function MyPage({ onNavigateToRegistration}) {
             <img src={bannerImg} alt="배너 일러스트" className={styles.bannerIllustration} />
           </div>
 
-          {/* 나의 평점평균 섹션 */}
+          {/* 나의 학점평균 섹션 */}
           <section className={styles.gpaSection}>
             <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>나의 성적평균</h3>
+              <h3 className={styles.sectionTitle}>나의 학점평균</h3>
               <button className={styles.writeBtn} onClick={onNavigateToRegistration}>
                 <img src={writeIcon} alt="작성하기 아이콘" className={styles.writeIcon} />
                 작성하기
@@ -122,14 +121,12 @@ export default function MyPage({ onNavigateToRegistration}) {
                 return (
                   <div key={name} className={styles.inputRow}>
                     <div className={styles.gradePill}>{label}</div>
-                    <input 
-                      type="text" 
-                      name={name}
-                      value={gpa[name]}
-                      onChange={handleGpaChange}
-                      placeholder={`${label} 성적평균을 입력해주세요.`}
+                    <div 
                       className={styles.underlineInput}
-                    />
+                      style={{ color: gpa[name] ? '#333' : '#aaa' }}
+                    >
+                      {gpa[name] || `${label} 학점평균을 입력해주세요.`}
+                    </div>
                   </div>
                 );
               })}
@@ -138,14 +135,12 @@ export default function MyPage({ onNavigateToRegistration}) {
 
               <div className={styles.inputRow}>
                 <div className={`${styles.gradePill} ${styles.totalPill}`}>전체평균</div>
-                <input 
-                  type="text" 
-                  name="total"
-                  value={gpa.total}
-                  onChange={handleGpaChange}
-                  placeholder="전체 성적평균을 입력해주세요."
+                <div 
                   className={`${styles.underlineInput} ${styles.totalInput}`}
-                />
+                  style={{ color: gpa.total ? '#144574' : '#aaa' }}
+                >
+                  {gpa.total || '전체 학점평균을 입력해주세요.'}
+                </div>
               </div>
             </div>
           </section>
@@ -164,11 +159,9 @@ export default function MyPage({ onNavigateToRegistration}) {
                   <h4 className={styles.specItemTitle}>자격증</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
-                  <input 
-                    type="text" name="cert" value={specs.cert} onChange={handleSpecChange}
-                    placeholder="예 ) GTQ 1급 / 2024.5.6"
-                    className={styles.specInput}
-                  />
+                  <div className={styles.specInput} style={{ color: specs.cert ? '#333' : '#aaa' }}>
+                    {specs.cert || '예 ) GTQ 1급 / 2024.5.6'}
+                  </div>
                 </div>
               </div>
 
@@ -179,16 +172,13 @@ export default function MyPage({ onNavigateToRegistration}) {
                   <h4 className={styles.specItemTitle}>수상경력</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
-                  <input 
-                    type="text" name="award1" value={specs.award1} onChange={handleSpecChange}
-                    placeholder="예 ) KOBACO 공익광고 공모전 / 대상"
-                    className={styles.specInput}
-                  />
-                  <input 
-                    type="text" name="award2" value={specs.award2} onChange={handleSpecChange}
-                    placeholder="예 ) 사회문제를 창의적인 광고 아이디어와 시각적 표현으로 해결하는 공익광고 공모전에 참가하여 기획부터 디자인까지 전 과정을 수행함."
-                    className={styles.specInput}
-                  />
+                  <div className={styles.specInput} style={{ color: specs.award1 ? '#333' : '#aaa' }}>
+                    {specs.award1 || '예 ) KOBACO 공익광고 공모전 / 대상'}
+                  </div>
+                  {/* ✨ 두 번째 줄도 값이 없을 땐 예시 문구를 보여주도록 복구합니다. */}
+                  <div className={styles.specInput} style={{ color: specs.award2 ? '#333' : '#aaa' }}>
+                    {specs.award2 || '예 ) 사회문제를 창의적인 광고 아이디어와 시각적 표현으로 해결하는 공익광고 공모전에 참가하여 기획부터 디자인까지 전 과정을 수행함.'}
+                  </div>
                 </div>
               </div>
 
@@ -199,16 +189,12 @@ export default function MyPage({ onNavigateToRegistration}) {
                   <h4 className={styles.specItemTitle}>자원봉사</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
-                  <input 
-                    type="text" name="volunteer1" value={specs.volunteer1} onChange={handleSpecChange}
-                    placeholder="예 ) 김장 나눔 봉사 / 한성대학교 사회봉사센터 / 8시간"
-                    className={styles.specInput}
-                  />
-                  <input 
-                    type="text" name="volunteer2" value={specs.volunteer2} onChange={handleSpecChange}
-                    placeholder="예 ) 지역사회의 취약계층을 위해 김장 김치를 직접 담그고 포장 및 배부를 지원한 봉사활동."
-                    className={styles.specInput}
-                  />
+                  <div className={styles.specInput} style={{ color: specs.volunteer1 ? '#333' : '#aaa' }}>
+                    {specs.volunteer1 || '예 ) 김장 나눔 봉사 / 한성대학교 사회봉사센터 / 8시간'}
+                  </div>
+                  <div className={styles.specInput} style={{ color: specs.volunteer2 ? '#333' : '#aaa' }}>
+                    {specs.volunteer2 || '예 ) 지역사회의 취약계층을 위해 김장 김치를 직접 담그고 포장 및 배부를 지원한 봉사활동.'}
+                  </div>
                 </div>
               </div>
 
@@ -219,11 +205,9 @@ export default function MyPage({ onNavigateToRegistration}) {
                   <h4 className={styles.specItemTitle}>기타활동</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
-                  <input 
-                    type="text" name="etc" value={specs.etc} onChange={handleSpecChange}
-                    placeholder="예 ) 멋쟁이사자처럼 대학 / IT 동아리 / 팀 프로젝트를 통해 서비스 기획 및 개발 경험."
-                    className={styles.specInput}
-                  />
+                  <div className={styles.specInput} style={{ color: specs.etc ? '#333' : '#aaa' }}>
+                    {specs.etc || '예 ) 멋쟁이사자처럼 대학 / IT 동아리 / 팀 프로젝트를 통해 서비스 기획 및 개발 경험.'}
+                  </div>
                 </div>
               </div>
 

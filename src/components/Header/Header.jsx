@@ -2,6 +2,8 @@ import React from 'react';
 import styles from './Header.module.css';
 
 import HSTEPLogo from '../../assets/HSTEP_logo.svg';
+import searchIcon from '../../assets/header_search.svg';
+import menuBarIcon from '../../assets/header_menuBar.svg';
 
 // activeMenu prop을 받아 어떤 메뉴에 파란 불을 켤지 결정합니다.
 export default function Header({ activeMenu }) {
@@ -23,16 +25,9 @@ export default function Header({ activeMenu }) {
 
         <div className={styles.headerIcons}>
           {/* 검색 아이콘 */}
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+          <img src={searchIcon} alt="검색" className={styles.actionIcon} />
           {/* 메뉴 아이콘 */}
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
+          <img src={menuBarIcon} alt="메뉴" className={styles.actionIcon} />
         </div>
       </div>
     </header>

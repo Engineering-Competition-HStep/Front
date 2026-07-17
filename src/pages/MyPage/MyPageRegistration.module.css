@@ -29,6 +29,7 @@
 }
 
 .sidebarTitle {
+  font-family: 'SBAggroL';
   font-size: 32px;
   font-weight: bold;
   color: #222;
@@ -57,18 +58,42 @@
 }
 
 /* 상단 안내 배너 */
+.bannerContainer {
+    margin-bottom: 100px;
+}
+
+.bannerMainTitle {
+    font-family: 'Pretendard';
+    font-size: 18px;
+    font-weight: bold;
+    color: #1A1A1A;
+    margin: 0 0 15px 0;
+}
+
 .infoBanner {
-  background-color: #F4F9FF;
+  background-color: #F1F7FE;
   border-radius: 12px;
-  padding: 30px 40px;
+  padding: 25px 20px;
   position: relative;
   overflow: hidden;
-  margin-bottom: 100px;
 }
-.bannerTitle { font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #333; }
-.bannerText { font-size: 14px; line-height: 1.6; color: #555; margin: 0; z-index: 2; position: relative; }
-.bannerText strong { font-weight: bold; color: #0084FF; }
-.bannerIllustration { position: absolute; right: 30px; top: 50%; transform: translateY(-50%); height: 90px; z-index: 1; }
+.bannerText { 
+    font-size: 14px; 
+    line-height: 1.6; 
+    color: #334656; 
+    margin: 0; 
+    z-index: 2; 
+    position: relative; 
+}
+
+.bannerIllustration { 
+    position: absolute; 
+    right: 30px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    height: 90px; 
+    z-index: 1; 
+}
 
 /* 타이틀 & 설명 공통 */
 .sectionHeader {

@@ -79,14 +79,17 @@ export default function MyPageRegistration() {
         <div className={styles.contentArea}>
           
           {/* 상단 안내 배너 */}
-          <div className={styles.infoBanner}>
-            <h4 className={styles.bannerTitle}>마이페이지 정보 등록 안내</h4>
-            <p className={styles.bannerText}>
-              학점 및 스펙을 정확하게 등록해야 <strong>전용 로드맵</strong>과 <strong>AI채팅</strong>을 사용할 수 있습니다.<br/>
-              교내외 활동, 수상경력, 자격증 등은 실제 경험을 기준으로 작성해주세요.<br/>
-              등록된 정보는 언제든지 수정 및 추가할 수 있습니다.
-            </p>
-            <img src={bannerImg} alt="배너 일러스트" className={styles.bannerIllustration} />
+          <div className={styles.bannerContainer}>
+            <h4 className={styles.bannerMainTitle}>마이페이지 정보 등록 안내</h4>
+            <div className={styles.infoBanner}>
+              <p className={styles.bannerText}>
+                <strong>학점 및 개인 스펙</strong>을 <strong>정확하게</strong> 입력해주세요.<br/>
+                입력한 정보는 <strong>AI 취업 분석과 맞춤형 로드맵 생성에 활용</strong>됩니다.<br/>
+                교내·외 활동, 수상경력, 자격증 등은 <strong>실제 경럼을 기준</strong>으로 작성해주세요.<br/>
+                등록한 정보는 언제든지 <strong>수정 및 추가</strong>할 수 있습니다.
+              </p>
+              <img src={bannerImg} alt="배너 일러스트" className={styles.bannerIllustration} />
+            </div>
           </div>
 
           {/* === 01. 평점평균 섹션 === */}

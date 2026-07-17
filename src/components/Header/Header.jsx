@@ -18,7 +18,6 @@ export default function Header({ activeMenu }) {
           <span className={`${styles.navItem} ${activeMenu === 'roadmap' ? styles.navItemActive : ''}`}>나의 로드맵</span>
           <span className={`${styles.navItem} ${activeMenu === 'recommend' ? styles.navItemActive : ''}`}>공고 추천</span>
           <span className={`${styles.navItem} ${activeMenu === 'chat' ? styles.navItemActive : ''}`}>AI채팅</span>
-          {/* 마이페이지일 경우 파란불 켜짐 */}
           <span className={`${styles.navItem} ${activeMenu === 'mypage' ? styles.navItemActive : ''}`}>마이페이지</span>
           <span className={`${styles.navItem} ${activeMenu === 'inquiry' ? styles.navItemActive : ''}`}>문의</span>
         </nav>

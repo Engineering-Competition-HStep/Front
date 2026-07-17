@@ -3,6 +3,9 @@ import Header from '../../components/Header/Header.jsx';
 import styles from './MyPageRegistration.module.css';
 import bannerImg from '../../assets/mypage_banner.svg';
 import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
+import stepFocusIcon from '../../assets/mypageregistration_step_focus.svg';
+import stepBasicIcon from '../../assets/mypageregistration_step_basic.svg';
+import stepLineIcon from '../../assets/mypageregistration_step_line.svg';
 
 export default function MyPageRegistration() {
   // 현재 진행 중인 스텝 (1: 학점, 2: 개인스펙)
@@ -51,22 +54,40 @@ export default function MyPageRegistration() {
           <h1 className={styles.sidebarTitle}>My Page</h1>
           
           <div className={styles.stepWrapper}>
+            {/* STEP 1 */}
             <div 
               className={`${styles.stepNode} ${currentStep === 1 ? styles.active : ''}`}
               onClick={() => scrollToStep(1)}
             >
-              <div className={styles.dot}></div>
+              <div className={styles.iconBox}>
+                <img 
+                  src={currentStep === 1 ? stepFocusIcon : stepBasicIcon} 
+                  alt="스텝 아이콘" 
+                  className={currentStep === 1 ? styles.focusIcon : styles.basicIcon} 
+                />
+              </div>
+              
+              <img src={stepLineIcon} alt="연결선" className={styles.stepLine} />
+
               <div className={styles.stepText}>
                 <span className={styles.stepLabel}>STEP 1</span>
                 <span className={styles.stepName}>학점</span>
               </div>
             </div>
             
+            {/* STEP 2 */}
             <div 
               className={`${styles.stepNode} ${currentStep === 2 ? styles.active : ''}`}
               onClick={() => scrollToStep(2)}
             >
-              <div className={styles.dot}></div>
+              <div className={styles.iconBox}>
+                <img 
+                  src={currentStep === 2 ? stepFocusIcon : stepBasicIcon} 
+                  alt="스텝 아이콘" 
+                  className={currentStep === 2 ? styles.focusIcon : styles.basicIcon} 
+                />
+              </div>
+
               <div className={styles.stepText}>
                 <span className={styles.stepLabel}>STEP 2</span>
                 <span className={styles.stepName}>개인스펙</span>

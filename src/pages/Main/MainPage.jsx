@@ -55,7 +55,7 @@ function SectionTitle({ icon, title, description, action }) {
   );
 }
 
-function MainPage() {
+function MainPage({ onNavigateToMyPage }) {
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
   
@@ -96,7 +96,15 @@ function MainPage() {
           <a href="#roadmap">나의 로드맵</a>
           <a href="#jobs">공고 추천</a>
           <a href="#ai-chat">AI채팅</a>
-          <a href="#mypage">마이페이지</a>
+          <a 
+            href="#mypage" 
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigateToMyPage();
+            }}
+          >
+            마이페이지
+          </a>
           <a href="#contact">문의</a>
         </nav>
         <div className="tools" aria-label="도구">

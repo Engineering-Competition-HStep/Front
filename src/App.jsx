@@ -1,48 +1,56 @@
 import React, { useState } from 'react';
-import Login from './pages/Login.jsx'; // 확장자 .jsx를 명시하는 것이 좋습니다.
-import FindPassword from './pages/FindPassword.jsx'; // 새로 만든 비밀번호 찾기 페이지를 불러옵니다.
+import Login from './pages/Login.jsx';
+import FindPassword from './pages/FindPassword.jsx';
 import Signup from './pages/Signup.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
+import MainPage from './pages/Main/MainPage.jsx';
 import MyPageRegistration from './pages/MyPage/MyPageRegistration.jsx';
 import './index.css';
 
 function App() {
-  // 현재 화면 상태를 관리합니다. 기본값은 'login' 입니다.
+  // 현재 화면 상태를 관리 기본값은 'login'
   const [currentView, setCurrentView] = useState('login'); 
 
-  // 현재 뷰 상태에 따라 다른 컴포넌트를 보여주는 함수입니다.
+  // 현재 뷰 상태에 따라 다른 컴포넌트를 보여주는 함수
   const renderView = () => {
     switch (currentView) {
+      // login -> (비밀번호 찾기 / 회원가입 / 메인화면)
       case 'login':
-        // 로그인 화면일 때, "비밀번호 찾기" 화면으로 넘어가는 함수를 props로 내려줍니다.
         return (
           <Login 
             onNavigateToFindPassword={() => setCurrentView('findPassword')} 
             onNavigateToSignup={() => setCurrentView('signup')} 
-            onLoginSuccess={() => setCurrentView('mypage')}
+            onLoginSuccess={() => setCurrentView('main')}
           />
         );
       
       case 'findPassword':
-        // 비밀번호 찾기 화면일 때, 다시 "로그인" 화면으로 돌아오는 함수를 props로 내려줍니다.
+        // 비밀번호 찾기 -> login
         return <FindPassword onBackToLogin={() => setCurrentView('login')} />;
       
       case 'signup':
+        // 회원가입 -> login
         return <Signup onBackToLogin={ () => setCurrentView('login') } />
 
+      case 'main':
+        // 메인화면 -> 마이페이지
+        return <MainPage onNavigateToMyPage={() => setCurrentView('mypage')} />;
+
       case 'mypage':
+        // 마이페이지 -> 마이페이지 작성하기 폼
         return <MyPage onNavigateToRegistration={() => setCurrentView('mypageRegistration')} />;
       
       case 'mypageRegistration':
+        // 마이페이지 작성하기 폼 -> 마이페이지
         return <MyPageRegistration onBackToMyPage={() => setCurrentView('mypage')} />;
       
       default:
-        // 알 수 없는 상태일 경우 안전하게 로그인 화면을 보여줍니다.
+        // 기본값 로그인 화면
         return (
           <Login 
             onNavigateToFindPassword={() => setCurrentView('findPassword')} 
             onNavigateToSignup={() => setCurrentView('signup')} 
-            onLoginSuccess={() => setCurrentView('mypage')}
+            onLoginSuccess={() => setCurrentView('main')}
           />
         );
     }

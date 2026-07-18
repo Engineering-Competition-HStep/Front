@@ -7,12 +7,21 @@ import stepFocusIcon from '../../assets/mypageregistration_step_focus.svg';
 import stepBasicIcon from '../../assets/mypageregistration_step_basic.svg';
 import stepLineIcon from '../../assets/mypageregistration_step_line.svg';
 
-export default function MyPageRegistration() {
+export default function MyPageRegistration( { onBackToMyPage } ) {
   // 현재 진행 중인 스텝 (1: 학점, 2: 개인스펙)
   const [currentStep, setCurrentStep] = useState(1);
 
   // 임시 학년 설정 변수
   const [userGrade, setUserGrade] = useState(3);
+
+  // 학점 데이터를 관리하는 상태 변수
+  const [gpaData, setGpaData] = useState({
+    grade1: '',
+    grade2: '',
+    grade3: '',
+    grade4: '',
+    total: ''
+  });
 
   // 개인 스펙 각 항목별 입력창의 개수와 내용을 관리하는 상태 변수
   const [specData, setSpecData] = useState({
@@ -50,6 +59,23 @@ export default function MyPageRegistration() {
       
       return { ...prev, [field]: updatedArray };
     });
+  };
+
+  // DB 통신 및 저장 로직
+  const handleSave = () => {
+    // DB로 보낼 데이터 모으기
+    const payload = {
+      gpa: gpaData,
+      specs: specData
+    };
+
+    console.log("🚀 [DB 전송용 데이터 완성]:", payload);
+    // TODO: 백엔드 API 연동 (예: await fetch('/api/user/info', { method: 'POST', body: JSON.stringify(payload) }))
+
+    // MyPage로 화면 전환하기
+    if (onBackToMyPage) {
+      onBackToMyPage();
+    }
   };
 
   // 스크롤 위치 추적 변수
@@ -167,6 +193,7 @@ export default function MyPageRegistration() {
               {[1, 2, 3, 4].map((gradeNum) => {
                 // 현재 내 학년보다 높은 학년인지 판별합니다.
                 const isLocked = gradeNum > userGrade;
+                const stateKey = `grade${gradeNum}`; 
 
                 return (
                   <div key={gradeNum} className={`${styles.gpaRow} ${gradeNum === 4 ? styles.mb70 : ''}`}>
@@ -174,6 +201,8 @@ export default function MyPageRegistration() {
                     <div className={styles.inputWrapper}>
                       <input 
                         type="text" 
+                        value={gpaData[stateKey]}
+                        onChange={(e) => setGpaData({ ...gpaData, [stateKey]: e.target.value })}
                         placeholder={isLocked ? "현재 학년보다 높아요." : `${gradeNum}학년 평점평균을 입력해주세요.`} 
                         className={styles.centerInput}
                         disabled={isLocked}
@@ -186,7 +215,13 @@ export default function MyPageRegistration() {
               <div className={styles.gpaRow}>
                 <div className={`${styles.gradePill} ${styles.totalPill}`}>전체평균</div>
                 <div className={`${styles.inputWrapper} ${styles.totalInputWrapper}`}>
-                  <input type="text" placeholder="전체 학점평균을 입력해주세요." className={`${styles.centerInput}`} />
+                  <input 
+                    type="text" 
+                    value={gpaData.total}
+                    onChange={(e) => setGpaData({ ...gpaData, total: e.target.value })}
+                    placeholder="전체 학점평균을 입력해주세요." 
+                    className={`${styles.centerInput}`} 
+                  />
                 </div>
               </div>
             </div>
@@ -321,7 +356,7 @@ export default function MyPageRegistration() {
 
           {/* 하단 저장 버튼 */}
           <div className={styles.saveBtnWrapper}>
-            <button className={styles.saveButton}>저장하기</button>
+            <button className={styles.saveButton} onClick={handleSave}>저장하기</button>
           </div>
 
         </div>

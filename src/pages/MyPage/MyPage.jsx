@@ -4,6 +4,7 @@ import Header from '../../components/Header/Header';
 import bannerImg from '../../assets/mypage_banner.svg';
 import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 import writeIcon from '../../assets/mypage_writeIcon.svg';
+import userProfileIcon from '../../assets/mypage_user_profile.svg';
 
 export default function MyPage({ onNavigateToRegistration}) {
   // 나의 학점평균 상태 관리
@@ -52,19 +53,17 @@ export default function MyPage({ onNavigateToRegistration}) {
           </div>
 
           <div className={styles.profileCard}>
-            <div className={styles.avatarWrapper}>
               {/* 유저 아바타 아이콘 */}
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor" color="#fff" style={{ opacity: 0.8, marginBottom: '-10px' }}>
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
-              <button className={styles.cameraBtn}>
-                {/* 카메라 아이콘 */}
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-              </button>
-            </div>
+              <button 
+              className={styles.profileImgBtn} 
+              onClick={() => alert('프로필 사진 변경 기능..?')}
+            >
+              <img 
+                src={userProfileIcon} 
+                alt="유저 프로필" 
+                className={styles.profileImage} 
+              />
+            </button>
 
             <h2 className={styles.userName}>000</h2>
             

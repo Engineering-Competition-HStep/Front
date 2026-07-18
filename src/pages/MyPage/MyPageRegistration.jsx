@@ -11,6 +11,9 @@ export default function MyPageRegistration() {
   // 현재 진행 중인 스텝 (1: 학점, 2: 개인스펙)
   const [currentStep, setCurrentStep] = useState(1);
 
+  // 임시 학년 설정 변수
+  const [userGrade, setUserGrade] = useState(3);
+
   // 스크롤 위치 추적 변수
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -123,31 +126,24 @@ export default function MyPageRegistration() {
             </div>
             
             <div className={styles.gpaContainer}>
-              <div className={styles.gpaRow}>
-                <div className={styles.gradePill}>1학년</div>
-                <div className={styles.inputWrapper}>
-                  <input type="text" placeholder="1학년 평점평균을 입력해주세요." className={styles.centerInput} />
-                </div>
-              </div>
-              <div className={styles.gpaRow}>
-                <div className={styles.gradePill}>2학년</div>
-                <div className={styles.inputWrapper}>
-                  <input type="text" placeholder="2학년 평점평균을 입력해주세요." className={styles.centerInput} />
-                </div>
-              </div>
-              <div className={styles.gpaRow}>
-                <div className={styles.gradePill}>3학년</div>
-                <div className={styles.inputWrapper}>
-                  <input type="text" placeholder="3학년 평점평균을 입력해주세요." className={styles.centerInput} />
-                </div>
-              </div>
-              {/* 4학년 아래는 여백(H70)이 더 넓습니다 */}
-              <div className={`${styles.gpaRow} ${styles.mb70}`}>
-                <div className={styles.gradePill}>4학년</div>
-                <div className={styles.inputWrapper}>
-                  <input type="text" placeholder="4학년 평점평균을 입력해주세요." className={styles.centerInput} />
-                </div>
-              </div>
+              {[1, 2, 3, 4].map((gradeNum) => {
+                // 현재 내 학년보다 높은 학년인지 판별합니다.
+                const isLocked = gradeNum > userGrade;
+
+                return (
+                  <div key={gradeNum} className={`${styles.gpaRow} ${gradeNum === 4 ? styles.mb70 : ''}`}>
+                    <div className={styles.gradePill}>{gradeNum}학년</div>
+                    <div className={styles.inputWrapper}>
+                      <input 
+                        type="text" 
+                        placeholder={isLocked ? "현재 학년보다 높아요." : `${gradeNum}학년 평점평균을 입력해주세요.`} 
+                        className={styles.centerInput}
+                        disabled={isLocked}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
               
               <div className={styles.gpaRow}>
                 <div className={`${styles.gradePill} ${styles.totalPill}`}>전체평균</div>

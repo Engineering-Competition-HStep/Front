@@ -3,6 +3,7 @@ import Login from './pages/Login.jsx'; // 확장자 .jsx를 명시하는 것이 
 import FindPassword from './pages/FindPassword.jsx'; // 새로 만든 비밀번호 찾기 페이지를 불러옵니다.
 import Signup from './pages/Signup.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
+import MyPageRegistration from './pages/MyPage/MyPageRegistration.jsx';
 import './index.css';
 
 function App() {
@@ -30,7 +31,11 @@ function App() {
         return <Signup onBackToLogin={ () => setCurrentView('login') } />
 
       case 'mypage':
-        return <MyPage />;
+        return <MyPage onNavigateToRegistration={() => setCurrentView('mypageRegistration')} />;
+      
+      case 'mypageRegistration':
+        return <MyPageRegistration onBackToMyPage={() => setCurrentView('mypage')} />;
+      
       default:
         // 알 수 없는 상태일 경우 안전하게 로그인 화면을 보여줍니다.
         return (

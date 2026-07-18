@@ -196,12 +196,12 @@ margin-bottom: 60px;
 }
 .specGroup:last-child { margin-bottom: 0; }
 
-.specHeader { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; }
-.specIcon { width: 24px; height: 24px; display: block; flex-shrink: 0; }
-.specHeader h3 { font-size: 18px; font-weight: bold; color: #333; margin: 0; line-height: 1; transform: translateY(-2px); }
+.specHeader { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.specIcon { width: 28px; height: 28px; display: block; flex-shrink: 0; }
+.specHeader h3 { font-size: 22px; color: #1A1A1A; margin: 0; line-height: 1;}
 
 .specSubTitle {
-font-size: 13px;
+font-size: 16px;
 font-weight: bold;
 color: #0356C8;
 margin: 0;
@@ -252,10 +252,10 @@ caret-color: #0084FF;
 }
 
 .addText {
-color: #999;
-font-size: 12px;
+color: #849CB2;
+font-size: 14px;
 text-align: right;
-margin-top: 8px;
+margin-top: 6px;
 cursor: pointer;
 }
 .addText:hover { color: #666; text-decoration: underline; }

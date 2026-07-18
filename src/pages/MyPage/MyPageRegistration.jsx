@@ -14,6 +14,44 @@ export default function MyPageRegistration() {
   // 임시 학년 설정 변수
   const [userGrade, setUserGrade] = useState(3);
 
+  // 개인 스펙 각 항목별 입력창의 개수와 내용을 관리하는 상태 변수
+  const [specData, setSpecData] = useState({
+    certs: [''],
+    awards: [{ name: '', desc: '' }], // 수상경력 세트 (이름, 설명)
+    volunteers: [{ name: '', desc: '' }], // 자원봉사 세트 (이름, 설명)
+    activities: ['']
+  });
+
+  // '+ 추가하기' 버튼을 누르면 해당 항목 배열에 빈 문자열('')을 추가하는 함수
+  const handleAddInput = (field) => {
+    setSpecData((prev) => {
+      // 세트 항목인지 판별하여 추가할 빈 데이터의 형태를 결정합니다.
+      const isSetField = field === 'awards' || field === 'volunteers';
+      const newItem = isSetField ? { name: '', desc: '' } : '';
+      return {
+        ...prev,
+        [field]: [...prev[field], newItem]
+      };
+    });
+  };
+
+  // 일반 배열인지, 객체 배열인지에 따라 상태를 다르게 업데이트
+  const handleInputChange = (field, index, value, subField = null) => {
+    setSpecData((prev) => {
+      const updatedArray = [...prev[field]];
+      
+      if (subField) {
+        // 객체 배열일 경우 (예: awards의 name 변경)
+        updatedArray[index] = { ...updatedArray[index], [subField]: value };
+      } else {
+        // 일반 문자열 배열일 경우
+        updatedArray[index] = value;
+      }
+      
+      return { ...prev, [field]: updatedArray };
+    });
+  };
+
   // 스크롤 위치 추적 변수
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -171,11 +209,20 @@ export default function MyPageRegistration() {
                   <h3>자격증</h3>
                 </div>
                 <div className={styles.specContent}>
-                  <p className={`${styles.specSubTitle} ${styles.mb30}`}>- 자격증 명 / 발급년도</p>
-                  <div className={styles.inputWrapper}>
-                    <input placeholder="예 ) GTQ 1급 / 2024.5.6" className={styles.centerInput} />
-                  </div>
-                  <div className={styles.addText}>+ 추가하기</div>
+                  <p className={`${styles.specSubTitle} ${styles.mb30}`}>• 자격증 명 / 발급년도</p>
+
+                  {/* 배열의 개수만큼 input을 반복해서 그림 */}
+                  {specData.certs.map((val, idx) => (
+                    <div key={idx} className={styles.inputWrapper} style={{ marginBottom: '16px' }}>
+                      <input 
+                        value={val}
+                        onChange={(e) => handleInputChange('certs', idx, e.target.value)}
+                        placeholder="예 ) GTQ 1급 / 2024.5.6" 
+                        className={styles.centerInput} 
+                      />
+                    </div>
+                  ))}
+                  <div className={styles.addText} onClick={() => handleAddInput('certs')}>+ 추가하기</div>
                 </div>
               </div>
 
@@ -186,17 +233,31 @@ export default function MyPageRegistration() {
                   <h3>수상경력</h3>
                 </div>
                 <div className={styles.specContent}>
-                  <p className={`${styles.specSubTitle} ${styles.mb50}`}>- 참여대회 명 / 등수 or 상 이름</p>
-                  <div className={styles.inputWrapper}>
-                    <input placeholder="예 ) KOBACO 공익광고 공모전 / 대상" className={styles.centerInput} />
-                  </div>
-                  <div className={`${styles.addText} ${styles.mb20}`}>+ 추가하기</div>
-                  
-                  <p className={`${styles.specSubTitle} ${styles.mb30}`}>- 간단설명</p>
-                  <div className={styles.inputWrapper}>
-                    <input placeholder="예 ) 사회문제를 창의적인 광고 아이디어와 시각적 표현으로 해결하는..." className={styles.centerInput} />
-                  </div>
-                  <div className={styles.addText}>+ 추가하기</div>
+                  {/* 배열의 개수만큼 input을 반복해서 그림 */}
+                  {specData.awards.map((item, idx) => (
+                    <div key={idx} style={{ marginBottom: '40px' }}>
+                      <p className={`${styles.specSubTitle} ${styles.mb30}`}>• 참여대회 명 / 등수 or 상 이름</p>
+                      <div className={styles.inputWrapper} style={{ marginBottom: '30px' }}>
+                        <input 
+                          value={item.name}
+                          onChange={(e) => handleInputChange('awards', idx, e.target.value, 'name')}
+                          placeholder="예 ) KOBACO 공익광고 공모전 / 대상" 
+                          className={styles.centerInput} 
+                        />
+                      </div>
+                      
+                      <p className={`${styles.specSubTitle} ${styles.mb30}`}>• 간단설명</p>
+                      <div className={styles.inputWrapper}>
+                        <input 
+                          value={item.desc}
+                          onChange={(e) => handleInputChange('awards', idx, e.target.value, 'desc')}
+                          placeholder="예 ) 사회문제를 창의적인 광고 아이디어와 시각적 표현으로 해결하는..." 
+                          className={styles.centerInput} 
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div className={styles.addText} onClick={() => handleAddInput('awards')}>+ 추가하기</div>
                 </div>
               </div>
 
@@ -207,17 +268,30 @@ export default function MyPageRegistration() {
                   <h3>자원봉사</h3>
                 </div>
                 <div className={styles.specContent}>
-                  <p className={`${styles.specSubTitle} ${styles.mb50}`}>- 봉사 명 / 기관 / 봉사 시간</p>
-                  <div className={styles.inputWrapper}>
-                    <input placeholder="예 ) 김장 나눔 봉사 / 한성대학교 사회봉사센터 / 8시간" className={styles.centerInput} />
-                  </div>
-                  <div className={`${styles.addText} ${styles.mb20}`}>+ 추가하기</div>
-                  
-                  <p className={`${styles.specSubTitle} ${styles.mb30}`}>- 간단설명</p>
-                  <div className={styles.inputWrapper}>
-                    <input placeholder="예 ) 지역사회의 취약계층을 위해 김장 김치를 직접 담그고..." className={styles.centerInput} />
-                  </div>
-                  <div className={styles.addText}>+ 추가하기</div>
+                  {specData.volunteers.map((item, idx) => (
+                    <div key={idx} style={{ marginBottom: '40px' }}>
+                      <p className={`${styles.specSubTitle} ${styles.mb50}`}>• 봉사 명 / 기관 / 봉사 시간</p>
+                      <div className={styles.inputWrapper} style={{ marginBottom: '30px' }}>
+                        <input 
+                          value={item.name}
+                          onChange={(e) => handleInputChange('volunteers', idx, e.target.value, 'name')}
+                          placeholder="예 ) 김장 나눔 봉사 / 한성대학교 사회봉사센터 / 8시간" 
+                          className={styles.centerInput} 
+                        />
+                      </div>
+                      
+                      <p className={`${styles.specSubTitle} ${styles.mb30}`}>• 간단설명</p>
+                      <div className={styles.inputWrapper}>
+                        <input 
+                          value={item.desc}
+                          onChange={(e) => handleInputChange('volunteers', idx, e.target.value, 'desc')}
+                          placeholder="예 ) 지역사회의 취약계층을 위해 김장 김치를 직접 담그고..." 
+                          className={styles.centerInput} 
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div className={styles.addText} onClick={() => handleAddInput('volunteers')}>+ 자원봉사 추가하기</div>
                 </div>
               </div>
 
@@ -228,11 +302,18 @@ export default function MyPageRegistration() {
                   <h3>기타활동</h3>
                 </div>
                 <div className={styles.specContent}>
-                  <p className={`${styles.specSubTitle} ${styles.mb50}`}>- 이수상 활동, 부트캠프, 인턴, 동아리, 외부 교육, 프로젝트성 활동 등</p>
-                  <div className={styles.inputWrapper}>
-                    <input placeholder="예 ) 멋쟁이사자처럼 대학 / IT 동아리 / 팀 프로젝트를 통해 서비스 기획 및 개발 경험." className={styles.centerInput} />
-                  </div>
-                  <div className={styles.addText}>+ 추가하기</div>
+                  <p className={`${styles.specSubTitle} ${styles.mb50}`}>• 이수상 활동, 부트캠프, 인턴, 동아리, 외부 교육, 프로젝트성 활동 등</p>
+                  {specData.activities.map((val, idx) => (
+                    <div key={idx} className={styles.inputWrapper} style={{ marginBottom: '16px' }}>
+                      <input 
+                        value={val}
+                        onChange={(e) => handleInputChange('activities', idx, e.target.value)}
+                        placeholder="예 ) 멋쟁이사자처럼 대학 / IT 동아리 / 팀 프로젝트를 통해 서비스 기획 및 개발 경험." 
+                        className={styles.centerInput} 
+                      />
+                    </div>
+                  ))}
+                  <div className={styles.addText} onClick={() => handleAddInput('activities')}>+ 추가하기</div>
                 </div>
               </div>
             </div>

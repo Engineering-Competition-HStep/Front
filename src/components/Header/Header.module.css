@@ -1,23 +1,26 @@
 /* --- 상단 공통 네비게이션 바 --- */
 .header {
-border-bottom: 1px solid #eaeaea;
-background-color: #fff;
-width: 100%;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  padding-top: 12px;
+  transition: all 0.3s ease;
+  z-index: 10;
+  border-bottom: 1px solid transparent;
 }
 
 .headerInner {
-width: 100%;
-margin: 0 auto;
-height: 40px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-padding: 0 30px;
-box-sizing: border-box;
+  width: min(1196px, calc(100% - 48px)); 
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .logoImage {
-height: 20px;
+height: 24px;
 width: auto;
 cursor: pointer;
 }
@@ -25,6 +28,7 @@ cursor: pointer;
 .nav {
 display: flex;
 gap: 40px;
+margin: auto;
 }
 
 .navItem {
@@ -34,6 +38,8 @@ font-size: 15px;
 font-weight: 500;
 cursor: pointer;
 position: relative;
+padding-bottom: 8px;
+transition: all 0.2s;
 }
 
 .navItem:hover {
@@ -49,7 +55,7 @@ font-weight: bold;
 .navItemActive::after {
 content: '';
 position: absolute;
-bottom: -10px;
+bottom: -3px;
 left: 0;
 width: 100%;
 height: 3px;
@@ -58,7 +64,8 @@ background-color: #0084FF;
 
 .headerIcons {
 display: flex;
-gap: 20px;
+align-items: center;
+gap: 18px;
 color: #333;
 cursor: pointer;
 }
@@ -69,3 +76,57 @@ cursor: pointer;
     cursor: pointer;
     display: block;
 }
+
+/* === 테마 1: 마이페이지용 (하얀 배경) === */
+.themeLight {
+  background-color: #fff;
+  border-bottom: 1px solid #eaeaea;
+  position: relative;
+}
+.themeLight .logoImage {
+  filter: none;
+}
+.themeLight .navItem { 
+  color: #1A1A1A; 
+}
+.themeLight .navItem:hover { 
+  color: #0084FF;
+}
+.themeLight .navItemActive { 
+  color: #0084FF; 
+  font-weight: bold; 
+}
+.themeLight .navItemActive::after {
+  background-color: #0084FF;
+}
+
+/* === 테마 2: 메인홈용 (투명 배경 + 하얀 글씨) === */
+.themeTransparent {
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  z-index: 10;
+}
+.themeTransparent .logoImage { 
+  filter: brightness(0) invert(1); 
+}
+.themeTransparent .navItem { 
+  color: #fff; 
+  opacity: 0.8; 
+}
+.themeTransparent .navItem:hover { 
+  opacity: 1; 
+}
+.themeTransparent .navItemActive { 
+  color: #fff; 
+  font-weight: 700; 
+  opacity: 1; 
+}
+.themeTransparent .navItemActive::after {
+  background-color: #fff;
+}
+.themeTransparent .actionIcon { 
+  filter: brightness(0) invert(1); }

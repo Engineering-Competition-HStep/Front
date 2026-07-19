@@ -25,6 +25,9 @@ import Home_right from "../../assets/Home_right.png";
 // 로드맵 화살표 이미지
 import Home_line from "../../assets/Home_line.png";
 
+// 상단 메뉴바 컴포넌트
+import Header from '../../components/Header/Header.jsx';
+
 const jobs = [
   ["국순당", Home_gooksundang, ["지식정보문화트랙 추천"], "청년 직무 아카데미 교육생 모집", "~11월 24일 23:59"],
   ["아디다스", Home_adidas_logo, ["정보시스템/AI트랙 추천"], "[신입/경력] 각 부문 인재채용", "~2월 9일 23:59"],
@@ -89,29 +92,15 @@ function MainPage({ onNavigateToMyPage }) {
 
   return (
     <main className="hstep">
-      <header className="nav">
-        <div className="brand"><img src={HSTEP_logo} alt="HSTEP" /></div>
-        <nav className="links" aria-label="주 메뉴">
-          <a href="#home">메인홈</a>
-          <a href="#roadmap">나의 로드맵</a>
-          <a href="#jobs">공고 추천</a>
-          <a href="#ai-chat">AI채팅</a>
-          <a 
-            href="#mypage" 
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigateToMyPage();
-            }}
-          >
-            마이페이지
-          </a>
-          <a href="#contact">문의</a>
-        </nav>
-        <div className="tools" aria-label="도구">
-          <img src={Home_search} alt="검색" />
-          <img src={Home_mypage} alt="메뉴" />
-        </div>
-      </header>
+      <Header 
+        activeMenu="main" 
+        theme="transparent" 
+        onMenuClick={(menu) => {
+          if (menu === 'mypage') {
+            onNavigateToMyPage();
+          }
+        }}
+      />
 
       <section className="hero" id="home">
         <img src={Home_header} alt="" className="hero-bg" />

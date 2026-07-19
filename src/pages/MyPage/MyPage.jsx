@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import styles from './MyPage.module.css';
+
 import Header from '../../components/Header/Header';
+import Footer from '../../components/Footer/Footer.jsx';
+
 import bannerImg from '../../assets/mypage_banner.svg';
 import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 import writeIcon from '../../assets/mypage_writeIcon.svg';
 import userProfileIcon from '../../assets/mypage_user_profile.svg';
+
+
 
 export default function MyPage({ onNavigateToRegistration, onNavigateToMain }) {
   // 나의 학점평균 상태 관리
@@ -222,6 +227,8 @@ export default function MyPage({ onNavigateToRegistration, onNavigateToMain }) {
           
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 }

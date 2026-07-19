@@ -1,0 +1,120 @@
+/* 푸터 전체 배경 */
+.footer {
+  padding: 26px 0;
+  background: #f4f5f7;
+  color: #7d858f;
+  font-size: 13px;
+  line-height: 1.4;
+  width: 100%;
+}
+
+/* 중앙 정렬 컨테이너 */
+.footerContainer {
+  width: min(1196px, calc(100% - 48px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 0.65fr 1.05fr 1.7fr;
+  gap: 35px;
+}
+
+.footerCs,
+.footerLinks {
+  padding-right: 30px;
+  border-right: 1px solid #e2e5e9;
+}
+
+.footerCs h3 {
+  margin: 0 0 12px;
+  color: #3f464e;
+  font-size: 16px;
+}
+
+.time {
+  margin-bottom: 8px;
+  color: #4e555d;
+  font-size: 19px;
+}
+
+.footerCs ul {
+  margin: 0 0 12px;
+  padding-left: 16px;
+}
+
+.btnGroup {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btnGroup button {
+  padding: 8px 10px;
+  border: 1px solid #d9dde2;
+  border-radius: 4px;
+  background: #fff;
+  color: #5c6570;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.footerLinks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+  color: #59616b;
+}
+
+.footerLegal p {
+  margin: 0 0 4px;
+  font-size: 12px;
+}
+
+.guaranteeBox {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 14px 0;
+}
+
+.guaranteeLabel {
+  padding: 6px 12px;
+  border: 1px solid #d9dde2;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.noticeText {
+  font-size: 11px;
+  color: #999;
+}
+
+.social {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.social span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #9299a1;
+}
+
+/* 반응형 모바일 디자인 */
+@media (max-width: 1000px) {
+  .footerContainer {
+    grid-template-columns: 1fr;
+  }
+  .footerCs,
+  .footerLinks {
+    padding: 0 0 25px;
+    border-right: 0;
+    border-bottom: 1px solid #e2e5e9;
+  }
+}
+
+@media (max-width: 640px) {
+  .footerLinks {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../../components/Header/Header.jsx';
+import Footer from '../../components/Footer/Footer.jsx';
+
 import styles from './MyPageRegistration.module.css';
+
 import bannerImg from '../../assets/mypage_banner.svg';
 import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 import stepFocusIcon from '../../assets/mypageregistration_step_focus.svg';
@@ -371,6 +374,8 @@ export default function MyPageRegistration({ onBackToMyPage, onNavigateToMain })
 
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

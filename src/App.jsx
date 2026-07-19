@@ -37,12 +37,22 @@ function App() {
         return <MainPage onNavigateToMyPage={() => setCurrentView('mypage')} />;
 
       case 'mypage':
-        // 마이페이지 -> 마이페이지 작성하기 폼
-        return <MyPage onNavigateToRegistration={() => setCurrentView('mypageRegistration')} />;
+        // 마이페이지 -> (마이페이지 작성하기 폼, 메인화면)
+        return (
+          <MyPage 
+            onNavigateToRegistration={() => setCurrentView('mypageRegistration')} 
+            onNavigateToMain={() => setCurrentView('main')} 
+          />
+        );
       
       case 'mypageRegistration':
-        // 마이페이지 작성하기 폼 -> 마이페이지
-        return <MyPageRegistration onBackToMyPage={() => setCurrentView('mypage')} />;
+        // 마이페이지 작성하기 폼 -> (마이페이지, 메인화면)
+        return (
+          <MyPageRegistration 
+            onBackToMyPage={() => setCurrentView('mypage')} 
+            onNavigateToMain={() => setCurrentView('main')} 
+          />
+        );
       
       default:
         // 기본값 로그인 화면

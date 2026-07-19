@@ -6,7 +6,7 @@ import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 import writeIcon from '../../assets/mypage_writeIcon.svg';
 import userProfileIcon from '../../assets/mypage_user_profile.svg';
 
-export default function MyPage({ onNavigateToRegistration}) {
+export default function MyPage({ onNavigateToRegistration, onNavigateToMain }) {
   // 나의 학점평균 상태 관리
   const [gpa, setGpa] = useState({
     grade1: '',
@@ -40,7 +40,14 @@ export default function MyPage({ onNavigateToRegistration}) {
     <div className={styles.pageContainer}>
       
       {/* 상단 메뉴바 컴포넌트 */}
-      <Header activeMenu="mypage" />
+      <Header 
+        activeMenu="mypage" 
+        onMenuClick={(menu) => {
+          if (menu === 'main') {
+            onNavigateToMain();
+          }
+        }}
+      />
 
       {/* 메인 컨텐츠 영역 */}
       <main className={styles.mainContent}>

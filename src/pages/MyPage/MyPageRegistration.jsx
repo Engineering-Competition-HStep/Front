@@ -7,7 +7,7 @@ import stepFocusIcon from '../../assets/mypageregistration_step_focus.svg';
 import stepBasicIcon from '../../assets/mypageregistration_step_basic.svg';
 import stepLineIcon from '../../assets/mypageregistration_step_line.svg';
 
-export default function MyPageRegistration( { onBackToMyPage } ) {
+export default function MyPageRegistration({ onBackToMyPage, onNavigateToMain }) {
   // 현재 진행 중인 스텝 (1: 학점, 2: 개인스펙)
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -111,7 +111,17 @@ export default function MyPageRegistration( { onBackToMyPage } ) {
 
   return (
     <div className={styles.pageContainer}>
-      <Header activeMenu="mypage" />
+      
+      <Header 
+        activeMenu="mypage" 
+        onMenuClick={(menu) => {
+          if (menu === 'main') {
+            onNavigateToMain();
+          } else if (menu === 'mypage') {
+            onBackToMyPage();
+          }
+        }}
+      />
       
       <main className={styles.mainLayout}>
         

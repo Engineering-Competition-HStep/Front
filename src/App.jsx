@@ -4,6 +4,7 @@ import FindPassword from './pages/FindPassword.jsx';
 import Signup from './pages/Signup.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
 import MainPage from './pages/Main/MainPage.jsx';
+import NoticePage from './pages/NoticePage/NoticePage';
 import MyPageRegistration from './pages/MyPage/MyPageRegistration.jsx';
 import Inquiry from './pages/Inquiry/Inquiry.jsx';
 import './index.css';
@@ -12,10 +13,8 @@ function App() {
   // 현재 화면 상태를 관리 기본값은 'login'
   const [currentView, setCurrentView] = useState('login'); 
 
-  const handleNavigate = (view) => {
-    setCurrentView(view);
-    window.scrollTo(0, 0); // 화면 이동 시 스크롤을 맨 위로 올려줍니다.
-  };
+  //main먼저 볼려고 써둔 것.
+  //const [currentView, setCurrentView] = useState('main');
 
   // 현재 뷰 상태에 따라 다른 컴포넌트를 보여주는 함수
   const renderView = () => {
@@ -39,8 +38,19 @@ function App() {
         return <Signup onBackToLogin={ () => setCurrentView('login') } />
 
       case 'main':
-        return <MainPage onNavigate={handleNavigate} />;
+        // 메인화면 -> 마이페이지, 공지사항
+        return <MainPage 
+          onNavigateToMyPage={() => setCurrentView('mypage')} 
+          onNavigateToNotice={() => setCurrentView('notice')}
+          />;
 
+      case 'notice': 
+        // 공지사항-> main
+        return <NoticePage 
+          onNavigateToMain={() => setCurrentView('main')}
+          onNavigateToMyPage={() => setCurrentView('mypage')}
+        />;
+      
       case 'mypage':
         return <MyPage onNavigate={handleNavigate} />;
       
@@ -71,51 +81,3 @@ function App() {
 }
 
 export default App;
-
-
-
-/*import React, { useState } from 'react';
-import Login from './pages/Login.jsx'; 
-import FindPassword from './pages/FindPassword.jsx'; 
-import Signup from './pages/Signup.jsx';
-//  1. 불러오는 경로와 이름을 바꿔줍니다.
-import MainPage from './pages/main/MainPage.jsx'; 
-import './index.css';
-
-function App() {
-  const [currentView, setCurrentView] = useState('home'); 
-
-  const renderView = () => {
-    switch (currentView) {
-      case 'home':
-        // 2. 화면에 띄울 컴포넌트 이름도 MainPage로 바꿉니다.
-        return <MainPage />;
-
-      case 'login':
-        return (
-          <Login 
-            onNavigateToFindPassword={() => setCurrentView('findPassword')} 
-            onNavigateToSignup={() => setCurrentView('signup')} 
-          />
-        );
-      
-      case 'findPassword':
-        return <FindPassword onBackToLogin={() => setCurrentView('login')} />;
-      
-      case 'signup':
-        return <Signup onBackToLogin={ () => setCurrentView('login') } />
-
-      default:
-        // 3. 기본값도 바꿔줍니다.
-        return <MainPage />; 
-    }
-  };
-
-  return (
-    <div>
-      {renderView()}
-    </div>
-  );
-}
-
-export default App; */

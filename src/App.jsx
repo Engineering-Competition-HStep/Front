@@ -10,10 +10,10 @@ import './index.css';
 
 function App() {
   // 현재 화면 상태를 관리 기본값은 'login'
-  //const [currentView, setCurrentView] = useState('login'); 
+  const [currentView, setCurrentView] = useState('login'); 
 
   //main먼저 볼려고 써둔 것.
-  const [currentView, setCurrentView] = useState('main');
+  //const [currentView, setCurrentView] = useState('main');
 
   // 현재 뷰 상태에 따라 다른 컴포넌트를 보여주는 함수
   const renderView = () => {
@@ -44,7 +44,7 @@ function App() {
           />;
 
       case 'notice': 
-        // 💡 여기서 onNavigateToMain을 꼭 넘겨줘야 합니다!
+        // 공지사항-> main
         return <NoticePage 
           onNavigateToMain={() => setCurrentView('main')}
           onNavigateToMyPage={() => setCurrentView('mypage')}

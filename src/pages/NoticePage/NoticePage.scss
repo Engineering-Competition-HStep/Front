@@ -1,0 +1,219 @@
+.notice-page {
+  /* 글로벌 설정과 동일하게 사용 */
+  --blue: #4d7ff0;
+  --text-dark: #222;
+  --text-gray: #666;
+  --text-light: #999;
+  --border-color: #eee;
+  
+  width: 100%;
+  background-color: #fff;
+  font-family: Pretendard, "Noto Sans KR", sans-serif;
+  padding-bottom: 160px; /* 맨 밑 푸터와 닿는 간격 H 160 */
+
+  .container {
+    width: min(1196px, calc(100% - 48px));
+    margin: 0 auto;
+    padding-top: 160px; /* 헤더 아래 여백 H 160 */
+  }
+
+  /* 브레드크럼 */
+  .breadcrumb {
+    color: var(--text-gray);
+    font-size: 13px;
+    margin-bottom: 12px;
+    
+    span {
+      margin: 0 6px;
+      color: #ccc;
+    }
+  }
+
+  /* 타이틀 & 검색바 영역 */
+  .notice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 65px; /* 리스트와의 간격 H 65 */
+    border-bottom: 2px solid #222; /* 시안에 살짝 보이는 리스트 상단 굵은 선 */
+    padding-bottom: 24px;
+
+    .title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .title-icon {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text-dark);
+      }
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      width: 280px;
+      height: 44px;
+      border: 1px solid #ddd;
+      border-radius: 22px;
+      padding: 0 16px;
+      background: #fff;
+
+      input {
+        flex-grow: 1;
+        border: none;
+        outline: none;
+        font-size: 15px;
+        color: var(--text-dark);
+        background: transparent;
+
+        &::placeholder {
+          color: #bbb;
+        }
+      }
+
+      button {
+        background: none;
+        border: none;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+
+  /* 공지사항 리스트 */
+  .notice-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    .notice-item {
+      display: flex;
+      align-items: center;
+      padding: 22px 10px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #f9f9f9;
+        cursor: pointer;
+      }
+
+      /* 카테고리 뱃지 */
+      .badge {
+        flex: 0 0 140px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        font-size: 13px;
+        font-weight: 600;
+        background: #f4f5f7;
+        color: var(--text-gray);
+
+        /* 상위 4개 강조 스타일 */
+        &.new {
+          background: var(--blue);
+          color: #fff;
+        }
+      }
+
+      /* 제목 */
+      .title {
+        flex-grow: 1;
+        padding: 0 24px;
+        font-size: 15px;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &.highlight {
+          font-weight: 600;
+        }
+      }
+
+      /* 날짜 */
+      .date {
+        flex: 0 0 120px;
+        text-align: center;
+        font-size: 14px;
+        color: var(--text-dark);
+      }
+
+      /* 조회수 */
+      .views {
+        flex: 0 0 80px;
+        text-align: right;
+        font-size: 14px;
+        color: var(--text-light);
+      }
+    }
+  }
+
+  /* 페이지네이션 */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 50px; /* 리스트와의 간격 H 50 */
+
+    button {
+      background: none;
+      border: none;
+      font-size: 14px;
+      color: var(--text-gray);
+      
+      &.page-num {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.active {
+          background: #c7d8fa; /* 시안의 연한 파란색 동그라미 */
+          color: var(--blue);
+          font-weight: 700;
+        }
+
+        &:hover:not(.active) {
+          background: #f4f5f7;
+        }
+      }
+
+      &.arrow {
+        font-size: 16px;
+        color: #bbb;
+        padding: 0 4px;
+
+        &:hover {
+          color: var(--text-dark);
+        }
+      }
+    }
+
+    .dots {
+      color: var(--text-gray);
+      letter-spacing: 2px;
+    }
+  }
+}

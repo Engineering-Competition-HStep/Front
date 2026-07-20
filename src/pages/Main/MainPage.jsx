@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import "./MainPage.scss"; // 분리한 SCSS 파일 임포트
+import "./MainPage.scss"; 
 
 // 기존 아이콘 및 배경 이미지
 import Home_logo from "../../assets/Home_logo.svg";
@@ -40,7 +40,8 @@ const notices = [
   ["[온라인 취업 멘토링 서비스] 슬기로운 취준생활, 코멘토로 지...", "2026-05-07"],
 ];
 
-function SectionTitle({ icon, title, description, action }) {
+// onActionClick props가 적용된 SectionTitle 컴포넌트
+function SectionTitle({ icon, title, description, action, onActionClick }) {
   return (
     <div className="section-title">
       <div>
@@ -50,12 +51,16 @@ function SectionTitle({ icon, title, description, action }) {
         </div>
         <p>{description}</p>
       </div>
-      {action && <button className="more">{action}</button>}
+      {/* 💡 전달받은 onActionClick을 버튼의 onClick에 연결 */}
+      {action && <button className="more" onClick={onActionClick}>{action}</button>}
     </div>
   );
 }
 
-function MainPage({ onNavigateToMyPage }) {
+// App.jsx에서 onNavigateToNotice를 정상적으로 받아옵니다.
+function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
+  // 🚨 const navigate = useNavigate(); 완전히 삭제됨!
+
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
   
@@ -219,6 +224,7 @@ function MainPage({ onNavigateToMyPage }) {
           title="한성대 공지사항" 
           description="한성대학교의 일정들을 만나보세요." 
           action="+ 더보기" 
+          onActionClick={() => onNavigateToNotice()} /* 💡 클릭 시 props 실행! */
         />
         <div className="notice-grid">
           {notices.map(([title, date]) => (

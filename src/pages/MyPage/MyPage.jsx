@@ -23,13 +23,40 @@ export default function MyPage({ onNavigate }) {
 
   // 나의 개인스펙 상태 관리
   const [specs, setSpecs] = useState({
-    cert: 'GTQ 1급 / 2024.5.6',
-    award1: '',
-    award2: '',
-    volunteer1: '',
-    volunteer2: '',
+    certName: '', certDate: '',
+    awardName: '', awardRank: '', awardDesc: '',
+    volName: '', volTime: '', volAgency: '', volDesc: '',
     etc: ''
   });
+
+  // 학점, 스펙 중 입력된 데이터 있는지 검사 
+  const hasAnyData = 
+    Object.values(gpa).some(val => val.trim() !== '') || 
+    Object.values(specs).some(val => val.trim() !== '');  
+
+const renderSpecValue = (value, placeholder, isHighlight = false) => {
+    if (value) {
+      // 값이 있을 때: 실제 데이터 표시
+      return (
+        <div 
+          className={styles.specInput} 
+          style={{ 
+            textAlign: 'left', 
+            color: isHighlight ? '#0356C8' : '#1A1A1A',
+            fontWeight: isHighlight ? 'bold' : 'normal'
+          }}
+        >
+          {value}
+        </div>
+      );
+    }
+    if (hasAnyData) {
+      // 내 데이터가 있을 때
+      return <div className={styles.specInput} style={{ textAlign: 'left' }}>{'\u00A0'}</div>;
+    }
+    // 초기 상태
+    return <div className={styles.specInput} style={{ textAlign: 'left', color: '#aaa' }}>{placeholder}</div>;
+  };
 
   const handleGpaChange = (e) => {
     const { name, value } = e.target;
@@ -166,8 +193,9 @@ export default function MyPage({ onNavigate }) {
                   <h4 className={styles.specItemTitle}>자격증</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
-                  <div className={styles.specInput} style={{ color: specs.cert ? '#333' : '#aaa' }}>
-                    {specs.cert || '예 ) GTQ 1급 / 2024.5.6'}
+                  <div style={{ display: 'flex', gap: '30px' }}>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.certName, '예 ) GTQ 1급')}</div>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.certDate, '예 ) 2024.5.6')}</div>
                   </div>
                 </div>
               </div>
@@ -179,12 +207,16 @@ export default function MyPage({ onNavigate }) {
                   <h4 className={styles.specItemTitle}>수상경력</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
-                  <div className={styles.specInput} style={{ color: specs.award1 ? '#333' : '#aaa' }}>
-                    {specs.award1 || '예 ) KOBACO 공익광고 공모전 / 대상'}
+                  <div style={{ display: 'flex', gap: '30px' }}>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.awardName, '예 ) KOBACO 공익광고 공모전', true)}</div>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.awardRank, '예 ) 대상', true)}</div>
                   </div>
-                  {/* ✨ 두 번째 줄도 값이 없을 땐 예시 문구를 보여주도록 복구합니다. */}
-                  <div className={styles.specInput} style={{ color: specs.award2 ? '#333' : '#aaa' }}>
-                    {specs.award2 || '예 ) 사회문제를 창의적인 광고 아이디어와 시각적 표현으로 해결하는 공익광고 공모전에 참가하여 기획부터 디자인까지 전 과정을 수행함.'}
+                  <div style={{ display: 'flex' }}>
+                    <div style={{ flex: 1 }}>
+                      {renderSpecValue(specs.awardDesc, 
+                        <>예 ) 사회문제를 창의적인 광고 아이디어와 시각적 표현으로 해결하는<br />공익광고 공모전에 참가하여 기획부터 디자인까지 전 과정을 수행함.</>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -196,11 +228,15 @@ export default function MyPage({ onNavigate }) {
                   <h4 className={styles.specItemTitle}>자원봉사</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
-                  <div className={styles.specInput} style={{ color: specs.volunteer1 ? '#333' : '#aaa' }}>
-                    {specs.volunteer1 || '예 ) 김장 나눔 봉사 / 한성대학교 사회봉사센터 / 8시간'}
+                  <div style={{ display: 'flex', gap: '30px' }}>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.volName, '예 ) 김장 나눔 봉사')}</div>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.volTime, '예 ) 8시간')}</div>
                   </div>
-                  <div className={styles.specInput} style={{ color: specs.volunteer2 ? '#333' : '#aaa' }}>
-                    {specs.volunteer2 || '예 ) 지역사회의 취약계층을 위해 김장 김치를 직접 담그고 포장 및 배부를 지원한 봉사활동.'}
+                  <div style={{ display: 'flex' }}>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.volAgency, '예 ) 한성대학교 사회봉사센터')}</div>
+                  </div>
+                  <div style={{ display: 'flex' }}>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.volDesc, '예 ) 지역사회의 취약계층을 위해 김장 김치를 직접 담그고 포장 및 배부를 지원한 봉사활동.')}</div>
                   </div>
                 </div>
               </div>
@@ -212,8 +248,8 @@ export default function MyPage({ onNavigate }) {
                   <h4 className={styles.specItemTitle}>기타활동</h4>
                 </div>
                 <div className={styles.specInputWrapper}>
-                  <div className={styles.specInput} style={{ color: specs.etc ? '#333' : '#aaa' }}>
-                    {specs.etc || '예 ) 멋쟁이사자처럼 대학 / IT 동아리 / 팀 프로젝트를 통해 서비스 기획 및 개발 경험.'}
+                  <div style={{ display: 'flex' }}>
+                    <div style={{ flex: 1 }}>{renderSpecValue(specs.etc, '예 ) 멋쟁이사자처럼 대학 / IT 동아리 / 팀 프로젝트를 통해 서비스 기획 및 개발 경험.')}</div>
                   </div>
                 </div>
               </div>

@@ -5,11 +5,17 @@ import Signup from './pages/Signup.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
 import MainPage from './pages/Main/MainPage.jsx';
 import MyPageRegistration from './pages/MyPage/MyPageRegistration.jsx';
+import Inquiry from './pages/Inquiry/Inquiry.jsx';
 import './index.css';
 
 function App() {
   // 현재 화면 상태를 관리 기본값은 'login'
   const [currentView, setCurrentView] = useState('login'); 
+
+  const handleNavigate = (view) => {
+    setCurrentView(view);
+    window.scrollTo(0, 0); // 화면 이동 시 스크롤을 맨 위로 올려줍니다.
+  };
 
   // 현재 뷰 상태에 따라 다른 컴포넌트를 보여주는 함수
   const renderView = () => {
@@ -33,26 +39,16 @@ function App() {
         return <Signup onBackToLogin={ () => setCurrentView('login') } />
 
       case 'main':
-        // 메인화면 -> 마이페이지
-        return <MainPage onNavigateToMyPage={() => setCurrentView('mypage')} />;
+        return <MainPage onNavigate={handleNavigate} />;
 
       case 'mypage':
-        // 마이페이지 -> (마이페이지 작성하기 폼, 메인화면)
-        return (
-          <MyPage 
-            onNavigateToRegistration={() => setCurrentView('mypageRegistration')} 
-            onNavigateToMain={() => setCurrentView('main')} 
-          />
-        );
+        return <MyPage onNavigate={handleNavigate} />;
       
       case 'mypageRegistration':
-        // 마이페이지 작성하기 폼 -> (마이페이지, 메인화면)
-        return (
-          <MyPageRegistration 
-            onBackToMyPage={() => setCurrentView('mypage')} 
-            onNavigateToMain={() => setCurrentView('main')} 
-          />
-        );
+        return <MyPageRegistration onNavigate={handleNavigate} />;
+
+      case 'inquiry':
+        return <Inquiry onNavigate={handleNavigate} />;
       
       default:
         // 기본값 로그인 화면

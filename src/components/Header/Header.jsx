@@ -36,7 +36,12 @@ export default function Header({ activeMenu, theme = 'light', onMenuClick }) {
           >
             마이페이지
           </span>
-          <span className={`${styles.navItem} ${activeMenu === 'inquiry' ? styles.navItemActive : ''}`}>문의</span>
+          <span 
+            className={`${styles.navItem} ${activeMenu === 'inquiry' ? styles.navItemActive : ''}`}
+            onClick={() => onMenuClick && onMenuClick('inquiry')} // ✨ 이 줄을 추가합니다!
+          >
+            문의
+          </span>
         </nav>
 
         <div className={styles.headerIcons}>

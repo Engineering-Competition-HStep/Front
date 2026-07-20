@@ -11,7 +11,7 @@ import userProfileIcon from '../../assets/mypage_user_profile.svg';
 
 
 
-export default function MyPage({ onNavigateToRegistration, onNavigateToMain }) {
+export default function MyPage({ onNavigate }) {
   // 나의 학점평균 상태 관리
   const [gpa, setGpa] = useState({
     grade1: '',
@@ -47,11 +47,7 @@ export default function MyPage({ onNavigateToRegistration, onNavigateToMain }) {
       {/* 상단 메뉴바 컴포넌트 */}
       <Header 
         activeMenu="mypage" 
-        onMenuClick={(menu) => {
-          if (menu === 'main') {
-            onNavigateToMain();
-          }
-        }}
+        onMenuClick={(menu) => onNavigate(menu)}
       />
 
       {/* 메인 컨텐츠 영역 */}
@@ -119,7 +115,7 @@ export default function MyPage({ onNavigateToRegistration, onNavigateToMain }) {
           <section className={styles.gpaSection}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>나의 학점평균</h3>
-              <button className={styles.writeBtn} onClick={onNavigateToRegistration}>
+              <button className={styles.writeBtn} onClick={() => onNavigate('mypageRegistration')}>
                 <img src={writeIcon} alt="작성하기 아이콘" className={styles.writeIcon} />
                 작성하기
               </button>

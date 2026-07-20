@@ -10,7 +10,7 @@ import stepFocusIcon from '../../assets/mypageregistration_step_focus.svg';
 import stepBasicIcon from '../../assets/mypageregistration_step_basic.svg';
 import stepLineIcon from '../../assets/mypageregistration_step_line.svg';
 
-export default function MyPageRegistration({ onBackToMyPage, onNavigateToMain }) {
+export default function MyPageRegistration({ onNavigate }) {
   // 현재 진행 중인 스텝 (1: 학점, 2: 개인스펙)
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -76,8 +76,8 @@ export default function MyPageRegistration({ onBackToMyPage, onNavigateToMain })
     // TODO: 백엔드 API 연동 (예: await fetch('/api/user/info', { method: 'POST', body: JSON.stringify(payload) }))
 
     // MyPage로 화면 전환하기
-    if (onBackToMyPage) {
-      onBackToMyPage();
+    if (onNavigate) {
+      onNavigate('mypage');
     }
   };
 
@@ -117,13 +117,7 @@ export default function MyPageRegistration({ onBackToMyPage, onNavigateToMain })
       
       <Header 
         activeMenu="mypage" 
-        onMenuClick={(menu) => {
-          if (menu === 'main') {
-            onNavigateToMain();
-          } else if (menu === 'mypage') {
-            onBackToMyPage();
-          }
-        }}
+        onMenuClick={(menu) => onNavigate(menu)}
       />
       
       <main className={styles.mainLayout}>

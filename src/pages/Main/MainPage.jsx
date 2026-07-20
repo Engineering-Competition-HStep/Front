@@ -59,7 +59,7 @@ function SectionTitle({ icon, title, description, action }) {
   );
 }
 
-function MainPage({ onNavigateToMyPage }) {
+function MainPage({ onNavigate }) {
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
   
@@ -96,11 +96,7 @@ function MainPage({ onNavigateToMyPage }) {
       <Header 
         activeMenu="main" 
         theme="transparent" 
-        onMenuClick={(menu) => {
-          if (menu === 'mypage') {
-            onNavigateToMyPage();
-          }
-        }}
+        onMenuClick={(menu) => onNavigate(menu)}
       />
 
       <section className="hero" id="home">

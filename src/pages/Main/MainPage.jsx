@@ -65,8 +65,8 @@ function SectionTitle({ icon, title, description, action, onActionClick }) {
   );
 }
 
-// App.jsx에서 onNavigateToMyPage, onNavigateToNotice를 정상적으로 받아옵니다.
-function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
+// App.jsx에서 onNavigateToExternalJobs도 정상적으로 받아옵니다.
+function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternalJobs }) {
 
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
@@ -137,7 +137,19 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
             메인홈
           </a>
           <a href="#roadmap" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
-          <a href="#jobs" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>공고 추천</a>
+          
+          {/* 공고 추천 클릭 시 외부 취업 공고 페이지로 이동하도록 수정! */}
+          <a 
+            href="#jobs" 
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigateToExternalJobs && onNavigateToExternalJobs();
+            }}
+            style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}
+          >
+            공고 추천
+          </a>
+          
           <a href="#ai-chat" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>AI채팅</a>
           
           {/* 마이페이지 클릭 시 App.jsx의 onNavigateToMyPage 함수가 실행되도록 연결 */}
@@ -267,7 +279,7 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
           title="한성대 공지사항" 
           description="한성대학교의 일정들을 만나보세요." 
           action="+ 더보기" 
-          onActionClick={() => onNavigateToNotice()} /* 💡 클릭 시 props 실행! */
+          onActionClick={() => onNavigateToNotice()} /* 클릭 시 props 실행! */
         />
         <div className="notice-grid">
           {notices.map(([title, date]) => (

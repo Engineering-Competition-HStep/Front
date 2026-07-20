@@ -7,7 +7,7 @@ color: #333;
 
 .mainLayout {
 max-width: 1000px;
-margin: 160px auto 0 auto;
+margin: 160px auto 100px auto;
 display: flex;
 gap: 80px;
 padding: 0 20px;
@@ -111,6 +111,7 @@ color: #222;
 flex: 1;
 display: flex;
 flex-direction: column;
+padding-bottom: 160px;
 }
 
 /* 상단 안내 배너 */
@@ -265,7 +266,6 @@ cursor: pointer;
 display: flex;
 justify-content: center;
 margin-top: 160px;
-margin-bottom: 160px;
 }
 
 .saveButton {

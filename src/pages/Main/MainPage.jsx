@@ -25,6 +25,10 @@ import Home_right from "../../assets/Home_right.png";
 // 로드맵 화살표 이미지
 import Home_line from "../../assets/Home_line.png";
 
+// 상단 메뉴바, 하단 푸터 컴포넌트
+import Header from '../../components/Header/Header.jsx';
+import Footer from '../../components/Footer/Footer.jsx';
+
 const jobs = [
   ["국순당", Home_gooksundang, ["지식정보문화트랙 추천"], "청년 직무 아카데미 교육생 모집", "~11월 24일 23:59"],
   ["아디다스", Home_adidas_logo, ["정보시스템/AI트랙 추천"], "[신입/경력] 각 부문 인재채용", "~2월 9일 23:59"],
@@ -59,7 +63,6 @@ function SectionTitle({ icon, title, description, action, onActionClick }) {
 
 // App.jsx에서 onNavigateToNotice를 정상적으로 받아옵니다.
 function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
-  // 🚨 const navigate = useNavigate(); 완전히 삭제됨!
 
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
@@ -94,29 +97,11 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
 
   return (
     <main className="hstep">
-      <header className="nav">
-        <div className="brand"><img src={HSTEP_logo} alt="HSTEP" /></div>
-        <nav className="links" aria-label="주 메뉴">
-          <a href="#home">메인홈</a>
-          <a href="#roadmap">나의 로드맵</a>
-          <a href="#jobs">공고 추천</a>
-          <a href="#ai-chat">AI채팅</a>
-          <a 
-            href="#mypage" 
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigateToMyPage();
-            }}
-          >
-            마이페이지
-          </a>
-          <a href="#contact">문의</a>
-        </nav>
-        <div className="tools" aria-label="도구">
-          <img src={Home_search} alt="검색" />
-          <img src={Home_mypage} alt="메뉴" />
-        </div>
-      </header>
+      <Header 
+        activeMenu="main" 
+        theme="transparent" 
+        onMenuClick={(menu) => onNavigate(menu)}
+      />
 
       <section className="hero" id="home">
         <img src={Home_header} alt="" className="hero-bg" />
@@ -236,46 +221,7 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
         </div>
       </section>
 
-      <footer className="footer">
-        <div className="container footer-inner">
-          <div className="footer-cs">
-            <h3>고객센터 〉</h3>
-            <div className="time">1670-0876 09:00~18:00</div>
-            <ul>
-              <li>평일: 전체 문의 상담</li>
-              <li>토요일, 공휴일: 오늘의집 직접배송 주문건 상담</li>
-              <li>일요일: 휴무</li>
-            </ul>
-            <div className="btn-group">
-              <button>카톡 상담(평일 09:00~18:00)</button>
-              <button>이메일 문의</button>
-            </div>
-          </div>
-          <div className="footer-links">
-            <span>회사소개</span><span>회사소개</span>
-            <span>회사소개</span><span>회사소개</span>
-            <span>회사소개</span><span>파트너 개인정보 처리방침</span>
-            <span>개인정보 처리방침</span><span>회사소개</span>
-            <span>회사소개</span><span>회사소개</span>
-            <span>회사소개</span><span>회사소개</span>
-            <span>회사소개</span>
-          </div>
-          <div className="footer-legal">
-            <p>(주)버킷플레이스 | 대표이사 이승재 | 서울 서초구 서초대로74길 4 삼성생명서초타워 25층, 27층</p>
-            <p>contact@bucketplace.net | 사업자등록번호 119-86-91245 사업자정보확인</p>
-            <p>통신판매업신고번호 제2018-서울서초-0580호</p>
-            <p style={{ marginTop: 16 }}>고객님이 현금결제한 금액에 대해 우리은행과 채무지급보증 계약을 체결하여 안전거래를 보장하고 있습니다. 서비스가입사실확인</p>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', margin: '14px 0' }}>
-              <div style={{ padding: '6px 12px', border: '1px solid #d9dde2', borderRadius: 4, fontSize: 11 }}>오늘의집 서비스 운영<br/>2024. 09. 08 ~ 2027. 09. 07</div>
-            </div>
-            <p style={{ fontSize: 11, color: '#999' }}>
-              (주)버킷플레이스는 통신판매중개자로 거래 당사자가 아니므로, 판매자가 등록한 상품정보 및 거래 등에 대해 책임을 지지 않습니다. 단, (주)버킷플레이스가 판매자로 등록 판매한 상품은 판매자로서 책임을 부담합니다.
-            </p>
-            <div className="social"><span /><span /><span /><span /></div>
-            <p>Copyright 2014. bucketplace, Co., Ltd. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

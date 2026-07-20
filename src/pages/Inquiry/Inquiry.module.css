@@ -1,0 +1,204 @@
+/* 기본 배경 및 폰트 설정 */
+.pageContainer {
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: 'Pretendard', sans-serif;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 메인 컨텐츠 영역 */
+.mainContent {
+  flex: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+/* 헤더와 타이틀 사이 */
+.titleArea {
+  margin-top: 160px; 
+  text-align: center;
+  /* 타이틀과 첫 번째 폼 사이 */
+  margin-bottom: 100px; 
+}
+
+.pageTitle {
+  font-size: 40px;
+  color: #1A1A1A;
+  margin: 0 0 10px 0;
+}
+
+.pageDesc {
+  font-size: 16px;
+  color: #567694;
+  margin: 0;
+}
+
+/* 폼 영역 */
+.formArea {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 입력 줄 사이 간격 */
+.formRow {
+  display: flex;
+  gap: 60px;
+  margin-bottom: 70px; 
+}
+
+.inputGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 18px;
+  font-weight: bold;
+  color: #334656;
+  margin-bottom: 20px;
+}
+
+/* 공통 입력창 스타일 (밑줄만 있는 형태) */
+.input, .select {
+  border: none;
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #1A1A1A;
+  outline: none;
+  background-color: transparent;
+  transition: border-color 0.2s;
+}
+
+.input::placeholder {
+  color: #849CB2;
+}
+
+.input:focus, .select:focus {
+  border-bottom-color: #0084FF;
+}
+
+/* 셀렉트 박스 (문의유형) 커스텀 */
+.select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("../../assets/Inquiry_listBtn.svg");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 20px;
+  color: #334656;
+}
+.select.selected {
+  color: #1A1A1A;
+}
+
+/* 문의내용과 개인정보 동의 사이 */
+.detailsGroup {
+  margin-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+}
+
+.textarea {
+  font-family: inherit;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  padding: 2px 0 10px 0;
+  font-size: 16px;
+  color: #1A1A1A;
+  outline: none;
+  background-color: transparent;
+  resize: none;
+  height: 60px;
+  overflow: hidden;  line-height: 1.5;
+  transition: border-color 0.2s;
+}
+
+.textarea::placeholder {
+  color: #849CB2;
+}
+
+.textarea:focus {
+  border-bottom-color: #0084FF;
+}
+
+.charCount {
+  text-align: right;
+  font-size: 14px;
+  color: #849CB2;
+  margin-top: 10px;
+}
+
+.charCount strong {
+    color: #334656;
+}
+
+/* 개인정보 동의와 전송 버튼 사이 */
+.consentGroup {
+  margin-bottom: 160px;
+}
+
+.consentDesc {
+  font-size: 15px;
+  color: #567694;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+/* 체크박스 커스텀 */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.hiddenCheckbox {
+  display: none;
+}
+
+.checkIconImg {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* 버튼과 푸터 사이 */
+.submitWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 160px; 
+}
+
+.submitBtn {
+  background-color: #999999;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 18px 120px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* 폼이 모두 입력되었을 때 파란색으로 활성화되는 스타일 (선택사항) */
+.submitBtn.active {
+  background-color: #0084FF;
+}
+
+.submitBtn.active:hover {
+  background-color: #0073e6;
+}

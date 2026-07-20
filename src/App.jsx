@@ -6,6 +6,7 @@ import MyPage from './pages/MyPage/MyPage.jsx';
 import MainPage from './pages/Main/MainPage.jsx';
 import NoticePage from './pages/NoticePage/NoticePage';
 import MyPageRegistration from './pages/MyPage/MyPageRegistration.jsx';
+import Inquiry from './pages/Inquiry/Inquiry.jsx';
 import './index.css';
 
 function App() {
@@ -51,12 +52,13 @@ function App() {
         />;
       
       case 'mypage':
-        // 마이페이지 -> 마이페이지 작성하기 폼
-        return <MyPage onNavigateToRegistration={() => setCurrentView('mypageRegistration')} />;
+        return <MyPage onNavigate={handleNavigate} />;
       
       case 'mypageRegistration':
-        // 마이페이지 작성하기 폼 -> 마이페이지
-        return <MyPageRegistration onBackToMyPage={() => setCurrentView('mypage')} />;
+        return <MyPageRegistration onNavigate={handleNavigate} />;
+
+      case 'inquiry':
+        return <Inquiry onNavigate={handleNavigate} />;
       
       default:
         // 기본값 로그인 화면

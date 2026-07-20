@@ -5,16 +5,17 @@ import Signup from './pages/Signup.jsx';
 import MyPage from './pages/MyPage/MyPage.jsx';
 import MainPage from './pages/Main/MainPage.jsx';
 import NoticePage from './pages/NoticePage/NoticePage';
+import ExternalJobs from './pages/ExternalJobs/ExternalJobs.jsx';
 import MyPageRegistration from './pages/MyPage/MyPageRegistration.jsx';
 import Inquiry from './pages/Inquiry/Inquiry.jsx';
 import './index.css';
 
 function App() {
   // 현재 화면 상태를 관리 기본값은 'login'
-  const [currentView, setCurrentView] = useState('login'); 
+  //const [currentView, setCurrentView] = useState('login'); 
 
   //main먼저 볼려고 써둔 것.
-  //const [currentView, setCurrentView] = useState('main');
+  const [currentView, setCurrentView] = useState('main');
 
   // 마이페이지 등에서 호출하는 handleNavigate 함수
   const handleNavigate = (view) => {
@@ -48,6 +49,7 @@ function App() {
         return <MainPage 
           onNavigateToMyPage={() => setCurrentView('mypage')} 
           onNavigateToNotice={() => setCurrentView('notice')}
+          onNavigateToExternalJobs={() => handleNavigate('externalJobs')}
           />;
 
       case 'notice': 
@@ -59,6 +61,10 @@ function App() {
       
       case 'mypage':
         return <MyPage onNavigate={handleNavigate} />;
+
+      case 'externalJobs':
+        // 외부 취업 공고 화면
+        return <ExternalJobs onNavigate={handleNavigate} />;
       
       case 'mypageRegistration':
         return <MyPageRegistration onNavigate={handleNavigate} />;

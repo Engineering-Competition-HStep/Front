@@ -26,8 +26,12 @@ import Home_right from "../../assets/Home_right.png";
 import Home_line from "../../assets/Home_line.png";
 
 // 상단 메뉴바, 하단 푸터 컴포넌트
-import Header from '../../components/Header/Header.jsx';
 import Footer from '../../components/Footer/Footer.jsx';
+
+// 공지사항 로고 및 아이콘
+import notice_logo from "../../assets/notice_logo.svg";
+import notice_search from "../../assets/notice_search.svg";
+import notice_menu from "../../assets/notice_menu.svg";
 
 const jobs = [
   ["국순당", Home_gooksundang, ["지식정보문화트랙 추천"], "청년 직무 아카데미 교육생 모집", "~11월 24일 23:59"],
@@ -55,13 +59,13 @@ function SectionTitle({ icon, title, description, action, onActionClick }) {
         </div>
         <p>{description}</p>
       </div>
-      {/* 💡 전달받은 onActionClick을 버튼의 onClick에 연결 */}
+      {/* 전달받은 onActionClick을 버튼의 onClick에 연결 */}
       {action && <button className="more" onClick={onActionClick}>{action}</button>}
     </div>
   );
 }
 
-// App.jsx에서 onNavigateToNotice를 정상적으로 받아옵니다.
+// App.jsx에서 onNavigateToMyPage, onNavigateToNotice를 정상적으로 받아옵니다.
 function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
 
   const [track, setTrack] = useState("부동산 트랙");
@@ -97,11 +101,65 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice }) {
 
   return (
     <main className="hstep">
-      <Header 
-        activeMenu="main" 
-        theme="transparent" 
-        onMenuClick={(menu) => onNavigate(menu)}
-      />
+      
+      {/* 상단 헤더 영역 (공지사항 페이지와 동일한 구조로 상단바 네비게이션 적용) */}
+      <header style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '80px', 
+        backgroundColor: 'transparent',
+        zIndex: 9999,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '0 40px',
+        boxSizing: 'border-box'
+      }}>
+        {/* 로고 영역 */}
+        <div 
+          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', width: '150px' }}
+        >
+          <img 
+            src={notice_logo} 
+            alt="HSTEP 로고" 
+            style={{ height: '24px', width: 'auto', display: 'block', filter: 'brightness(0) invert(1)' }} 
+          />
+        </div>
+        
+        {/* 중앙 메뉴 영역 */}
+        <nav style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: '15px' }}>
+          <a 
+            href="#home" 
+            style={{ color: '#ffffff', fontWeight: '600', textDecoration: 'none', borderBottom: '2px solid #ffffff', paddingBottom: '4px' }}
+          >
+            메인홈
+          </a>
+          <a href="#roadmap" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
+          <a href="#jobs" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>공고 추천</a>
+          <a href="#ai-chat" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>AI채팅</a>
+          
+          {/* 마이페이지 클릭 시 App.jsx의 onNavigateToMyPage 함수가 실행되도록 연결 */}
+          <a 
+            href="#mypage" 
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigateToMyPage && onNavigateToMyPage();
+            }}
+            style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}
+          >
+            마이페이지
+          </a>
+          <a href="#contact" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>문의</a>
+        </nav>
+
+        {/* 우측 아이콘 영역 */}
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', width: '150px', justifyContent: 'flex-end' }}>
+          <img src={notice_search} alt="검색" style={{ cursor: 'pointer', width: '24px', height: '24px', filter: 'brightness(0) invert(1)' }} />
+          <img src={notice_menu} alt="메뉴" style={{ cursor: 'pointer', width: '24px', height: '24px', filter: 'brightness(0) invert(1)' }} />
+        </div>
+      </header>
 
       <section className="hero" id="home">
         <img src={Home_header} alt="" className="hero-bg" />

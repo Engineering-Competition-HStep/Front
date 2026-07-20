@@ -29,7 +29,7 @@ const noticeList = [
 function NoticePage({ onNavigateToMain, onNavigateToMyPage }) {
   const [searchInput, setSearchInput] = useState("");
 
-  // 💡 검색어가 바뀔 때마다 실시간으로 필터링 처리 (비어있으면 전체 리스트 자동 복구!)
+  // 검색어가 바뀔 때마다 실시간으로 필터링 처리 (비어있으면 전체 리스트 자동 복구)
   const filteredNotices = searchInput.trim() === "" 
     ? noticeList 
     : noticeList.filter(

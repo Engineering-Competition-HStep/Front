@@ -16,6 +16,12 @@ function App() {
   //main먼저 볼려고 써둔 것.
   //const [currentView, setCurrentView] = useState('main');
 
+  // 마이페이지 등에서 호출하는 handleNavigate 함수
+  const handleNavigate = (view) => {
+    setCurrentView(view);
+    window.scrollTo(0, 0);
+  };
+
   // 현재 뷰 상태에 따라 다른 컴포넌트를 보여주는 함수
   const renderView = () => {
     switch (currentView) {
@@ -38,7 +44,7 @@ function App() {
         return <Signup onBackToLogin={ () => setCurrentView('login') } />
 
       case 'main':
-        // 메인화면 -> 마이페이지, 공지사항
+        // 메인화면 상단 바에서 마이페이지와 공지사항으로 정상 이동하도록 수정
         return <MainPage 
           onNavigateToMyPage={() => setCurrentView('mypage')} 
           onNavigateToNotice={() => setCurrentView('notice')}

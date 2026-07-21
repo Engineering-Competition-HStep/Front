@@ -208,6 +208,51 @@ color: #0356C8;
 margin: 0;
 }
 
+.specContent {
+  width: 100%;
+}
+
+.inputRow {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  width: 100%;
+  padding-left: 40px; 
+  box-sizing: border-box;
+}
+
+.inputColHalf {
+  flex: 1; 
+}
+
+.inputColFull {
+  width: 100%;
+}
+
+.leftInput {
+  font-family: inherit;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  color: #1A1A1A;
+  line-height: 1.5;
+  text-align: left;
+  caret-color: #0084FF;
+  padding: 0;
+  display: block;
+}
+
+.leftInput::placeholder {
+  color: #aaa;
+}
+
+.leftInput:disabled {
+  cursor: not-allowed;
+}
+
+
 /* 여백 보조 클래스 */
 .mb20 { margin-bottom: 20px; }
 .mb30 { margin-bottom: 30px; }
@@ -217,7 +262,7 @@ margin: 0;
 .inputWrapper {
 flex: 1;
 border-bottom: 1px solid #ddd;
-padding-bottom: 8px;
+padding-bottom: 4px;
 transition: border-color 0.3s ease;
 }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // 새로 만든 전용 CSS 모듈을 불러옵니다.
 import styles from './Signup.module.css';
 
@@ -13,6 +13,19 @@ import gradeIcon from '../assets/grade.svg';
 import gradeChoiceIcon from '../assets/grade_choice.svg';
 // 뒤로가기 화살표 아이콘
 import backIcon from '../assets/back_button.svg';
+
+const TRACK_MAP = {
+  'BIGDATA': 1,
+  'WEB': 2,
+  'MOBILE': 3
+};
+
+// [임시 데이터] 백엔드 트랙 조회 API가 생기기 전까지 사용할 임시 목록
+const MOCK_TRACKS = [
+  { id: 'BIGDATA', name: '빅데이터트랙' },
+  { id: 'WEB', name: '웹공학트랙' },
+  { id: 'MOBILE', name: '모바일소프트웨어트랙' },
+];
 
 function Signup({ onBackToLogin }) {
   const [currentStep, setCurrentStep] = useState(1) // 1: 회원가입, 2: 메일인증, 3: 완료
@@ -34,9 +47,19 @@ function Signup({ onBackToLogin }) {
 
   // 이메일 상태
   const [email, setEmail] = useState('');
+  // 이메일 중복/형식 검사를 통과했는지 기억하는 상태
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   // 에러 문구 표시 여부 관리 상태 변수
   const [showSubmitError, setShowSubmitError] = useState(false);
+
+  const [trackList, setTrackList] = useState([]);
+
+  useEffect(() => {
+    // TODO: 나중에 백엔드 API(GET /api/tracks)가 생기면 여기서 fetch
+    setTrackList(MOCK_TRACKS);
+  }, []);
+
   const isStep1Valid = 
     name.trim().length > 0 &&
     studentId.trim().length > 0 &&
@@ -45,20 +68,99 @@ function Signup({ onBackToLogin }) {
     track1 !== '' &&
     track2 !== '';
 
+    // 이메일 인증(확인) 버튼을 눌렀을 때 실행되는 함수
+  const verifyEmail = async () => {
+    if (!email) {
+      alert('이메일을 입력해주세요.');
+      return;
+    }
+
+    try {
+      // 1. 백엔드 API 호출: 이메일 검사 (GET 요청)
+      const response = await fetch(`http://localhost:8080/api/auth/check/email?email=${email}`);
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('사용 가능한 이메일입니다!');
+        setIsEmailVerified(true); // 통과
+      } else {
+        alert(`사용 불가: ${result.message || '형식이 잘못된 이메일입니다.'}`);
+        setIsEmailVerified(false); // 탈락
+      }
+    } catch (error) {
+      console.error('이메일 검사 에러:', error);
+    }
+  };
+
   // 폼 제출(다음으로 버튼 클릭) 시 실행될 함수
-  const handleNextStep = (e) => {
+  const handleNextStep = async (e) => {
     e.preventDefault();
     
-    // 입력창 모두 입력했는지 유효성 검사
-    if (currentStep === 1 && !isStep1Valid) {
-      setShowSubmitError(true);
-      return; 
-    }
-    setShowSubmitError(false);
+    // 1단계 -> 2단계
+    if (currentStep === 1) {
+      if (!isStep1Valid) {
+        setShowSubmitError(true);
+        return; 
+      }
 
-    console.log('다음 단계로 넘어갈 데이터:', { name, studentId, password, grade, track1, track2 });
-    // TODO: 이메일 인증 단계 화면으로 넘어가거나 API 전송 로직을 작성
-    if (currentStep < 3) setCurrentStep(currentStep + 1)
+      // 학번 중복 및 형식 검사 API 호출!
+      try {
+        const response = await fetch(`http://localhost:8080/api/auth/check/student-number?userId=${studentId}`);
+        const result = await response.json();
+
+        if (response.ok) {
+          // 학번 검사 통과 시에만 2단계로 넘어감
+          setShowSubmitError(false);
+          setCurrentStep(2);
+        } else {
+          alert(`학번 확인 실패: ${result.message || '이미 가입된 학번이거나 형식이 잘못되었습니다.'}`);
+        }
+      } catch (error) {
+        console.error('학번 검사 에러:', error);
+        alert('서버와 통신할 수 없습니다.');
+      }
+    } 
+
+    // [2단계 -> 3단계] 최종 회원가입
+    else if (currentStep === 2) {
+      // 이메일 검사를 통과했는지 확인
+      if (!isEmailVerified) {
+        alert('이메일 [인증하기] 버튼을 눌러 확인을 먼저 진행해주세요.');
+        return;
+      }
+
+      const trackIds = [];
+      if (track1) trackIds.push(TRACK_MAP[track1]);
+      if (track2 && track1 !== track2) trackIds.push(TRACK_MAP[track2]);
+
+      const signupData = {
+        userId: studentId, 
+        email: email,
+        password: password,
+        name: name,
+        grade: parseInt(grade, 10),
+        trackIds: trackIds
+      };
+
+      try {
+        const response = await fetch('http://localhost:8080/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(signupData),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          setCurrentStep(3); // 가입 성공 3단계로 이동
+        } else {
+          alert(`가입 실패: ${result.message || '입력 정보를 확인해주세요.'}`);
+        }
+      } catch (error) {
+        console.error('회원가입 에러:', error);
+        alert('서버와 통신할 수 없습니다.');
+      }
+    }
   };
 
   return (
@@ -199,9 +301,9 @@ function Signup({ onBackToLogin }) {
             >
               {/* 추후 트랙 테이블 연동 */}
               <option value="" disabled>1트랙</option>
-              <option value="BIGDATA">빅테이터 트랙</option>
-              <option value="WEB">웹 공학 트랙</option>
-              <option value="MOBILE">모바일 소프트웨어 트랙</option>
+              {trackList.map((track) => (
+                <option key={track.id} value={track.id}>{track.name}</option>
+              ))}
             </select>
             
             <select 
@@ -210,9 +312,9 @@ function Signup({ onBackToLogin }) {
               onChange={(e) => setTrack2(e.target.value)}
             >
               <option value="" disabled>2트랙</option>
-              <option value="BIGDATA">빅데이터 트랙</option>
-              <option value="WEB">웹 공학 트랙</option>
-              <option value="MOBILE">모바일 소프트웨어 트랙</option>
+              {trackList.map((track) => (
+                <option key={track.id} value={track.id}>{track.name}</option>
+              ))}
             </select>
           </div>
 
@@ -252,15 +354,17 @@ function Signup({ onBackToLogin }) {
                   type="email"
                   placeholder="예) abcd123@hansung.ac.kr"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {setEmail(e.target.value); setIsEmailVerified(false);} }
                   className={styles.emailInput}
                 />
+                {/* 메일 인증 API 아직 미구현 */}
                 <button 
                   type="button" 
                   className={styles.verifyButton}
-                  onClick={() => alert('인증 메일이 발송되었습니다. (데모)')}
+                  onClick={verifyEmail}
+                  style={{ backgroundColor: isEmailVerified ? '#0356C8' : '' }}
                 >
-                  인증하기
+                  {isEmailVerified ? '인증완료' : '인증하기'}
                 </button>
               </div>
             </div>
@@ -270,7 +374,7 @@ function Signup({ onBackToLogin }) {
                 이전으로
               </button>
 
-            <button type="submit" className={styles.submitButton}>
+            <button type="submit" className={`${styles.submitButton} ${isEmailVerified ? styles.submitButtonActive : ''}`}>
               다음으로
             </button>
           </form>
@@ -290,9 +394,8 @@ function Signup({ onBackToLogin }) {
             {/* 메인 화면으로 넘어가는 버튼 */}
             <button 
               type="button" 
-              className={styles.startButton} 
-              onClick={onBackToLogin}  // 추후에 메인페이지로 이동 구현
-            >
+              className={`${styles.submitButton} ${styles.submitButtonActive}`} 
+              onClick={onBackToLogin}>
               HSTEP 시작하기
             </button>
           </div>

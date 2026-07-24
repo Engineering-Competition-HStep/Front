@@ -66,8 +66,8 @@ function SectionTitle({ icon, title, description, action, onActionClick }) {
 }
 
 // App.jsx에서 onNavigateToExternalJobs도 정상적으로 받아옵니다.
-function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternalJobs }) {
-
+function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternalJobs, onNavigateToExternalJobsMore }) {
+  
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
   
@@ -195,6 +195,7 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
             title="외부 취업 공고" 
             description="나에게 맞는 다양한 취업 공고를 만나보세요." 
             action="+ 취업공고 더 보러가기" 
+            onActionClick={() => onNavigateToExternalJobsMore && onNavigateToExternalJobsMore()}
           />
         </div>
         <div className="carousel-wrapper">

@@ -6,6 +6,7 @@ import MyPage from './pages/MyPage/MyPage.jsx';
 import MainPage from './pages/Main/MainPage.jsx';
 import NoticePage from './pages/NoticePage/NoticePage';
 import ExternalJobs from './pages/ExternalJobs/ExternalJobs.jsx';
+import ExternalJobsMore from './pages/ExternalJobsMore/ExternalJobsMore.jsx';
 import MyPageRegistration from './pages/MyPage/MyPageRegistration.jsx';
 import Inquiry from './pages/Inquiry/Inquiry.jsx';
 import './index.css';
@@ -42,7 +43,7 @@ function App() {
       
       case 'signup':
         // 회원가입 -> login
-        return <Signup onBackToLogin={ () => setCurrentView('login') } />
+        return <Signup onBackToLogin={ () => setCurrentView('login') } />;
 
       case 'main':
         // 메인화면 상단 바에서 마이페이지와 공지사항으로 정상 이동하도록 수정
@@ -50,7 +51,8 @@ function App() {
           onNavigateToMyPage={() => setCurrentView('mypage')} 
           onNavigateToNotice={() => setCurrentView('notice')}
           onNavigateToExternalJobs={() => handleNavigate('externalJobs')}
-          />;
+          onNavigateToExternalJobsMore={() => handleNavigate('externalJobsMore')}
+        />;
 
       case 'notice': 
         // 공지사항-> main
@@ -65,6 +67,9 @@ function App() {
       case 'externalJobs':
         // 외부 취업 공고 화면
         return <ExternalJobs onNavigate={handleNavigate} />;
+      
+      case 'externalJobsMore':
+        return <ExternalJobsMore onNavigate={handleNavigate} />;
       
       case 'mypageRegistration':
         return <MyPageRegistration onNavigate={handleNavigate} />;

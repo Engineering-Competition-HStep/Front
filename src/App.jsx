@@ -7,6 +7,7 @@ import MainPage from './pages/Main/MainPage.jsx';
 import NoticePage from './pages/NoticePage/NoticePage';
 import ExternalJobs from './pages/ExternalJobs/ExternalJobs.jsx';
 import ExternalJobsMore from './pages/ExternalJobsMore/ExternalJobsMore.jsx';
+import AiChat from './pages/AiChat/AiChat.jsx'; // 💡 1. AiChat 컴포넌트 import 추가
 import MyPageRegistration from './pages/MyPage/MyPageRegistration.jsx';
 import Inquiry from './pages/Inquiry/Inquiry.jsx';
 import './index.css';
@@ -52,6 +53,7 @@ function App() {
           onNavigateToNotice={() => setCurrentView('notice')}
           onNavigateToExternalJobs={() => handleNavigate('externalJobs')}
           onNavigateToExternalJobsMore={() => handleNavigate('externalJobsMore')}
+          onNavigateToAiChat={() => handleNavigate('aiChat')}
         />;
 
       case 'notice': 
@@ -70,6 +72,9 @@ function App() {
       
       case 'externalJobsMore':
         return <ExternalJobsMore onNavigate={handleNavigate} />;
+      
+        case 'aiChat': // aiChat 뷰
+        return <AiChat onNavigate={handleNavigate} />;
       
       case 'mypageRegistration':
         return <MyPageRegistration onNavigate={handleNavigate} />;

@@ -43,9 +43,9 @@ const jobs = [
 
 const notices = [
   ["2026학년도 2학기 교차 전부(과) 선발 안내 (7.13~7.17)", "2026-07-06"],
-  ["[에피소드] 2026학년도 2학기 외부 임차기숙사 입사생 모집...", "2026-06-29"],
-  ["[양식] 국가고시합격자장학금 신청안내 - 국가전문자격시험 합...", "2026-05-12"],
-  ["[온라인 취업 멘토링 서비스] 슬기로운 취준생활, 코멘토로 지...", "2026-05-07"],
+   ["[에피소드] 2026학년도 2학기 외부 임차기숙사 입사생 모집...", "2026-06-29"],
+   ["[양식] 국가고시합격자장학금 신청안내 - 국가전문자격시험 합...", "2026-05-12"],
+   ["[온라인 취업 멘토링 서비스] 슬기로운 취준생활, 코멘토로 지...", "2026-05-07"],
 ];
 
 // onActionClick props가 적용된 SectionTitle 컴포넌트
@@ -66,7 +66,7 @@ function SectionTitle({ icon, title, description, action, onActionClick }) {
 }
 
 // App.jsx에서 onNavigateToExternalJobs도 정상적으로 받아옵니다.
-function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternalJobs, onNavigateToExternalJobsMore }) {
+function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternalJobs, onNavigateToExternalJobsMore, onNavigateToAiChat }) {
   
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
@@ -138,7 +138,7 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
           </a>
           <a href="#roadmap" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
           
-          {/* 공고 추천 클릭 시 외부 취업 공고 페이지로 이동하도록 수정! */}
+          {/* 공고 추천 클릭 시 외부 취업 공고 페이지로 이동하도록 수정 */}
           <a 
             href="#jobs" 
             onClick={(e) => {
@@ -150,7 +150,17 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
             공고 추천
           </a>
           
-          <a href="#ai-chat" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>AI채팅</a>
+          {/* AI채팅 클릭 시 App.jsx에서 내려준 onNavigateToAiChat 실행 */}
+          <a 
+            href="#ai-chat" 
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigateToAiChat && onNavigateToAiChat();
+            }}
+            style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}
+          >
+            AI채팅
+          </a>
           
           {/* 마이페이지 클릭 시 App.jsx의 onNavigateToMyPage 함수가 실행되도록 연결 */}
           <a 

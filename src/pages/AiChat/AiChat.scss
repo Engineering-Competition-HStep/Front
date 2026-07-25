@@ -1,0 +1,341 @@
+/* AiChat.scss */
+
+.ai-chat-page {
+  background-color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .chat-layout {
+    display: flex;
+    flex: 1;
+    margin-top: 80px; 
+  }
+
+  /* 좌측 사이드바 */
+  .chat-sidebar {
+    width: 240px;
+    background-color: #ffffff;
+    border-right: none;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
+    border-radius: 0 30px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 10;
+
+    .sidebar-header {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      border-bottom: 1px solid #f0f0f0; 
+      h3 { font-size: 15px; font-weight: 700; color: #333; margin: 0; }
+    }
+
+    .history-section {
+      padding: 15px 16px 20px;
+      overflow-y: auto;
+      max-height: calc(100vh - 150px);
+      border: none !important; /* 혹시 모를 테두리 완벽 차단 */
+
+      .empty-history { font-size: 13px; color: #aaa; margin: 10px 0 0 8px; }
+
+      .history-group {
+        margin-bottom: 16px;
+        border: none !important;
+
+        .date-label {
+          font-size: 11px;
+          color: #888;
+          font-weight: 600;
+          margin: 0 0 6px 8px;
+          padding-bottom: 0 !important;
+          border-bottom: none !important; 
+          border-top: none !important;
+        }
+
+        .history-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          border: none !important;
+
+          .history-item {
+            height: 34px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            border: none !important;
+
+            .search-icon {
+              width: 15px;
+              height: 15px;
+              flex-shrink: 0;
+              opacity: 0.6;
+            }
+
+            .text {
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              flex: 1;
+            }
+
+            &:hover {
+              background-color: #f0f4f8;
+              color: #0084FF;
+              .search-icon { opacity: 1; }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* 우측 메인 채팅 영역 */
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 30px;
+
+    .main-header {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+
+      .title-area {
+        .header-title-img {
+          height: 52px;
+          width: auto;
+          display: block;
+        }
+      }
+
+      .dev-toggle-btn {
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4b74ff;
+        background-color: #f0f4ff;
+        border: 1px solid #d0e0ff;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        &:hover { background-color: #4b74ff; color: #ffffff; }
+      }
+    }
+
+    .chat-log {
+      flex: 1;
+      padding: 15px 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+
+      .background-watermark {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.85;
+
+        img {
+          width: 240px;
+          height: auto;
+          display: block;
+        }
+      }
+
+      .unregistered-flow,
+      .registered-flow,
+      .prompt-suggestions {
+        position: relative;
+        z-index: 1;
+      }
+
+      .message-row {
+        display: flex;
+        gap: 12px;
+        max-width: 80%;
+        margin-bottom: 16px;
+
+        &.bot {
+          align-self: flex-start;
+          
+          .bot-avatar-wrapper {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            img {
+              width: 100%;
+              height: 100%;
+              display: block;
+            }
+          }
+
+          .message-bubble {
+            background-color: #f8f9fc;
+            border: 1px solid #eef1f6;
+            color: #222;
+            border-radius: 4px 20px 20px 20px;
+          }
+        }
+
+        &.user {
+          align-self: flex-end;
+          
+          .message-bubble {
+            background-color: #0084FF;
+            color: #ffffff;
+            border-radius: 20px 4px 20px 20px;
+            box-shadow: 0 4px 12px rgba(0, 132, 255, 0.25);
+          }
+        }
+
+        .message-bubble {
+          padding: 16px 20px;
+          font-size: 14.5px;
+          line-height: 1.5;
+          white-space: pre-line;
+
+          .greet-text { margin: 0 0 12px 0; font-weight: 600; }
+          .desc-text {
+            margin: 0; color: #444;
+            .highlight-blue { color: #0084FF; font-weight: 700; }
+          }
+        }
+      }
+
+      .unregistered-flow {
+        display: flex;
+        flex-direction: column;
+
+        .action-row {
+          margin-left: 52px;
+          margin-top: -6px;
+
+          .goto-register-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #333;
+            background-color: #f0f4f8;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            span { font-size: 15px; transition: transform 0.2s; }
+            &:hover {
+              background-color: #e2ebf5; color: #0084FF;
+              span { transform: translateX(4px); }
+            }
+          }
+        }
+      }
+
+      .registered-flow {
+        display: flex;
+        flex-direction: column;
+
+        .prompt-suggestions {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          margin: 10px 0 24px 0;
+
+          .prompt-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+
+            .prompt-chip {
+              height: 38px;
+              padding: 0 18px;
+              border: none;
+              border-radius: 19px;
+              background-color: #f0f4f8;
+              color: #333;
+              font-size: 13.5px;
+              font-weight: 500;
+              cursor: pointer;
+              transition: all 0.2s;
+              &:hover {
+                background-color: #e0e8f2; color: #0084FF;
+                transform: translateY(-2px);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .input-section {
+      margin-bottom: 50px;
+
+      .input-box {
+        height: 56px;
+        border: 1px solid #e0e4eb;
+        border-radius: 28px;
+        background-color: #ffffff;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        padding: 0 6px 0 20px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+
+        &:focus-within {
+          border-color: #0084FF;
+          box-shadow: 0 6px 20px rgba(0, 132, 255, 0.12);
+        }
+
+        input {
+          flex: 1;
+          border: none;
+          outline: none;
+          font-size: 14.5px;
+          color: #333;
+          background: transparent;
+          &::placeholder { color: #aaa; }
+        }
+
+        .send-btn {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          border: none;
+          background-color: #0084FF;
+          color: white;
+          font-size: 17px;
+          font-weight: bold;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s, transform 0.1s;
+          &:hover { background-color: #006bce; }
+          &:active { transform: scale(0.95); }
+        }
+      }
+    }
+  }
+}

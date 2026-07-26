@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./MainPage.scss"; 
 
 // 기존 아이콘 및 배경 이미지
@@ -66,12 +66,57 @@ function SectionTitle({ icon, title, description, action, onActionClick }) {
 }
 
 // App.jsx에서 onNavigateToExternalJobs도 정상적으로 받아옵니다.
-function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternalJobs, onNavigateToExternalJobsMore, onNavigateToAiChat }) {
+// 💡 [수정] App.jsx에서 내려주는 모든 이동 관련 props를 안전하게 받도록 확대 적용!
+function MainPage({ 
+  onNavigate,
+  onNavigateToMyPage, 
+  onNavigateToNotice, 
+  onNavigateToExternalJobs, 
+  onNavigateToExternalJobsMore, 
+  onNavigateToAiChat 
+}) {
   
   const [track, setTrack] = useState("부동산 트랙");
   const realEstate = track === "부동산 트랙";
   
   const scrollRef = useRef(null);
+
+  // 백엔드에서 받아온 최신 공지사항을 담을 상태 추가 (초기값은 더미 데이터로 설정하여 안전성 확보)
+  const [serverNotices, setServerNotices] = useState([]);
+
+  //  메인 페이지가 켜질 때 백엔드의 '최신 공지 4개' API 호출 로직 복구
+  useEffect(() => {
+    fetch('http://localhost:8080/api/notices/latest?size=4')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`서버 에러 상태 코드: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data && data.length > 0) {
+          setServerNotices(data);
+        }
+      })
+      .catch((err) => {
+        console.error("최신 공지사항 불러오기 실패 (더미 데이터로 대체합니다):", err);
+      });
+  }, []);
+
+  //  어떤 방식의 메뉴 클릭이 들어와도 안전하게 이동시키는 통합 핸들러 함수 추가
+  const handleMenuNavigation = (menu) => {
+    if (menu === 'jobs' || menu === 'externalJobs') {
+      onNavigateToExternalJobs ? onNavigateToExternalJobs() : onNavigate && onNavigate('externalJobs');
+    } else if (menu === 'aichat' || menu === 'ai-chat') {
+      onNavigateToAiChat ? onNavigateToAiChat() : onNavigate && onNavigate('aichat');
+    } else if (menu === 'mypage') {
+      onNavigateToMyPage ? onNavigateToMyPage() : onNavigate && onNavigate('mypage');
+    } else if (menu === 'notice') {
+      onNavigateToNotice ? onNavigateToNotice() : onNavigate && onNavigate('notice');
+    } else {
+      onNavigate && onNavigate(menu);
+    }
+  };
 
   const recommended = realEstate
     ? ["스마트도시·교통계획 트랙", "기업경영 트랙", "회계·재무경영 트랙"]
@@ -119,6 +164,7 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
       }}>
         {/* 로고 영역 */}
         <div 
+          onClick={() => handleMenuNavigation('main')}
           style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', width: '150px' }}
         >
           <img 
@@ -132,18 +178,27 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
         <nav style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: '15px' }}>
           <a 
             href="#home" 
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('main'); }}
             style={{ color: '#ffffff', fontWeight: '600', textDecoration: 'none', borderBottom: '2px solid #ffffff', paddingBottom: '4px' }}
           >
             메인홈
           </a>
-          <a href="#roadmap" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
+          
+          {/* 나의 로드맵 클릭 시 정상 이동하도록 이벤트 연결 */}
+          <a 
+            href="#roadmap" 
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('roadmap'); }}
+            style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}
+          >
+            나의 로드맵
+          </a>
           
           {/* 공고 추천 클릭 시 외부 취업 공고 페이지로 이동하도록 수정 */}
           <a 
             href="#jobs" 
             onClick={(e) => {
               e.preventDefault();
-              onNavigateToExternalJobs && onNavigateToExternalJobs();
+              handleMenuNavigation('externalJobs');
             }}
             style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}
           >
@@ -155,7 +210,7 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
             href="#ai-chat" 
             onClick={(e) => {
               e.preventDefault();
-              onNavigateToAiChat && onNavigateToAiChat();
+              handleMenuNavigation('aichat');
             }}
             style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}
           >
@@ -167,13 +222,21 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
             href="#mypage" 
             onClick={(e) => {
               e.preventDefault();
-              onNavigateToMyPage && onNavigateToMyPage();
+              handleMenuNavigation('mypage');
             }}
             style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}
           >
             마이페이지
           </a>
-          <a href="#contact" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>문의</a>
+          
+          {/* 문의 클릭 시 정상 이동하도록 이벤트 연결 */}
+          <a 
+            href="#contact" 
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('contact'); }}
+            style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}
+          >
+            문의
+          </a>
         </nav>
 
         {/* 우측 아이콘 영역 */}
@@ -191,7 +254,7 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
               <p className="welcome">어서오세요 000님!</p>
               <h1><strong>HSTEP</strong>에서 함께 입사해봐요</h1>
               <p className="copy">나의 트랙에 맞춰진 전용 로드맵을 AI와 함께 상담하고, 고민해보아요</p>
-              <button className="outline-btn">나의 로드맵 만들러 가기 <span>→</span></button>
+              <button className="outline-btn" onClick={() => handleMenuNavigation('roadmap')}>나의 로드맵 만들러 가기 <span>→</span></button>
             </div>
           </div>
         </div>
@@ -205,7 +268,7 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
             title="외부 취업 공고" 
             description="나에게 맞는 다양한 취업 공고를 만나보세요." 
             action="+ 취업공고 더 보러가기" 
-            onActionClick={() => onNavigateToExternalJobsMore && onNavigateToExternalJobsMore()}
+            onActionClick={() => onNavigateToExternalJobsMore ? onNavigateToExternalJobsMore() : handleMenuNavigation('externalJobs')}
           />
         </div>
         <div className="carousel-wrapper">
@@ -290,15 +353,28 @@ function MainPage({ onNavigateToMyPage, onNavigateToNotice, onNavigateToExternal
           title="한성대 공지사항" 
           description="한성대학교의 일정들을 만나보세요." 
           action="+ 더보기" 
-          onActionClick={() => onNavigateToNotice()} /* 클릭 시 props 실행! */
+          onActionClick={() => handleMenuNavigation('notice')} /* 클릭 시 props 실행! */
         />
         <div className="notice-grid">
-          {notices.map(([title, date]) => (
-            <a className="notice" href="#notice" key={title}>
-              <p className="notice-title">{title}</p>
-              <div className="notice-meta"><span>{date}</span><span>→</span></div>
-            </a>
-          ))}
+          {/* \백엔드 서버에서 받아온 공지가 있으면 실제 데이터를, 서버 에러이거나 로딩 전이면 더미 데이터를 뿌림.*/}
+          {serverNotices.length > 0 ? (
+            serverNotices.map((item, index) => (
+              <a className="notice" href={item.url || "#notice"} target="_blank" rel="noreferrer" key={item.id || index}>
+                <p className="notice-title">{item.title}</p>
+                <div className="notice-meta">
+                  <span>{item.publishedAt || item.date || item.createdDate}</span>
+                  <span>→</span>
+                </div>
+              </a>
+            ))
+          ) : (
+            notices.map(([title, date], index) => (
+              <a className="notice" href="#notice" key={index} onClick={(e) => { e.preventDefault(); handleMenuNavigation('notice'); }}>
+                <p className="notice-title">{title}</p>
+                <div className="notice-meta"><span>{date}</span><span>→</span></div>
+              </a>
+            ))
+          )}
         </div>
       </section>
 

@@ -9,9 +9,14 @@ import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 import writeIcon from '../../assets/mypage_writeIcon.svg';
 import userProfileIcon from '../../assets/mypage_user_profile.svg';
 
-
-
-export default function MyPage({ onNavigate }) {
+// App.jsx에서 내려줄 수 있는 모든 이동 관련 props를 안전하게 다 받도록 확대
+export default function MyPage({ 
+  onNavigate, 
+  onNavigateToMain, 
+  onNavigateToNotice, 
+  onNavigateToExternalJobs, 
+  onNavigateToAiChat 
+}) {
   // 나의 학점평균 상태 관리
   const [gpa, setGpa] = useState({
     grade1: '',
@@ -34,7 +39,22 @@ export default function MyPage({ onNavigate }) {
     Object.values(gpa).some(val => val.trim() !== '') || 
     Object.values(specs).some(val => val.trim() !== '');  
 
-const renderSpecValue = (value, placeholder, isHighlight = false) => {
+  // 어떤 방식의 메뉴 클릭이 들어와도 안전하게 이동시키는 통합 핸들러 함수 추가
+  const handleMenuNavigation = (menu) => {
+    if (menu === 'main' || menu === 'home') {
+      onNavigateToMain ? onNavigateToMain() : onNavigate && onNavigate('main');
+    } else if (menu === 'jobs' || menu === 'externalJobs') {
+      onNavigateToExternalJobs ? onNavigateToExternalJobs() : onNavigate && onNavigate('externalJobs');
+    } else if (menu === 'aichat' || menu === 'ai-chat') {
+      onNavigateToAiChat ? onNavigateToAiChat() : onNavigate && onNavigate('aichat');
+    } else if (menu === 'notice') {
+      onNavigateToNotice ? onNavigateToNotice() : onNavigate && onNavigate('notice');
+    } else {
+      onNavigate && onNavigate(menu);
+    }
+  };
+
+  const renderSpecValue = (value, placeholder, isHighlight = false) => {
     if (value) {
       // 값이 있을 때: 실제 데이터 표시
       return (
@@ -72,9 +92,10 @@ const renderSpecValue = (value, placeholder, isHighlight = false) => {
     <div className={styles.pageContainer}>
       
       {/* 상단 메뉴바 컴포넌트 */}
+      {/* 통합 핸들러를 연결하여 Header에서 AI채팅 등을 눌렀을 때 이동하도록 수정 */}
       <Header 
         activeMenu="mypage" 
-        onMenuClick={(menu) => onNavigate(menu)}
+        onMenuClick={(menu) => handleMenuNavigation(menu)}
       />
 
       {/* 메인 컨텐츠 영역 */}
@@ -107,7 +128,10 @@ const renderSpecValue = (value, placeholder, isHighlight = false) => {
               미디어디자인 트랙
             </div>
 
-            <button className={styles.bookmarkBtn}>
+            <button 
+              className={styles.bookmarkBtn}
+              onClick={() => handleMenuNavigation('externalJobs')}
+            >
               <div className={styles.bookmarkInner}>
                 {/* 북마크 아이콘 */}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" color="#555">
@@ -142,7 +166,7 @@ const renderSpecValue = (value, placeholder, isHighlight = false) => {
           <section className={styles.gpaSection}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>나의 학점평균</h3>
-              <button className={styles.writeBtn} onClick={() => onNavigate('mypageRegistration')}>
+              <button className={styles.writeBtn} onClick={() => onNavigate && onNavigate('mypageRegistration')}>
                 <img src={writeIcon} alt="작성하기 아이콘" className={styles.writeIcon} />
                 작성하기
               </button>

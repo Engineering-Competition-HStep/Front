@@ -1,132 +1,88 @@
-/* --- 상단 공통 네비게이션 바 --- */
+/* 상단 헤더 전체 틀 (하단 회색 실선 제거) */
 .header {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 80px;
+  z-index: 9999;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding-top: 12px;
-  transition: all 0.3s ease;
-  z-index: 10;
-  border-bottom: 1px solid transparent;
+  padding: 0 40px;
+  box-sizing: border-box;
+  border-bottom: none !important; /* 헤더 아래 가로 회색 실선 삭제 */
 }
 
-.headerInner {
-  width: min(1196px, calc(100% - 48px)); 
-  margin: 0 auto;
+/* 흰색 배경 테마 (마이페이지, 문의 등) */
+.themeLight {
+  background-color: #ffffff;
+  border-bottom: none !important;
+}
+
+/* 투명 배경 테마 (AI채팅, 메인홈) */
+.themeTransparent {
+  background-color: transparent;
+  border-bottom: none !important;
+}
+
+/* 좌측 로고 영역 */
+.logoArea {
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
+  width: 150px;
 }
 
 .logoImage {
-height: 24px;
-width: auto;
-cursor: pointer;
+  height: 24px;
+  width: auto;
+  display: block;
 }
 
-.nav {
-display: flex;
-gap: 40px;
-margin: auto;
+/* 중앙 네비게이션 메뉴 */
+.navMenu {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  font-size: 15px;
 }
 
-.navItem {
-text-decoration: none;
-color: #1A1A1A;
-font-size: 15px;
-font-weight: 500;
-cursor: pointer;
-position: relative;
-padding-bottom: 8px;
-transition: all 0.2s;
+/* 기본 메뉴 텍스트 스타일 (선택 안 됐을 때) */
+.navLink {
+  color: #333333;
+  text-decoration: none;
+  opacity: 0.9;
+  cursor: pointer;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease; /* 크기나 굵기 변경 시 부드럽게 전환 */
 }
 
-.navItem:hover {
-color: #0084FF;
+.navLink:hover {
+  opacity: 1;
 }
 
-/* 현재 선택된 메뉴 강조 스타일 */
-.navItemActive {
-color: #0084FF;
-font-weight: bold;
+/* 선택된 활성 메뉴: 파란색 글씨 + 파란색 밑줄 + 확실한 굵기(700)와 크기(16px) 강조! */
+.activeLink {
+  color: #0084FF !important;
+  font-weight: 650 !important; /* 확실히 두꺼워지는 강조 효과 */
+  font-size: 15.5px !important;  /* 살짝 커지는 확대 효과 추가 */
+  opacity: 1;
+  border-bottom: 2px solid #0084FF !important;
 }
 
-.navItemActive::after {
-content: '';
-position: absolute;
-bottom: -3px;
-left: 0;
-width: 100%;
-height: 3px;
-background-color: #0084FF;
+/* 우측 아이콘 영역 */
+.rightIcons {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  width: 150px;
+  justify-content: flex-end;
 }
 
-.headerIcons {
-display: flex;
-align-items: center;
-gap: 18px;
-color: #333;
-cursor: pointer;
+.icon {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
 }
-
-.actionIcon {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    display: block;
-}
-
-/* === 테마 1: 마이페이지용 (하얀 배경) === */
-.themeLight {
-  background-color: #fff;
-  border-bottom: 1px solid #eaeaea;
-  position: relative;
-}
-.themeLight .logoImage {
-  filter: none;
-}
-.themeLight .navItem { 
-  color: #1A1A1A; 
-}
-.themeLight .navItem:hover { 
-  color: #0084FF;
-}
-.themeLight .navItemActive { 
-  color: #0084FF; 
-  font-weight: bold; 
-}
-.themeLight .navItemActive::after {
-  background-color: #0084FF;
-}
-
-/* === 테마 2: 메인홈용 (투명 배경 + 하얀 글씨) === */
-.themeTransparent {
-  position: absolute; 
-  top: 0; 
-  left: 0; 
-  width: 100%;
-  background-color: transparent;
-  border: none;
-  z-index: 10;
-}
-.themeTransparent .logoImage { 
-  filter: brightness(0) invert(1); 
-}
-.themeTransparent .navItem { 
-  color: #fff; 
-  opacity: 0.8; 
-}
-.themeTransparent .navItem:hover { 
-  opacity: 1; 
-}
-.themeTransparent .navItemActive { 
-  color: #fff; 
-  font-weight: 700; 
-  opacity: 1; 
-}
-.themeTransparent .navItemActive::after {
-  background-color: #fff;
-}
-.themeTransparent .actionIcon { 
-  filter: brightness(0) invert(1); }

@@ -26,8 +26,30 @@ const noticeList = [
   { id: 12, department: "학사운영팀", title: "[양식] 국가근로장학금 출근부 미입력 사유서 양식 안내", date: "2026-07-06", views: 469 },
 ];
 
-function NoticePage({ onNavigateToMain, onNavigateToMyPage }) {
+//  App.jsx에서 내려주는 이동 props를 안전하게 받도록 확대 적용!
+function NoticePage({ 
+  onNavigate,
+  onNavigateToMain, 
+  onNavigateToMyPage, 
+  onNavigateToExternalJobs, 
+  onNavigateToAiChat 
+}) {
   const [searchInput, setSearchInput] = useState("");
+
+  // 어떤 방식의 메뉴 클릭이 들어와도 안전하게 이동시키는 통합 핸들러 함수 추가
+  const handleMenuNavigation = (menu) => {
+    if (menu === 'main' || menu === 'home') {
+      onNavigateToMain ? onNavigateToMain() : onNavigate && onNavigate('main');
+    } else if (menu === 'jobs' || menu === 'externalJobs') {
+      onNavigateToExternalJobs ? onNavigateToExternalJobs() : onNavigate && onNavigate('externalJobs');
+    } else if (menu === 'aichat' || menu === 'ai-chat') {
+      onNavigateToAiChat ? onNavigateToAiChat() : onNavigate && onNavigate('aichat');
+    } else if (menu === 'mypage') {
+      onNavigateToMyPage ? onNavigateToMyPage() : onNavigate && onNavigate('mypage');
+    } else {
+      onNavigate && onNavigate(menu);
+    }
+  };
 
   // 검색어가 바뀔 때마다 실시간으로 필터링 처리 (비어있으면 전체 리스트 자동 복구)
   const filteredNotices = searchInput.trim() === "" 
@@ -69,7 +91,7 @@ function NoticePage({ onNavigateToMain, onNavigateToMyPage }) {
       }}>
         {/* 로고 영역 */}
         <div 
-          onClick={() => onNavigateToMain && onNavigateToMain()} 
+          onClick={() => handleMenuNavigation('main')} 
           style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', width: '150px' }}
         >
           <img 
@@ -83,25 +105,55 @@ function NoticePage({ onNavigateToMain, onNavigateToMyPage }) {
         <nav style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: '15px' }}>
           <a 
             href="#home" 
-            onClick={(e) => { e.preventDefault(); onNavigateToMain && onNavigateToMain(); }}
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('main'); }}
             style={{ color: '#4d7ff0', fontWeight: '600', textDecoration: 'none', borderBottom: '2px solid #4d7ff0', paddingBottom: '4px' }}
           >
             메인홈
           </a>
-          <a href="#roadmap" style={{ color: '#333333', textDecoration: 'none' }}>나의 로드맵</a>
-          <a href="#jobs" style={{ color: '#333333', textDecoration: 'none' }}>공고 추천</a>
-          <a href="#ai-chat" style={{ color: '#333333', textDecoration: 'none' }}>AI채팅</a>
+          
+          {/* 나의 로드맵 이동 누락 부분 안전하게 연결 */}
+          <a 
+            href="#roadmap" 
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('roadmap'); }}
+            style={{ color: '#333333', textDecoration: 'none' }}
+          >
+            나의 로드맵
+          </a>
+          
+          {/* 공고 추천 이동 정상 연결 */}
+          <a 
+            href="#jobs" 
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('externalJobs'); }}
+            style={{ color: '#333333', textDecoration: 'none' }}
+          >
+            공고 추천
+          </a>
+          
+          {/* AI채팅 클릭 시 정상적으로 이동하도록 연결! */}
+          <a 
+            href="#ai-chat" 
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('aichat'); }}
+            style={{ color: '#333333', textDecoration: 'none' }}
+          >
+            AI채팅
+          </a>
+          
           <a 
             href="#mypage" 
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigateToMyPage && onNavigateToMyPage();
-            }}
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('mypage'); }}
             style={{ color: '#333333', textDecoration: 'none' }}
           >
             마이페이지
           </a>
-          <a href="#contact" style={{ color: '#333333', textDecoration: 'none' }}>문의</a>
+          
+          {/* 문의 페이지 이동 누락 부분 안전하게 연결 */}
+          <a 
+            href="#contact" 
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('contact'); }}
+            style={{ color: '#333333', textDecoration: 'none' }}
+          >
+            문의
+          </a>
         </nav>
 
         {/* 우측 아이콘 영역 */}
@@ -118,7 +170,7 @@ function NoticePage({ onNavigateToMain, onNavigateToMyPage }) {
           {/* 브레드크럼(경로) */}
           <div className="breadcrumb" style={{ display: 'flex', alignItems: 'center', fontSize: '13px', color: '#666', marginBottom: '12px' }}>
             <span 
-              onClick={() => onNavigateToMain && onNavigateToMain()} 
+              onClick={() => handleMenuNavigation('main')} 
               style={{ fontWeight: '500', color: '#666', cursor: 'pointer' }}
             >
               메인홈

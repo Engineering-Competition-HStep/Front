@@ -90,7 +90,8 @@ const initialOtherJobs = [
   }
 ];
 
-function ExternalJobs({ onNavigate }) {
+// 💡 [수정] 괄호 안에 onNavigateToAiChat props를 명시적으로 추가했습니다!
+function ExternalJobs({ onNavigate, onNavigateToAiChat }) {
   const [topJobs, setTopJobs] = useState(initialTopJobs);
   const [otherJobs, setOtherJobs] = useState(initialOtherJobs);
   
@@ -175,11 +176,31 @@ function ExternalJobs({ onNavigate }) {
         
         <nav className="nav-menu">
           <a href="#home" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('main'); }}>메인홈</a>
-          <a href="#roadmap">나의 로드맵</a>
+          
+          {/* 💡 [수정] 나의 로드맵 이동 누락 부분 안전하게 연결 */}
+          <a href="#roadmap" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('roadmap'); }}>나의 로드맵</a>
+          
           <a href="#jobs" className="active">공고 추천</a>
-          <a href="#ai-chat">AI채팅</a>
+          
+          {/* 💡 [핵심 수정] AI채팅 클릭 시 정상적으로 이동하도록 수정! */}
+          <a 
+            href="#ai-chat" 
+            onClick={(e) => {
+              e.preventDefault();
+              if (onNavigateToAiChat) {
+                onNavigateToAiChat();
+              } else if (onNavigate) {
+                onNavigate('aichat');
+              }
+            }}
+          >
+            AI채팅
+          </a>
+          
           <a href="#mypage" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('mypage'); }}>마이페이지</a>
-          <a href="#contact">문의</a>
+          
+          {/* [수정] 문의 페이지 이동 누락 부분 안전하게 연결 */}
+          <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('contact'); }}>문의</a>
         </nav>
 
         <div className="right-icons">

@@ -31,9 +31,31 @@ const getSimulatedBotResponse = (query) => {
   }
 };
 
-function AiChat({ onNavigate }) {
+// 어떤 형태의 이동 props가 내려와도 안전하게 처리하도록 확대 수용
+function AiChat({ 
+  onNavigate, 
+  onNavigateToMain, 
+  onNavigateToMyPage, 
+  onNavigateToExternalJobs, 
+  onNavigateToAiChat 
+}) {
   const [isRegistered, setIsRegistered] = useState(true);
   const [input, setInput] = useState('');
+
+  // 어떤 방식의 메뉴 클릭이 들어와도 안전하게 이동시키는 통합 핸들러 함수 추가
+  const handleMenuNavigation = (menu) => {
+    if (menu === 'main' || menu === 'home') {
+      onNavigateToMain ? onNavigateToMain() : onNavigate && onNavigate('main');
+    } else if (menu === 'jobs' || menu === 'externalJobs') {
+      onNavigateToExternalJobs ? onNavigateToExternalJobs() : onNavigate && onNavigate('externalJobs');
+    } else if (menu === 'aichat' || menu === 'ai-chat') {
+      onNavigateToAiChat ? onNavigateToAiChat() : onNavigate && onNavigate('aiChat');
+    } else if (menu === 'mypage') {
+      onNavigateToMyPage ? onNavigateToMyPage() : onNavigate && onNavigate('mypage');
+    } else {
+      onNavigate && onNavigate(menu);
+    }
+  };
 
   // 브라우저 로컬 스토리지 기반 최근 검색어 관리 (몇 일 전 자동 계산)
   const [history, setHistory] = useState(() => {
@@ -110,24 +132,33 @@ function AiChat({ onNavigate }) {
         boxSizing: 'border-box'
       }}>
         <div 
-          onClick={() => onNavigate && onNavigate('main')}
+          onClick={() => handleMenuNavigation('main')}
           style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', width: '150px' }}
         >
           <img src={notice_logo} alt="HSTEP 로고" style={{ height: '24px', width: 'auto', display: 'block' }} />
         </div>
         
         <nav style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: '15px' }}>
-          <a href="#home" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('main'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>메인홈</a>
-          <a href="#roadmap" style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
-          <a href="#jobs" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('externalJobs'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>공고 추천</a>
+          <a href="#home" onClick={(e) => { e.preventDefault(); handleMenuNavigation('main'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>메인홈</a>
+          
+          {/* 나의 로드맵 클릭 시 정상 이동하도록 이벤트 연결 */}
+          <a href="#roadmap" onClick={(e) => { e.preventDefault(); handleMenuNavigation('roadmap'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
+          
+          {/* 공고 추천 이동 안전하게 연결 */}
+          <a href="#jobs" onClick={(e) => { e.preventDefault(); handleMenuNavigation('externalJobs'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>공고 추천</a>
+          
           <a 
             href="#ai-chat" 
+            onClick={(e) => { e.preventDefault(); handleMenuNavigation('aiChat'); }}
             style={{ color: '#0084FF', fontWeight: '600', textDecoration: 'none', borderBottom: '2px solid #0084FF', paddingBottom: '4px' }}
           >
             AI채팅
           </a>
-          <a href="#mypage" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('mypage'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>마이페이지</a>
-          <a href="#contact" style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>문의</a>
+          
+          <a href="#mypage" onClick={(e) => { e.preventDefault(); handleMenuNavigation('mypage'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>마이페이지</a>
+          
+          {/* 문의 클릭 시 정상 이동하도록 이벤트 연결 */}
+          <a href="#contact" onClick={(e) => { e.preventDefault(); handleMenuNavigation('inquiry'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>문의</a>
         </nav>
 
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center', width: '150px', justifyContent: 'flex-end' }}>
@@ -200,7 +231,7 @@ function AiChat({ onNavigate }) {
                   </div>
                 </div>
                 <div className="action-row">
-                  <button className="goto-register-btn" onClick={() => onNavigate && onNavigate('mypageRegistration')}>
+                  <button className="goto-register-btn" onClick={() => handleMenuNavigation('mypageRegistration')}>
                     마이페이지에서 정보 등록하러 가기 <span>→</span>
                   </button>
                 </div>

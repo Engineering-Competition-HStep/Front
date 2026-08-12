@@ -12,10 +12,10 @@ import './index.css';
 
 function App() {
   // 현재 화면 상태를 관리 기본값은 'login'
-  //const [currentView, setCurrentView] = useState('login'); 
+  const [currentView, setCurrentView] = useState('login');
 
   //main먼저 볼려고 써둔 것.
-  const [currentView, setCurrentView] = useState('main');
+  // const [currentView, setCurrentView] = useState('main');
 
   // 마이페이지 등에서 호출하는 handleNavigate 함수
   const handleNavigate = (view) => {

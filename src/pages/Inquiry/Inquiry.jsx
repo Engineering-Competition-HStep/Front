@@ -62,7 +62,6 @@ export default function Inquiry({ onNavigate }) {
         
         <div className={styles.titleArea}>
           <h1 className={styles.pageTitle}>문의하기</h1>
-          <p className={styles.pageDesc}>로그인 후 문의를 해주시면 더 정확하게 답변을 드릴 수 있어요.</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.formArea}>

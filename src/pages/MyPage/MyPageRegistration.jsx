@@ -55,6 +55,28 @@ export default function MyPageRegistration({ onNavigate }) {
     });
   };
 
+  // '-' 삭제하기 버튼을 눌렀을 때 실행되는 함수
+  const handleRemoveInput = (field, index) => {
+    setSpecData((prev) => {
+      const arr = prev[field];
+      
+      // 1개만 남아있을 경우
+      if (arr.length === 1) {
+        const resetObj = 
+          field === 'certs' ? { name: '', date: '' } :
+          field === 'awards' ? { name: '', rank: '', desc: '' } :
+          field === 'volunteers' ? { name: '', time: '', agency: '', desc: '' } :
+          { desc: '' };
+        return { ...prev, [field]: [resetObj] };
+      } 
+      // 2개 이상일 경우
+      else {
+        const newArr = arr.filter((_, i) => i !== index);
+        return { ...prev, [field]: newArr };
+      }
+    });
+  };
+
   // DB 통신 및 저장 로직
   const handleSave = () => {
     // DB로 보낼 데이터 모으기
@@ -245,17 +267,21 @@ export default function MyPageRegistration({ onNavigate }) {
                 <div className={styles.specContent}>
                   <p className={`${styles.specSubTitle} ${styles.mb20}`}>• 자격증 명 / 발급년도</p>
                   {specData.certs.map((item, idx) => (
-                    <div key={idx} className={styles.inputRow}>
-                      <div className={styles.inputColHalf}>
-                        <div className={styles.inputWrapper}>
-                          <input value={item.name} onChange={(e) => handleInputChange('certs', idx, 'name', e.target.value)} placeholder="예 ) GTQ 1급" className={styles.leftInput} />
+                    <div key={idx} style={{ marginBottom: idx !== specData.certs.length - 1 ? '20px' : '0' }}>
+                      <div className={styles.inputRow}>
+                        <div className={styles.inputColHalf}>
+                          <div className={styles.inputWrapper}>
+                            <input value={item.name} onChange={(e) => handleInputChange('certs', idx, 'name', e.target.value)} placeholder="예 ) GTQ 1급" className={styles.leftInput} />
+                          </div>
+                        </div>
+                        <div className={styles.inputColHalf}>
+                          <div className={styles.inputWrapper}>
+                            <input value={item.date} onChange={(e) => handleInputChange('certs', idx, 'date', e.target.value)} placeholder="예 ) 2024.5.6" className={styles.leftInput} />
+                          </div>
                         </div>
                       </div>
-                      <div className={styles.inputColHalf}>
-                        <div className={styles.inputWrapper}>
-                          <input value={item.date} onChange={(e) => handleInputChange('certs', idx, 'date', e.target.value)} placeholder="예 ) 2024.5.6" className={styles.leftInput} />
-                        </div>
-                      </div>
+                      {/* 삭제하기 버튼 */}
+                      <div className={styles.addText} onClick={() => handleRemoveInput('certs', idx)}>- 삭제하기</div>
                     </div>
                   ))}
                   <div className={styles.addText} onClick={() => handleAddInput('certs')}>+ 추가하기</div>
@@ -312,6 +338,8 @@ export default function MyPageRegistration({ onNavigate }) {
                           </div>
                         </div>
                       </div>
+                      {/* 삭제하기 버튼 */}
+                      <div className={styles.addText} onClick={() => handleRemoveInput('awards', idx)}>- 삭제하기</div>
                     </div>
                   ))}
                   <div className={styles.addText} onClick={() => handleAddInput('awards')}>+ 추가하기</div>
@@ -375,6 +403,8 @@ export default function MyPageRegistration({ onNavigate }) {
                           </div>
                         </div>
                       </div>
+                      {/* 삭제하기 버튼 */}
+                      <div className={styles.addText} onClick={() => handleRemoveInput('volunteers', idx)}>- 삭제하기</div>
                     </div>
                   ))}
                   <div className={styles.addText} onClick={() => handleAddInput('volunteers')}>+ 추가하기</div>
@@ -390,12 +420,16 @@ export default function MyPageRegistration({ onNavigate }) {
                 <div className={styles.specContent}>
                   <p className={`${styles.specSubTitle} ${styles.mb20}`}>• 미수상 활동, 부트캠프, 인턴, 동아리, 외부 교육, 프로젝트성 활동 등</p>
                   {specData.activities.map((item, idx) => (
-                    <div key={idx} className={styles.inputRow}>
-                      <div className={styles.inputColFull}>
-                        <div className={styles.inputWrapper}>
-                          <input value={item.desc} onChange={(e) => handleInputChange('activities', idx, 'desc', e.target.value)} placeholder="예 ) 멋쟁이사자처럼 대학 / IT 동아리 / 팀 프로젝트를 통해 서비스 기획 및 개발 경험." className={styles.leftInput} />
+                    <div key={idx} style={{ marginBottom: idx !== specData.activities.length - 1 ? '20px' : '0' }}>
+                      <div className={styles.inputRow} style={{ marginBottom: '10px' }}>
+                        <div className={styles.inputColFull}>
+                          <div className={styles.inputWrapper}>
+                            <input value={item.desc} onChange={(e) => handleInputChange('activities', idx, 'desc', e.target.value)} placeholder="예 ) 멋쟁이사자처럼 대학 / IT 동아리 / 팀 프로젝트를 통해 서비스 기획 및 개발 경험." className={styles.leftInput} />
+                          </div>
                         </div>
                       </div>
+                      {/* 삭제하기 버튼 */}
+                      <div className={styles.addText} onClick={() => handleRemoveInput('activities', idx)}>- 삭제하기</div>
                     </div>
                   ))}
                   <div className={styles.addText} onClick={() => handleAddInput('activities')}>+ 추가하기</div>

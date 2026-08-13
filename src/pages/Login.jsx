@@ -35,22 +35,49 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup, onLoginSuccess} )
   // 학번, 비밀번호 입력창 텍스트 있는지 확인하는 변수
   const isFormValid = studentId.length > 0 && password.length > 0
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    // TODO: 백엔드(DB) 연동 시 여기에 API 통신 코드가 들어감
-    // fetch('/api/login') 등을 통해 성공/실패 여부를 응답받고,
-    // 실패로 판정되면 setHasError(true)를 실행
+    try {
+      const loginData = {
+        userId: studentId, 
+        password: password
+      };
 
-    // 임시 테스트 로그(아이디가 123이 아니면 로그인 실패)
-    if (studentId !== '123') {
+      // 백엔드 서버로 POST 요청
+      const response = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginData),
+      });
+
+      const result = await response.json();
+
+      // 로그인 성공 처리
+      if (response.ok) {
+        setHasError(false);
+        const token = result.data ? result.data.accessToken : result.accessToken;
+        
+        // 브라우저의 출입증 보관
+        if (token) {
+          localStorage.setItem('accessToken', token); 
+        }
+
+        // 로그인 성공
+        alert('로그인에 성공했습니다!');
+        if (onLoginSuccess) {
+          onLoginSuccess(); 
+        }
+        
+      } else {
+        // 로그인 실패 (비밀번호 틀림, 없는 학번 등)
+        setHasError(true);
+        console.error('로그인 거절 사유:', result.message);
+      }
+    } catch (error) {
+      console.error('로그인 API 통신 에러:', error);
       setHasError(true);
-    } else {
-      setHasError(false);
-      onLoginSuccess();
     }
-
-    console.log('로그인 시도:', { studentId, password });
   };
 
   return (

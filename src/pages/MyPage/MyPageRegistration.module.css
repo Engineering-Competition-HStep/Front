@@ -327,3 +327,8 @@ transition: background-color 0.2s;
 .saveButton:hover {
 background-color: #888;
 }
+
+.itemActionRow {
+  display: block;
+  margin: 0;
+}

@@ -356,7 +356,7 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                   grades={ROADMAP_GRADES}
                   activeGrade={boardGrade}
                   onGradeChange={setBoardGrade}
-                  roles="학점·개인 스펙 등록 후 확인할 수 있어요"
+                  roles="추후 AI가 추천해줌..?"
                   categories={ROADMAP_CATEGORIES}
                   getColumn={getEmptyBoardColumn}
                   showTrackTabs={false}

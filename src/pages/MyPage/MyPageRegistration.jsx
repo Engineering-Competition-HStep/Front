@@ -9,6 +9,23 @@ import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 import stepFocusIcon from '../../assets/mypageregistration_step_focus.svg';
 import stepBasicIcon from '../../assets/mypageregistration_step_basic.svg';
 import stepLineIcon from '../../assets/mypageregistration_step_line.svg';
+import { parseVolunteerDescription, buildVolunteerDescription } from '../../utils/profileFormat';
+
+const API_BASE_URL = 'http://localhost:8080';
+
+const EMPTY_SPEC_ITEM = {
+  certs: { id: null, name: '', date: '' },
+  awards: { id: null, name: '', rank: '', desc: '' },
+  volunteers: { id: null, name: '', time: '', agency: '', desc: '' },
+  activities: { id: null, desc: '' },
+};
+
+const SPEC_ENDPOINT = {
+  certs: 'certificates',
+  awards: 'awards',
+  volunteers: 'volunteers',
+  activities: 'activities',
+};
 
 export default function MyPageRegistration({ onNavigate }) {
   // 현재 진행 중인 스텝 (1: 학점, 2: 개인스펙)
@@ -16,6 +33,12 @@ export default function MyPageRegistration({ onNavigate }) {
 
   // 임시 학년 설정 변수
   const [userGrade, setUserGrade] = useState(3);
+
+  // 로그인한 사용자의 학번
+  const [userId, setUserId] = useState(null);
+
+  // 저장 중 중복 클릭 방지용 상태
+  const [isSaving, setIsSaving] = useState(false);
 
   // 학점 데이터를 관리하는 상태 변수
   const [gpaData, setGpaData] = useState({
@@ -26,24 +49,141 @@ export default function MyPageRegistration({ onNavigate }) {
     total: ''
   });
 
+  const [gradeGpaIds, setGradeGpaIds] = useState({});
+
   // 개인 스펙 각 항목별 입력창의 개수와 내용을 관리하는 상태 변수
   const [specData, setSpecData] = useState({
-    certs: [{ name: '', date: '' }],
-    awards: [{ name: '', rank: '', desc: '' }],
-    volunteers: [{ name: '', time: '', agency: '', desc: '' }],
-    activities: [{ desc: '' }]
+    certs: [EMPTY_SPEC_ITEM.certs],
+    awards: [EMPTY_SPEC_ITEM.awards],
+    volunteers: [EMPTY_SPEC_ITEM.volunteers],
+    activities: [EMPTY_SPEC_ITEM.activities]
   });
 
-  // '+ 추가하기' 버튼을 누르면 해당 항목 배열에 빈 문자열('')을 추가하는 함수
+  const [deletedIds, setDeletedIds] = useState({ certs: [], awards: [], volunteers: [], activities: [] });
+
+  // 로그인한 사용자의 기존 학점/개인스펙을 전부 불러와 폼에 미리 채움
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    const controller = new AbortController();
+
+    const loadProfile = async () => {
+      try {
+        const meResponse = await fetch(`${API_BASE_URL}/api/members/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        const meResult = await meResponse.json();
+
+        if (!meResponse.ok) {
+          console.error('회원 정보 조회 실패:', meResult.message);
+          return;
+        }
+
+        const me = meResult.data || meResult;
+        setUserId(me.userId);
+        if (me.grade) setUserGrade(me.grade);
+
+        const qs = `userId=${encodeURIComponent(me.userId)}`;
+        const authHeaders = { Authorization: `Bearer ${token}` };
+
+        const [gpaRes, certRes, awardRes, volRes, actRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/profile/grade-gpa?${qs}`, { headers: authHeaders, signal: controller.signal }),
+          fetch(`${API_BASE_URL}/api/profile/certificates?${qs}`, { headers: authHeaders, signal: controller.signal }),
+          fetch(`${API_BASE_URL}/api/profile/awards?${qs}`, { headers: authHeaders, signal: controller.signal }),
+          fetch(`${API_BASE_URL}/api/profile/volunteers?${qs}`, { headers: authHeaders, signal: controller.signal }),
+          fetch(`${API_BASE_URL}/api/profile/activities?${qs}`, { headers: authHeaders, signal: controller.signal }),
+        ]);
+
+        if (gpaRes.ok) {
+          const gpaList = await gpaRes.json();
+          const idMap = {};
+          setGpaData((prev) => {
+            const next = { ...prev, total: me.gpa != null ? String(me.gpa) : prev.total };
+            gpaList.forEach((row) => {
+              next[`grade${row.grade}`] = row.gpa != null ? String(row.gpa) : '';
+              idMap[row.grade] = row.userGradeGpaId;
+            });
+            return next;
+          });
+          setGradeGpaIds(idMap);
+        }
+
+        if (certRes.ok) {
+          const list = await certRes.json();
+          if (list.length > 0) {
+            setSpecData((prev) => ({
+              ...prev,
+              certs: list.map((c) => ({
+                id: c.certificateId,
+                name: c.certificateName || '',
+                date: c.issuedYear != null ? String(c.issuedYear) : '',
+              })),
+            }));
+          }
+        }
+
+        if (awardRes.ok) {
+          const list = await awardRes.json();
+          if (list.length > 0) {
+            setSpecData((prev) => ({
+              ...prev,
+              awards: list.map((a) => ({
+                id: a.awardId,
+                name: a.competitionName || '',
+                rank: a.awardName || '',
+                desc: a.description || '',
+              })),
+            }));
+          }
+        }
+
+        if (volRes.ok) {
+          const list = await volRes.json();
+          if (list.length > 0) {
+            setSpecData((prev) => ({
+              ...prev,
+              volunteers: list.map((v) => {
+                const { agency, desc } = parseVolunteerDescription(v.description);
+                return {
+                  id: v.volunteerId,
+                  name: v.volunteerName || '',
+                  time: v.volunteerHours != null ? `${v.volunteerHours}시간` : '',
+                  agency,
+                  desc,
+                };
+              }),
+            }));
+          }
+        }
+
+        if (actRes.ok) {
+          const list = await actRes.json();
+          if (list.length > 0) {
+            setSpecData((prev) => ({
+              ...prev,
+              activities: list.map((a) => ({
+                id: a.activityId,
+                desc: a.description || a.activityName || '',
+              })),
+            }));
+          }
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('마이페이지 등록 정보 불러오기 실패:', error);
+        }
+      }
+    };
+
+    loadProfile();
+    return () => controller.abort();
+  }, []);
+
+  // '+ 추가하기' 버튼을 누르면 해당 항목 배열에 새 빈 항목을 추가하는 함수
   const handleAddInput = (field) => {
-    setSpecData((prev) => {
-      const newObj = 
-        field === 'certs' ? { name: '', date: '' } :
-        field === 'awards' ? { name: '', rank: '', desc: '' } :
-        field === 'volunteers' ? { name: '', time: '', agency: '', desc: '' } :
-        { desc: '' };
-      return { ...prev, [field]: [...prev[field], newObj] };
-    });
+    setSpecData((prev) => ({ ...prev, [field]: [...prev[field], EMPTY_SPEC_ITEM[field]] }));
   };
 
   // 텍스트 입력 처리 함수
@@ -57,40 +197,210 @@ export default function MyPageRegistration({ onNavigate }) {
 
   // '-' 삭제하기 버튼을 눌렀을 때 실행되는 함수
   const handleRemoveInput = (field, index) => {
+    // 이미 DB에 저장돼 있던 항목이면(id 있음) 저장 시점에 삭제 요청을 보냄
+    const removedId = specData[field][index]?.id;
+    if (removedId) {
+      setDeletedIds((prev) => ({ ...prev, [field]: [...prev[field], removedId] }));
+    }
+
     setSpecData((prev) => {
       const arr = prev[field];
-      
-      // 1개만 남아있을 경우
+
+      // 1개만 남아있을 경우: 완전히 새 빈 항목으로 초기화
       if (arr.length === 1) {
-        const resetObj = 
-          field === 'certs' ? { name: '', date: '' } :
-          field === 'awards' ? { name: '', rank: '', desc: '' } :
-          field === 'volunteers' ? { name: '', time: '', agency: '', desc: '' } :
-          { desc: '' };
-        return { ...prev, [field]: [resetObj] };
-      } 
-      // 2개 이상일 경우
-      else {
-        const newArr = arr.filter((_, i) => i !== index);
-        return { ...prev, [field]: newArr };
+        return { ...prev, [field]: [EMPTY_SPEC_ITEM[field]] };
       }
+      // 2개 이상일 경우: 배열에서 제거
+      const newArr = arr.filter((_, i) => i !== index);
+      return { ...prev, [field]: newArr };
     });
   };
 
   // DB 통신 및 저장 로직
-  const handleSave = () => {
-    // DB로 보낼 데이터 모으기
-    const payload = {
-      gpa: gpaData,
-      specs: specData
-    };
+  const handleSave = async () => {
+    if (isSaving) return;
 
-    console.log(" [DB 전송용 데이터 완성]:", payload);
-    // TODO: 백엔드 API 연동 (예: await fetch('/api/user/info', { method: 'POST', body: JSON.stringify(payload) }))
+    const token = localStorage.getItem('accessToken');
+    if (!token || !userId) {
+      alert('로그인이 필요합니다. 다시 로그인해주세요.');
+      if (onNavigate) onNavigate('login');
+      return;
+    }
 
-    // MyPage로 화면 전환하기
-    if (onNavigate) {
-      onNavigate('mypage');
+    setIsSaving(true);
+
+    try {
+      const authHeaders = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+      const qs = `userId=${encodeURIComponent(userId)}`;
+      const requests = [];
+
+      // 학점평균
+      const gradeGpaRequests = [1, 2, 3, 4]
+        .filter((n) => n <= userGrade && gpaData[`grade${n}`].trim() !== '')
+        .map((n) => ({ grade: n, gpa: parseFloat(gpaData[`grade${n}`]) }))
+        .filter((row) => !Number.isNaN(row.gpa));
+
+      const gradeGpaResponses = [];
+
+      if (gradeGpaRequests.length > 0) {
+        gradeGpaResponses.push(
+          await fetch(`${API_BASE_URL}/api/profile/grade-gpa/bulk?${qs}`, {
+            method: 'PUT',
+            headers: authHeaders,
+            body: JSON.stringify(gradeGpaRequests),
+          })
+        );
+      } else if (gpaData.total.trim() !== '') {
+        const totalGpa = parseFloat(gpaData.total);
+        if (!Number.isNaN(totalGpa)) {
+          gradeGpaResponses.push(
+            await fetch(`${API_BASE_URL}/api/members/me`, {
+              method: 'PATCH',
+              headers: authHeaders,
+              body: JSON.stringify({ gpa: totalGpa }),
+            })
+          );
+        }
+      }
+
+      for (const n of [1, 2, 3, 4]) {
+        const existingId = gradeGpaIds[n];
+        const stillFilled = gpaData[`grade${n}`].trim() !== '';
+        if (existingId && !stillFilled) {
+          gradeGpaResponses.push(
+            await fetch(`${API_BASE_URL}/api/profile/grade-gpa/${existingId}`, {
+              method: 'DELETE',
+              headers: authHeaders,
+            })
+          );
+        }
+      }
+
+      const noGradeFilled = [1, 2, 3, 4].every((n) => gpaData[`grade${n}`].trim() === '');
+      if (gradeGpaRequests.length === 0 && gpaData.total.trim() === '' && noGradeFilled) {
+        gradeGpaResponses.push(
+          await fetch(`${API_BASE_URL}/api/profile/grade-gpa/bulk?${qs}`, {
+            method: 'PUT',
+            headers: authHeaders,
+            body: JSON.stringify([]),
+          })
+        );
+      }
+
+      requests.push(...gradeGpaResponses);
+
+      // 자격증 
+      specData.certs.forEach((item) => {
+        const name = item.name.trim();
+        const yearMatch = item.date.match(/\d{4}/);
+        const body = {
+          certificateName: name,
+          issuedYear: yearMatch ? Number(yearMatch[0]) : null,
+        };
+        if (item.id) {
+          requests.push(
+            name === ''
+              ? fetch(`${API_BASE_URL}/api/profile/certificates/${item.id}`, { method: 'DELETE', headers: authHeaders })
+              : fetch(`${API_BASE_URL}/api/profile/certificates/${item.id}`, { method: 'PUT', headers: authHeaders, body: JSON.stringify(body) })
+          );
+        } else if (name !== '') {
+          requests.push(fetch(`${API_BASE_URL}/api/profile/certificates?${qs}`, { method: 'POST', headers: authHeaders, body: JSON.stringify(body) }));
+        }
+      });
+
+      // 수상경력
+      specData.awards.forEach((item) => {
+        const name = item.name.trim();
+        const rankMatch = item.rank.match(/\d+/);
+        const body = {
+          competitionName: name,
+          awardName: item.rank.trim() || name,
+          awardRank: rankMatch ? Number(rankMatch[0]) : null,
+          description: item.desc.trim(),
+        };
+        if (item.id) {
+          requests.push(
+            name === ''
+              ? fetch(`${API_BASE_URL}/api/profile/awards/${item.id}`, { method: 'DELETE', headers: authHeaders })
+              : fetch(`${API_BASE_URL}/api/profile/awards/${item.id}`, { method: 'PUT', headers: authHeaders, body: JSON.stringify(body) })
+          );
+        } else if (name !== '') {
+          requests.push(fetch(`${API_BASE_URL}/api/profile/awards?${qs}`, { method: 'POST', headers: authHeaders, body: JSON.stringify(body) }));
+        }
+      });
+
+      // 자원봉사
+      specData.volunteers.forEach((item) => {
+        const name = item.name.trim();
+        const hoursMatch = item.time.match(/\d+/);
+        const body = {
+          volunteerName: name,
+          volunteerHours: hoursMatch ? Number(hoursMatch[0]) : 0,
+          description: buildVolunteerDescription(item.agency, item.desc),
+        };
+        if (item.id) {
+          requests.push(
+            name === ''
+              ? fetch(`${API_BASE_URL}/api/profile/volunteers/${item.id}`, { method: 'DELETE', headers: authHeaders })
+              : fetch(`${API_BASE_URL}/api/profile/volunteers/${item.id}`, { method: 'PUT', headers: authHeaders, body: JSON.stringify(body) })
+          );
+        } else if (name !== '') {
+          requests.push(fetch(`${API_BASE_URL}/api/profile/volunteers?${qs}`, { method: 'POST', headers: authHeaders, body: JSON.stringify(body) }));
+        }
+      });
+
+      // 기타활동
+      specData.activities.forEach((item) => {
+        const text = item.desc.trim();
+        const body = {
+          activityName: text.slice(0, 100),
+          fieldKeyword: '',
+          period: '',
+          description: text.slice(0, 500),
+        };
+        if (item.id) {
+          requests.push(
+            text === ''
+              ? fetch(`${API_BASE_URL}/api/profile/activities/${item.id}`, { method: 'DELETE', headers: authHeaders })
+              : fetch(`${API_BASE_URL}/api/profile/activities/${item.id}`, { method: 'PUT', headers: authHeaders, body: JSON.stringify(body) })
+          );
+        } else if (text !== '') {
+          requests.push(fetch(`${API_BASE_URL}/api/profile/activities?${qs}`, { method: 'POST', headers: authHeaders, body: JSON.stringify(body) }));
+        }
+      });
+
+      // '- 삭제하기'로 화면에서 미리 지워둔, 기존에 저장돼 있던 항목들 삭제
+      Object.entries(deletedIds).forEach(([field, ids]) => {
+        ids.forEach((id) => {
+          requests.push(
+            fetch(`${API_BASE_URL}/api/profile/${SPEC_ENDPOINT[field]}/${id}`, { method: 'DELETE', headers: authHeaders })
+          );
+        });
+      });
+
+      const responses = await Promise.all(requests);
+      const failedResponses = responses.filter((res) => !res.ok);
+
+      if (failedResponses.length > 0) {
+        console.error('일부 항목 저장 실패:', failedResponses);
+        alert('일부 정보 저장에 실패했습니다. 입력값을 확인한 뒤 다시 시도해주세요.');
+        return;
+      }
+
+      setDeletedIds({ certs: [], awards: [], volunteers: [], activities: [] });
+      alert('저장되었습니다!');
+      // MyPage로 화면 전환
+      if (onNavigate) {
+        onNavigate('mypage');
+      }
+    } catch (error) {
+      console.error('마이페이지 등록 저장 API 통신 에러:', error);
+      alert('저장 중 오류가 발생했습니다. 네트워크 상태를 확인해주세요.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -441,7 +751,9 @@ export default function MyPageRegistration({ onNavigate }) {
 
           {/* 하단 저장 버튼 */}
           <div className={styles.saveBtnWrapper}>
-            <button className={styles.saveButton} onClick={handleSave}>저장하기</button>
+            <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
+              {isSaving ? '저장 중...' : '저장하기'}
+            </button>
           </div>
 
         </div>

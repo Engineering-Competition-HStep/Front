@@ -106,6 +106,63 @@ export default function MyPage({
     .map((trackId) => trackList.find((t) => t.trackId === trackId)?.trackName)
     .filter(Boolean);
 
+  // 트랙 수정
+  const [isEditingTracks, setIsEditingTracks] = useState(false);
+  const [editTrack1, setEditTrack1] = useState('');
+  const [editTrack2, setEditTrack2] = useState('');
+  const [isSavingTracks, setIsSavingTracks] = useState(false);
+
+  const openTrackEditor = () => {
+    const [t1, t2] = memberInfo?.trackIds || [];
+    setEditTrack1(t1 != null ? String(t1) : '');
+    setEditTrack2(t2 != null ? String(t2) : '');
+    setIsEditingTracks(true);
+  };
+
+  // 1트랙을 바꿨는데 2트랙과 같아지면, 2트랙 선택을 초기화
+  const handleEditTrack1Change = (value) => {
+    setEditTrack1(value);
+    if (value !== '' && value === editTrack2) setEditTrack2('');
+  };
+
+  const isTrackEditValid = editTrack1 !== '' && editTrack2 !== '' && editTrack1 !== editTrack2;
+
+  const handleSaveTracks = async () => {
+    if (!isTrackEditValid || isSavingTracks) return;
+
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      alert('로그인이 필요합니다. 다시 로그인해주세요.');
+      return;
+    }
+
+    setIsSavingTracks(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/members/me`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ trackIds: [Number(editTrack1), Number(editTrack2)] }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        alert(result.message || '트랙 수정에 실패했습니다.');
+        return;
+      }
+
+      setMemberInfo(result.data || result);
+      setIsEditingTracks(false);
+    } catch (error) {
+      console.error('트랙 수정 API 통신 에러:', error);
+      alert('트랙 수정 중 오류가 발생했습니다. 네트워크 상태를 확인해주세요.');
+    } finally {
+      setIsSavingTracks(false);
+    }
+  };
+
   // 학점 하나라도 있거나, 개인스펙 4종 중 하나라도 있으면 '등록된 사용자' 화면으로 취급합니다.
   const hasGradeData = gradeGpaList.length > 0 || memberInfo?.gpa != null;
   const hasAnyData =
@@ -174,7 +231,7 @@ export default function MyPage({
             <h1>My Page</h1>
           </div>
 
-          <div className={styles.profileCard}>
+          <div className={`${styles.profileCard} ${isEditingTracks ? styles.profileCardNoClip : ''}`}>
               {/* 유저 아바타 아이콘 */}
               <button
               className={styles.profileImgBtn}
@@ -198,6 +255,69 @@ export default function MyPage({
                     </React.Fragment>
                   ))
                 : '등록된 트랙이 없어요.'}
+            </div>
+
+            <div className={styles.trackEditArea}>
+              <button className={styles.trackEditToggle} onClick={openTrackEditor}>
+                수정하기
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+
+              {isEditingTracks && (
+                <>
+                  {/* 팝오버 바깥을 클릭하면 닫히도록 하는 투명 오버레이 */}
+                  <button
+                    className={styles.trackPopoverBackdrop}
+                    aria-label="닫기"
+                    onClick={() => setIsEditingTracks(false)}
+                  />
+                  <div className={styles.trackPopover}>
+                    <select
+                      className={styles.trackPopoverSelect}
+                      value={editTrack1}
+                      onChange={(e) => handleEditTrack1Change(e.target.value)}
+                    >
+                      <option value="" disabled>1트랙</option>
+                      {trackList.map((track) => (
+                        <option key={track.trackId} value={track.trackId}>
+                          {track.trackName}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      className={styles.trackPopoverSelect}
+                      value={editTrack2}
+                      onChange={(e) => setEditTrack2(e.target.value)}
+                    >
+                      <option value="" disabled>2트랙</option>
+                      {trackList.map((track) => (
+                        <option
+                          key={track.trackId}
+                          value={track.trackId}
+                          disabled={String(track.trackId) === editTrack1}
+                        >
+                          {track.trackName}
+                        </option>
+                      ))}
+                    </select>
+
+                    {editTrack1 !== '' && editTrack1 === editTrack2 && (
+                      <span className={styles.trackPopoverWarning}>1트랙과 2트랙은 서로 다르게 선택해주세요.</span>
+                    )}
+
+                    <button
+                      className={styles.trackPopoverSaveBtn}
+                      onClick={handleSaveTracks}
+                      disabled={!isTrackEditValid || isSavingTracks}
+                    >
+                      {isSavingTracks ? '저장 중...' : '수정 완료'}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             <button

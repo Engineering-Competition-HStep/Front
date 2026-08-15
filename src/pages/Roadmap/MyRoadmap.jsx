@@ -11,45 +11,56 @@ const API_BASE_URL = 'http://localhost:8080';
 
 // TODO(백엔드 연동)
 // - GET /api/ai-roadmaps/eligibility            : 연동 완료 (아래 useEffect). available이 false면 "등록 전" 화면, true면 "등록 후" 화면.
-// - GET /api/ai-roadmaps/me                     : 로드맵 보드(카테고리별 항목) 데이터
-// - POST /api/ai-roadmaps/chat                  : AI Roadmap Chat 대화
+// - GET /api/ai-roadmaps/me                     : 연동 완료 (아래 useEffect + buildBoardColumn).
+// - POST /api/ai-roadmaps                       : 연동 완료 (handleSelectJob). "AI 추천 분야" 배너에서 직무를 클릭하면 그 직무로 로드맵을 생성.
+// - POST /api/ai-roadmaps/chat                  : "관심 직무 변경"만 연동 완료 (handleSelectJob, 이미 로드맵이 있을 때).
+//                                                  실제 채팅 UI(하단 AI Roadmap Chat 입력창)는 아직 미연동 - 확인 절차 없이 chat 제안 생성 -> apply를 바로 이어서 호출.
 // - GET /api/tracks                             : 트랙 변경 시뮬레이션 드롭다운 (Signup.jsx와 동일 방식)
-// - GET /api/ai-roadmaps/jobs/recommendations   : AI 추천 분야 / HSTEP가 추천하는 직무 / 하단 순위별 카드
+// - GET /api/ai-roadmaps/jobs/recommendations   : 연동 완료. AI 추천 분야 / HSTEP가 추천하는 직무. (하단 순위별 카드는 트랙+태그 형태라 별도 확인 필요)
 
 const ROADMAP_CATEGORIES = ['공모전', '프로젝트', '자격증', '인턴·대외활동'];
 
 // --- 로드맵 보드(트랙 탭 + 좌측 학년 사이드바 + 인력 양성 유형 배너 + 우측 4열 과목 카드) ---
 // MainPage.jsx의 "Roadmap" 섹션(.roadmap-panel) 구조를 그대로 가져와서 MyRoadmap 전용 데이터로 채운 버전입니다.
 // 등록 전(비어있는 미리보기)/등록 후(실제 데이터) 화면에서 동일한 <RoadmapCourseBoard>로 함께 씁니다.
-// TODO(백엔드 연동): 실제로는 학년별 취득 예정 스펙/활동이 GET /api/ai-roadmaps/me 응답으로 내려와야 합니다.
 const ROADMAP_GRADES = ['취준생', '4학년', '3학년', '2학년', '1학년'];
-const ROADMAP_BOARD_ROLES = '부동산 UX 디자이너    |    부동산 플랫폼 서비스 기획자';
 
-// 카테고리별로 "어느 학년의 몇 학기 슬롯에 놓일지"를 지정해두면,
-// 아래 getBoardColumn()이 학년 선택에 맞춰 2학기(row2)/1학기(row1) 카드를 채워줍니다.
-const ROADMAP_BOARD_ITEMS = {
-  공모전: [
-    { grade: '4학년', slot: 'row1', type: '수상', title: '교내 공모전 진출' },
-  ],
-  프로젝트: [
-    { grade: '4학년', slot: 'row2', type: '심화', title: '부동산 플랫폼 UX 프로젝트' },
-    { grade: '3학년', slot: 'row1', type: '심화', title: '카페 리뉴얼 기획 프로젝트' },
-    { grade: '2학년', slot: 'row1', type: '핵심', title: '공간 브랜딩 프로젝트' },
-  ],
-  자격증: [
-    { grade: '3학년', slot: 'row2', type: '자격', title: 'GTQ 1급' },
-  ],
-  '진로·대외활동': [
-    { grade: '4학년', slot: 'row1', type: '대외활동', title: '부동산 종합 관제조 개선' },
-  ],
+// jobRecommendations 조회 전(로딩 중) roleBanner에 보여줄 자리표시용 직무 목록. jobId가 없어서 클릭은 안 됨.
+const FALLBACK_ROLE_OPTIONS = [
+  { jobId: null, jobName: '부동산 UX 디자이너' },
+  { jobId: null, jobName: '부동산 플랫폼 서비스 기획자' },
+];
+
+// FE 학년 라벨 -> 백엔드 targetGrade(1~4학년, 5=취준생)
+const GRADE_TO_TARGET_GRADE = { '1학년': 1, '2학년': 2, '3학년': 3, '4학년': 4, 취준생: 5 };
+
+// FE 카테고리 라벨 -> 백엔드 AiRoadmapStandardItem.Category
+const CATEGORY_TO_BACKEND = {
+  공모전: 'CONTEST',
+  프로젝트: 'PROJECT',
+  자격증: 'CERTIFICATE',
+  '인턴·대외활동': 'INTERNSHIP',
 };
 
-// 카테고리 + 선택된 학년 -> { row2, row1 } 고정 슬롯으로 변환
-function getBoardColumn(category, grade) {
-  const entries = ROADMAP_BOARD_ITEMS[category] || [];
-  const row2 = entries.find((entry) => entry.grade === grade && entry.slot === 'row2') || null;
-  const row1 = entries.find((entry) => entry.grade === grade && entry.slot === 'row1') || null;
-  return { row2, row1 };
+// 백엔드 priority(HIGH/MEDIUM/LOW) -> 카드에 보여줄 한글 라벨
+const PRIORITY_LABELS = { HIGH: '필수', MEDIUM: '권장', LOW: '선택' };
+
+// GET /api/ai-roadmaps/me가 내려주는 items(카테고리/학년 구분 없이 전체)를 받아서,
+// 카테고리 + 선택된 학년에 맞는 항목만 displayOrder 순으로 골라 { row2, row1 } 2칸에 채웁니다.
+// (백엔드 데이터에는 "학기" 개념이 없어서, 정렬 순서상 앞의 2개를 그대로 위/아래 칸에 배치합니다.)
+function buildBoardColumn(items, category, grade) {
+  const targetGrade = GRADE_TO_TARGET_GRADE[grade];
+  const backendCategory = CATEGORY_TO_BACKEND[category];
+
+  const matched = (items || [])
+    .filter((item) => item.category === backendCategory && item.targetGrade === targetGrade)
+    .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+
+  const toCard = (item) => (item
+    ? { type: PRIORITY_LABELS[item.priority] || item.priority, title: item.title }
+    : null);
+
+  return { row2: toCard(matched[0]), row1: toCard(matched[1]) };
 }
 
 // 등록 전 화면의 로드맵 보드 미리보기용: 아직 등록된 데이터가 없으니 모든 슬롯을 빈 상태로 반환
@@ -66,7 +77,10 @@ function RoadmapCourseBoard({
   grades,
   activeGrade,
   onGradeChange,
-  roles,
+  roleOptions = [],
+  onSelectJob,
+  selectingJobId,
+  selectedJobId,
   categories,
   getColumn,
   showTrackTabs = true,
@@ -111,13 +125,36 @@ function RoadmapCourseBoard({
           </div>
 
           <div className="roadmapContent">
-            {/* AI 추천 분야 배너 */}
+            {/* AI 추천 분야 배너: 이미 선택된 직무는 체크 표시만, 나머지는 클릭해서 생성/변경 가능 */}
             <div className="roleBanner">
               <span className="roleBadge">
                 <img src={Home_work} alt="" className="roleBadgeIcon" />
                 AI 추천 분야
               </span>
-              <span className="roleText">{roles}</span>
+              <span className="roleTextRow">
+                {roleOptions.map((job, index) => {
+                  const isSelected = job.jobId && job.jobId === selectedJobId;
+                  return (
+                    <React.Fragment key={job.jobId ?? job.jobName}>
+                      {index > 0 && <span className="roleDivider">|</span>}
+                      {onSelectJob && job.jobId && !isSelected ? (
+                        <button
+                          type="button"
+                          className="roleTextBtn"
+                          disabled={selectingJobId != null}
+                          onClick={() => onSelectJob(job.jobId)}
+                        >
+                          {selectingJobId === job.jobId ? '반영 중…' : job.jobName}
+                        </button>
+                      ) : (
+                        <span className={`roleText ${isSelected ? 'roleTextSelected' : ''}`}>
+                          {isSelected ? `✓ ${job.jobName}` : job.jobName}
+                        </span>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </span>
             </div>
 
             {!isRegistered ? (
@@ -218,6 +255,14 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   const [memberTrackIds, setMemberTrackIds] = useState([]);
   // AI 추천 직무 (점수 높은 순 최대 3개)
   const [jobRecommendations, setJobRecommendations] = useState([]);
+  // 로드맵 보드 카드 데이터 (GET /api/ai-roadmaps/me의 items, 카테고리/학년 구분 없이 전체)
+  const [roadmapItems, setRoadmapItems] = useState([]);
+  // POST /api/ai-roadmaps로 로드맵이 이미 생성되어 있는지 여부 (있어야 "AI 추천 분야" 직무 클릭으로 재생성을 막을 수 있음)
+  const [hasRoadmap, setHasRoadmap] = useState(false);
+  // 현재 로드맵의 관심 직무 id (생성/조회 응답의 interestJobId)
+  const [selectedJobId, setSelectedJobId] = useState(null);
+  // "AI 추천 분야"에서 직무를 클릭해 로드맵 생성 요청 중인 jobId (중복 클릭 방지 + 버튼 로딩 표시용)
+  const [selectingJobId, setSelectingJobId] = useState(null);
   // trackId -> trackName 매핑용, DB의 트랙 전체 목록
   const [trackList, setTrackList] = useState([]);
 
@@ -356,10 +401,118 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
     return () => controller.abort();
   }, [isRegistered]);
 
-  // roleBanner의 "AI 추천 분야" 텍스트
-  const boardRoles = jobRecommendations.length > 0
-    ? jobRecommendations.map((job) => job.jobName).join('    |    ')
-    : ROADMAP_BOARD_ROLES;
+  // 로드맵 보드 카드
+  useEffect(() => {
+    if (!isRegistered) return;
+
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    const controller = new AbortController();
+
+    const fetchRoadmapItems = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          const data = result.data || result;
+          setRoadmapItems(data.items || []);
+          setHasRoadmap(true);
+          setSelectedJobId(data.interestJobId ?? null);
+        } else if (response.status === 404) {
+          // 아직 관심 직무를 선택하지 않아 로드맵이 없는, 정상적인 상태
+          setHasRoadmap(false);
+        } else {
+          console.error('로드맵 보드 데이터 조회 실패:', result.message);
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('로드맵 보드 데이터 조회 API 통신 에러:', error);
+        }
+      }
+    };
+
+    fetchRoadmapItems();
+
+    return () => controller.abort();
+  }, [isRegistered]);
+
+  const handleSelectJob = async (jobId) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token || selectingJobId != null || (hasRoadmap && jobId === selectedJobId)) return;
+
+    setSelectingJobId(jobId);
+    try {
+      if (!hasRoadmap) {
+        const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ jobId }),
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          const data = result.data || result;
+          setRoadmapItems(data.items || []);
+          setHasRoadmap(true);
+          setSelectedJobId(data.interestJobId ?? jobId);
+        } else {
+          alert(result.message || '로드맵 생성에 실패했습니다.');
+        }
+        return;
+      }
+
+      const chatResponse = await fetch(`${API_BASE_URL}/api/ai-roadmaps/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message: '관심 직무 변경', targetJobId: jobId }),
+      });
+      const chatResult = await chatResponse.json();
+
+      if (!chatResponse.ok) {
+        alert(chatResult.message || '직무 변경 제안 생성에 실패했습니다.');
+        return;
+      }
+
+      const proposalId = (chatResult.data || chatResult).proposal?.proposalId;
+      if (!proposalId) {
+        alert((chatResult.data || chatResult).message || '직무 변경 제안을 만들지 못했습니다.');
+        return;
+      }
+
+      const applyResponse = await fetch(`${API_BASE_URL}/api/ai-roadmaps/chat/proposals/${proposalId}/apply`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const applyResult = await applyResponse.json();
+
+      if (applyResponse.ok) {
+        const data = applyResult.data || applyResult;
+        setRoadmapItems(data.items || []);
+        setSelectedJobId(data.interestJobId ?? jobId);
+      } else {
+        alert(applyResult.message || '직무 변경 적용에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('관심 직무 선택/변경 API 통신 에러:', error);
+      alert('처리 중 오류가 발생했습니다.');
+    } finally {
+      setSelectingJobId(null);
+    }
+  };
+
+  // roleBanner의 "AI 추천 분야" 직무 목록: 로드맵이 아직 없을 때만 클릭해서 생성할 수 있게 onSelectJob을 넘긴다
+  const boardRoleOptions = jobRecommendations.length > 0 ? jobRecommendations : FALLBACK_ROLE_OPTIONS;
 
   // "HSTEP가 추천하는 직무" 섹션
   const displayedRecommendedJobs = jobRecommendations.length > 0
@@ -439,7 +592,7 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                   grades={ROADMAP_GRADES}
                   activeGrade={boardGrade}
                   onGradeChange={setBoardGrade}
-                  roles="추후 AI가 추천해줌..?"
+                  roleOptions={[{ jobId: null, jobName: '추후 AI가 추천해줌..?' }]}
                   categories={ROADMAP_CATEGORIES}
                   getColumn={getEmptyBoardColumn}
                   showTrackTabs={false}
@@ -463,9 +616,12 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                 grades={ROADMAP_GRADES}
                 activeGrade={boardGrade}
                 onGradeChange={setBoardGrade}
-                roles={boardRoles}
+                roleOptions={boardRoleOptions}
+                onSelectJob={handleSelectJob}
+                selectingJobId={selectingJobId}
+                selectedJobId={selectedJobId}
                 categories={ROADMAP_CATEGORIES}
-                getColumn={getBoardColumn}
+                getColumn={(category, grade) => buildBoardColumn(roadmapItems, category, grade)}
                 showTrackTabs={false}
                 isRegistered={isRegistered}
               />

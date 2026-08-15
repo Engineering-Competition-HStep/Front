@@ -323,10 +323,48 @@
     object-fit: contain;
   }
 
+  .roleTextRow {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
   .roleText {
     font-size: 15px;
-    font-weight: 600;
-    color: #1e293b;
+    font-weight: 700;
+    color: var(--blue);
+  }
+
+  .roleTextSelected {
+    font-weight: 800;
+  }
+
+  .roleTextBtn {
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--blue);
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover:not(:disabled) {
+      color: #0073e6;
+      text-decoration: underline;
+    }
+
+    &:disabled {
+      color: #a3c4e6;
+      cursor: not-allowed;
+    }
+  }
+
+  .roleDivider {
+    color: var(--blue);
+    opacity: 0.45;
   }
 
   .columnsGrid {

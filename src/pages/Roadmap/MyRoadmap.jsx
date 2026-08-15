@@ -111,7 +111,7 @@ function RoadmapCourseBoard({
           </div>
 
           <div className="roadmapContent">
-            {/* 인력 양성 유형 배너 */}
+            {/* AI 추천 분야 배너 */}
             <div className="roleBanner">
               <span className="roleBadge">
                 <img src={Home_work} alt="" className="roleBadgeIcon" />
@@ -216,7 +216,9 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   const [memberName, setMemberName] = useState(memberNameProp || '000');
   // 사용자가 선택한 1트랙/2트랙 id (GET /api/members/me의 trackIds)
   const [memberTrackIds, setMemberTrackIds] = useState([]);
-  // trackId -> trackName 매핑용, DB의 트랙 전체 목록 (Signup.jsx와 동일한 GET /api/tracks)
+  // AI 추천 직무 (점수 높은 순 최대 3개)
+  const [jobRecommendations, setJobRecommendations] = useState([]);
+  // trackId -> trackName 매핑용, DB의 트랙 전체 목록
   const [trackList, setTrackList] = useState([]);
 
   useEffect(() => {
@@ -320,6 +322,50 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
     return () => controller.abort();
   }, []);
 
+  // AI 추천 직무
+  useEffect(() => {
+    if (!isRegistered) return;
+
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    const controller = new AbortController();
+
+    const fetchJobRecommendations = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps/jobs/recommendations`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          setJobRecommendations(result.data || result);
+        } else {
+          console.error('AI 추천 직무 조회 실패:', result.message);
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('AI 추천 직무 조회 API 통신 에러:', error);
+        }
+      }
+    };
+
+    fetchJobRecommendations();
+
+    return () => controller.abort();
+  }, [isRegistered]);
+
+  // roleBanner의 "AI 추천 분야" 텍스트
+  const boardRoles = jobRecommendations.length > 0
+    ? jobRecommendations.map((job) => job.jobName).join('    |    ')
+    : ROADMAP_BOARD_ROLES;
+
+  // "HSTEP가 추천하는 직무" 섹션
+  const displayedRecommendedJobs = jobRecommendations.length > 0
+    ? jobRecommendations.map((job, index) => ({ rank: index + 1, name: job.jobName }))
+    : RECOMMENDED_JOBS;
+
   // 로드맵 보드(등록 후 화면)에서 선택된 트랙 탭 / 학년
   const [boardTrack, setBoardTrack] = useState(currentTrackNames[0] || '트랙 미등록');
   const [boardGrade, setBoardGrade] = useState(ROADMAP_GRADES[0]);
@@ -409,7 +455,6 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
           <>
             {/* --- 등록 후 화면 --- */}
             <section className="roadmapBoard">
-              <span className="currentGoalBadge">부동산 브랜딩 코디네이터</span>
 
               <RoadmapCourseBoard
                 trackTabs={boardTrackTabs}
@@ -418,9 +463,10 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                 grades={ROADMAP_GRADES}
                 activeGrade={boardGrade}
                 onGradeChange={setBoardGrade}
-                roles={ROADMAP_BOARD_ROLES}
+                roles={boardRoles}
                 categories={ROADMAP_CATEGORIES}
                 getColumn={getBoardColumn}
+                showTrackTabs={false}
                 isRegistered={isRegistered}
               />
             </section>
@@ -529,7 +575,7 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
               <p className="subtitle">회원님의 트랙과 스펙을 분석해서 추천 직무를 알려드립니다</p>
 
               <div className="jobRankRow">
-                {RECOMMENDED_JOBS.map((job) => (
+                {displayedRecommendedJobs.map((job) => (
                   <span key={job.rank} className={`jobRankPill ${job.rank === 1 ? 'jobRankPillActive' : ''}`}>
                     {job.rank}순위 {job.name}
                   </span>

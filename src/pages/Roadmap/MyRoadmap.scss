@@ -113,115 +113,17 @@
     margin: 0 auto;
   }
 
-  .registerCardTop {
-    display: flex;
-    gap: 32px;
-    padding: 40px 40px 0;
-    margin-bottom: 32px;
-  }
-
-  /* 학년별 진행 타임라인 바 */
-  .progressBar {
-    flex-shrink: 0;
-    width: 140px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    border-radius: 24px 0 0 24px;
-    overflow: hidden;
-  }
-
-  .progressStep {
-    align-self: flex-end;
-    padding: 14px 8px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 600;
-    text-align: center;
-    border-radius: 4px 0 0 4px;
-  }
-
-  .registerAiBlock {
-    flex: 1;
-    min-width: 0;
-    text-align: left;
-  }
-
-  .recommendBadge {
-    display: inline-block;
-    margin-bottom: 12px;
-    padding: 6px 14px;
-    border-radius: 16px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .recommendTags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .recommendTag {
-    padding: 10px 18px;
-    border-radius: 24px;
-    border: 1px solid #d6e4f7;
-    background: #fff;
-    color: var(--navy);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .registerText {
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--navy);
-    margin: 0 0 4px 0;
-  }
-
-  .registerButton {
-    margin-top: 16px;
-    padding: 14px 24px;
-    border: none;
-    border-radius: 8px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background: #0073e6;
-    }
-  }
-
 
 
   /* ================= 등록 후: 로드맵 보드 ================= */
   .roadmapBoard {
     position: relative;
     z-index: 1;
-    background: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(6.5px);
+    -webkit-backdrop-filter: blur(6.5px);
     margin-top: 24px;
     text-align: center;
-  }
-
-  .currentGoalBadge {
-    display: inline-block;
-    margin-bottom: 20px;
-    padding: 10px 20px;
-    border-radius: 20px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
   }
 
   .roadmapTabs {
@@ -257,11 +159,13 @@
     }
   }
 
-  /* 바깥 회색 패널 */
+  /* 바깥 회색 패널 (반투명 + 블러로 뒤쪽 이미지가 은은하게 비치도록) */
   .roadmapPanel {
     width: 100vw;
     margin-left: calc(50% - 50vw);
-    background: #f2f5fa;
+    background: rgba(242, 245, 250, 0.03);
+    backdrop-filter: blur(0.75px);
+    -webkit-backdrop-filter: blur(0.75px);
     border-radius: 0;
     padding: 0;
     box-shadow: none;
@@ -387,98 +291,6 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-  }
-
-  /* --- 등록 전 AI 추천 분야 상단 배너 --- */
-  .roleBanner.aiBanner {
-    justify-content: flex-start;
-    padding: 16px 24px;
-    gap: 16px;
-  }
-
-  .aiBadge {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 16px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 700;
-  }
-
-  .aiRecommendText {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e5288;
-
-    .sep {
-      margin: 0 10px;
-      color: #b0c4de;
-    }
-  }
-
-  /* --- 등록 전 중앙 안내 및 버튼 영역 --- */
-  .unregisteredGuide {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    text-align: center;
-
-    .guideMainText {
-      font-size: 16px;
-      color: #556070;
-      line-height: 1.6;
-      margin: 0 0 10px 0;
-
-      strong {
-        color: var(--blue);
-        font-weight: 700;
-      }
-    }
-
-    .guideSubText {
-      font-size: 14px;
-      color: #8896a6;
-      margin: 0 0 28px 0;
-    }
-
-    .guideCtaBtn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 12px 28px;
-      border: none;
-      border-radius: 24px;
-      background: var(--blue);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0, 132, 255, 0.3);
-      transition: background-color 0.2s ease, transform 0.2s ease;
-
-      &:hover {
-        background: #0073e6;
-        transform: translateY(-2px);
-      }
-    }
-  }
-
-  /* 등록 전 하단 카테고리 탭만 출력하는 전용 그리드 */
-  .bottomOnlyGrid {
-    flex: none;
-    .roadmapColumn {
-      border-right: 1px solid #d4deeb;
-      &:last-child {
-        border-right: none;
-      }
-    }
   }
 
   .roleBanner {

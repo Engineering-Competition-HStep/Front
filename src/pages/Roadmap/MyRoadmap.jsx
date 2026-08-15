@@ -10,8 +10,7 @@ import Home_work from '../../assets/Home_work.svg';
 const API_BASE_URL = 'http://localhost:8080';
 
 // TODO(백엔드 연동)
-// - GET /api/ai-roadmaps/eligibility            : 로드맵 이용 가능 여부(학점/스펙 등록 여부) 확인
-//   -> available이 false면 "등록 전" 화면(기본값), true면 "등록 후" 화면을 보여주면 됩니다.
+// - GET /api/ai-roadmaps/eligibility            : 연동 완료 (아래 useEffect). available이 false면 "등록 전" 화면, true면 "등록 후" 화면.
 // - GET /api/ai-roadmaps/me                     : 로드맵 보드(카테고리별 항목) 데이터
 // - POST /api/ai-roadmaps/chat                  : AI Roadmap Chat 대화
 // - GET /api/tracks                             : 트랙 변경 시뮬레이션 드롭다운 (Signup.jsx와 동일 방식)
@@ -74,6 +73,7 @@ function RoadmapCourseBoard({
   isRegistered = false,
   memberName = '000',
   onNavigate,
+  eligibilityMessage = '',
 }) {
   return (
     <>
@@ -124,8 +124,12 @@ function RoadmapCourseBoard({
             // [미등록 상태] isRegistered가 false일 때 보여줄 중앙 안내 화면
             <div className="emptyStateWrap">
               <p className="emptyMessage">
-                나의 로드맵과 트랙 변경 시뮬레이션을 이용하려면<br />
-                마이페이지에서 <span className="highlight">학점과 개인 스펙을 먼저 등록</span>해주세요.
+                {eligibilityMessage || (
+                  <>
+                    나의 로드맵과 트랙 변경 시뮬레이션을 이용하려면<br />
+                    마이페이지에서 <span className="highlight">학점과 개인 스펙을 먼저 등록</span>해주세요.
+                  </>
+                )}
               </p>
               
               <p className="emptySubMessage">
@@ -279,9 +283,42 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
     .map((id) => trackList.find((track) => track.trackId === id)?.trackName)
     .filter(Boolean);
 
-  // TODO: 실제로는 GET /api/ai-roadmaps/eligibility 결과(available)로 결정해야 합니다.
-  // 지금은 기본 화면(=등록 전 화면)이 먼저 보여야 하므로 false로 고정해뒀습니다.
+  // GET /api/ai-roadmaps/eligibility 결과(available)로 등록 전/후 화면을 결정
   const [isRegistered, setIsRegistered] = useState(false);
+  const [eligibilityMessage, setEligibilityMessage] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    const controller = new AbortController();
+
+    const fetchEligibility = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps/eligibility`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          const data = result.data || result;
+          setIsRegistered(!!data.available);
+          setEligibilityMessage(data.message || '');
+        } else {
+          console.error('로드맵 이용 가능 여부 조회 실패:', result.message);
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('로드맵 이용 가능 여부 조회 API 통신 에러:', error);
+        }
+      }
+    };
+
+    fetchEligibility();
+
+    return () => controller.abort();
+  }, []);
 
   // 로드맵 보드(등록 후 화면)에서 선택된 트랙 탭 / 학년
   const [boardTrack, setBoardTrack] = useState(currentTrackNames[0] || '트랙 미등록');
@@ -363,6 +400,7 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                   isRegistered={isRegistered}
                   memberName={memberName}
                   onNavigate={onNavigate}
+                  eligibilityMessage={eligibilityMessage}
                 />
               </div>
             </section>

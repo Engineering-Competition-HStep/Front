@@ -6,17 +6,23 @@ import Footer from '../../components/Footer/Footer.jsx';
 
 import myRoadMap_icon from '../../assets/myRoadMap_icon.svg';
 import Home_work from '../../assets/Home_work.svg';
+import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 
 const API_BASE_URL = 'http://localhost:8080';
 
 // TODO(백엔드 연동)
 // - GET /api/ai-roadmaps/eligibility            : 연동 완료 (아래 useEffect). available이 false면 "등록 전" 화면, true면 "등록 후" 화면.
-// - GET /api/ai-roadmaps/me                     : 연동 완료 (아래 useEffect + buildBoardColumn).
+// - GET /api/ai-roadmaps/me                     : 연동 완료 (아래 useEffect + buildBoardColumn + buildGradeRecommendation).
 // - POST /api/ai-roadmaps                       : 연동 완료 (handleSelectJob). "AI 추천 분야" 배너에서 직무를 클릭하면 그 직무로 로드맵을 생성.
-// - POST /api/ai-roadmaps/chat                  : "관심 직무 변경"만 연동 완료 (handleSelectJob, 이미 로드맵이 있을 때).
-//                                                  실제 채팅 UI(하단 AI Roadmap Chat 입력창)는 아직 미연동 - 확인 절차 없이 chat 제안 생성 -> apply를 바로 이어서 호출.
-// - GET /api/tracks                             : 트랙 변경 시뮬레이션 드롭다운 (Signup.jsx와 동일 방식)
-// - GET /api/ai-roadmaps/jobs/recommendations   : 연동 완료. AI 추천 분야 / HSTEP가 추천하는 직무. (하단 순위별 카드는 트랙+태그 형태라 별도 확인 필요)
+// - POST /api/ai-roadmaps/chat                  : 연동 완료. "AI 추천 분야" 배너 클릭(handleSelectJob)은 확인 없이 chat -> apply를 바로 이어서 호출.
+//                                                  하단 AI Roadmap Chat 입력창은 ChatResponse의 requiresConfirmation/proposal을 그대로 노출해서
+//                                                  사용자가 반영/취소를 직접 선택하게 함(handleChatProposalDecision). jobOptions는 클릭 시 targetJobId로 재전송(handleChatJobOptionClick).
+// - GET /api/tracks                             : 연동 완료. 트랙 탭 + 트랙 변경 시뮬레이션 드롭다운(Signup.jsx와 동일 방식).
+// - GET /api/ai-roadmaps/jobs/recommendations   : 연동 완료. AI 추천 분야 / HSTEP가 추천하는 직무 순위.
+//
+// 미연동(백엔드 자체가 없음) - 트랙 변경 시뮬레이션 섹션 전체:
+//   - "변경 결과" 버튼에 onClick 없음(눌러도 아무 동작 안 함), "관심 직무" select도 옵션이 비어있음(placeholder만 존재).
+//   - 백엔드에 시뮬레이션 관련 컨트롤러/서비스가 없어서(grep 결과 0건), API 설계부터 새로 필요.
 
 const ROADMAP_CATEGORIES = ['공모전', '프로젝트', '자격증', '인턴·대외활동'];
 
@@ -33,6 +39,10 @@ const FALLBACK_ROLE_OPTIONS = [
 
 // FE 학년 라벨 -> 백엔드 targetGrade(1~4학년, 5=취준생)
 const GRADE_TO_TARGET_GRADE = { '1학년': 1, '2학년': 2, '3학년': 3, '4학년': 4, 취준생: 5 };
+// 역방향: RoadmapResponse.currentGrade(1~5) -> "OO님의 학년별 추천"에서 현재 학년 배지를 강조하기 위한 라벨
+const TARGET_GRADE_TO_GRADE_LABEL = { 1: '1학년', 2: '2학년', 3: '3학년', 4: '4학년', 5: '취준생' };
+// "OO님의 학년별 추천" 그리드 표시 순서(피그마 기준 2열 배치: 1행 1학년|3학년, 2행 2학년|4학년, 3행 취준생)
+const GRADE_RECOMMEND_ORDER = ['1학년', '3학년', '2학년', '4학년', '취준생'];
 
 // FE 카테고리 라벨 -> 백엔드 AiRoadmapStandardItem.Category
 const CATEGORY_TO_BACKEND = {
@@ -66,6 +76,21 @@ function buildBoardColumn(items, category, grade) {
 // 등록 전 화면의 로드맵 보드 미리보기용: 아직 등록된 데이터가 없으니 모든 슬롯을 빈 상태로 반환
 function getEmptyBoardColumn() {
   return { row2: null, row1: null };
+}
+
+// "OO님의 학년별 추천"에 쓸, 해당 학년의 우선순위 상위 활동 최대 2개(카테고리 구분 없이 전체 중에서).
+const ITEM_PRIORITY_ORDER = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+function buildGradeRecommendation(items, gradeLabel) {
+  const targetGrade = GRADE_TO_TARGET_GRADE[gradeLabel];
+
+  return (items || [])
+    .filter((item) => item.targetGrade === targetGrade && item.status !== 'HIDDEN')
+    .sort((a, b) => {
+      const priorityDiff = (ITEM_PRIORITY_ORDER[a.priority] ?? 3) - (ITEM_PRIORITY_ORDER[b.priority] ?? 3);
+      return priorityDiff !== 0 ? priorityDiff : (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+    })
+    .slice(0, 2)
+    .map((item) => item.title);
 }
 
 // MainPage.jsx의 .roadmap-panel(트랙 탭 + 파란 학년 사이드바 + 인력 양성 유형 배너 + 4열 과목 카드)을
@@ -241,12 +266,6 @@ const RECOMMENDED_JOBS = [
   { rank: 3, name: '부동산 디자이너' },
 ];
 
-const BOTTOM_RANK_CARDS = [
-  { rank: 1, track: '부동산 마케팅 트랙', tags: ['특화 UX 프로젝트', '부동산 플랫폼 UX 프로젝트'] },
-  { rank: 2, track: '부동산 브랜딩 트랙', tags: ['공간 브랜딩 프로젝트', '부동산 콘텐츠 기획'] },
-  { rank: 3, track: '부동산 디자인 트랙', tags: ['부동산 종합 관제조 개선', '부동산 디자인 관제조 개선'] },
-];
-
 function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   // 로그인한 사용자 이름: 부모가 직접 내려주면 그 값을 쓰고,
   // 아니면 로그인 시 저장해둔 accessToken으로 GET /api/members/me를 호출해서 채운다.
@@ -261,6 +280,8 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   const [hasRoadmap, setHasRoadmap] = useState(false);
   // 현재 로드맵의 관심 직무 id (생성/조회 응답의 interestJobId)
   const [selectedJobId, setSelectedJobId] = useState(null);
+  // 회원의 현재 학년 (RoadmapResponse.currentGrade, 1~4=학년/5=취준생) — "OO님의 학년별 추천"에서 현재 학년 배지 강조용
+  const [memberGrade, setMemberGrade] = useState(null);
   // "AI 추천 분야"에서 직무를 클릭해 로드맵 생성 요청 중인 jobId (중복 클릭 방지 + 버튼 로딩 표시용)
   const [selectingJobId, setSelectingJobId] = useState(null);
   // trackId -> trackName 매핑용, DB의 트랙 전체 목록
@@ -423,6 +444,7 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
           setRoadmapItems(data.items || []);
           setHasRoadmap(true);
           setSelectedJobId(data.interestJobId ?? null);
+          setMemberGrade(data.currentGrade ?? null);
         } else if (response.status === 404) {
           // 아직 관심 직무를 선택하지 않아 로드맵이 없는, 정상적인 상태
           setHasRoadmap(false);
@@ -440,6 +462,63 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
 
     return () => controller.abort();
   }, [isRegistered]);
+
+  // 제안(proposalId)을 실제로 반영(apply)하고 로드맵 상태(roadmapItems/selectedJobId/memberGrade)를 갱신한다.
+  // AI 추천 분야 배너의 즉시 반영(handleSelectJob)과 채팅창의 "반영하기" 버튼(handleChatProposalDecision)이
+  // 이 함수를 공유한다 - 알림/말풍선 같은 UI 반응은 호출부에서 반환값(ok/message)을 보고 각자 처리한다.
+  const applyRoadmapProposal = async (proposalId) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return { ok: false, message: '로그인이 필요합니다.' };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps/chat/proposals/${proposalId}/apply`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+
+      if (!response.ok) return { ok: false, message: result.message };
+
+      const data = result.data || result;
+      setRoadmapItems(data.items || []);
+      setSelectedJobId(data.interestJobId ?? selectedJobId);
+      setMemberGrade(data.currentGrade ?? memberGrade);
+      return { ok: true, data };
+    } catch (error) {
+      console.error('로드맵 변경 제안 반영 API 통신 에러:', error);
+      return { ok: false, networkError: true };
+    }
+  };
+
+  // "관심 직무 변경" 제안을 채팅 API로 생성한다("관심 직무 변경"은 인텐트 분류기가 인식하는 고정 문구).
+  // AI 추천 분야 배너에서 직무를 클릭했을 때(handleSelectJob) 쓰며, 채팅창과 달리 말풍선은 남기지 않는다.
+  const requestJobChangeProposal = async (jobId) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return { ok: false, message: '로그인이 필요합니다.' };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message: '관심 직무 변경', targetJobId: jobId }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) return { ok: false, message: result.message };
+
+      const data = result.data || result;
+      const proposalId = data.proposal?.proposalId;
+      if (!proposalId) return { ok: false, message: data.message };
+
+      return { ok: true, proposalId };
+    } catch (error) {
+      console.error('관심 직무 변경 제안 생성 API 통신 에러:', error);
+      return { ok: false, networkError: true };
+    }
+  };
 
   const handleSelectJob = async (jobId) => {
     const token = localStorage.getItem('accessToken');
@@ -463,44 +542,22 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
           setRoadmapItems(data.items || []);
           setHasRoadmap(true);
           setSelectedJobId(data.interestJobId ?? jobId);
+          setMemberGrade(data.currentGrade ?? null);
         } else {
           alert(result.message || '로드맵 생성에 실패했습니다.');
         }
         return;
       }
 
-      const chatResponse = await fetch(`${API_BASE_URL}/api/ai-roadmaps/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ message: '관심 직무 변경', targetJobId: jobId }),
-      });
-      const chatResult = await chatResponse.json();
-
-      if (!chatResponse.ok) {
-        alert(chatResult.message || '직무 변경 제안 생성에 실패했습니다.');
+      // 이미 로드맵이 있으면 채팅과 동일한 "제안 생성 -> 반영" 두 단계를 확인 절차 없이 이어서 처리한다.
+      const proposalResult = await requestJobChangeProposal(jobId);
+      if (!proposalResult.ok) {
+        alert(proposalResult.message || '직무 변경 제안 생성에 실패했습니다.');
         return;
       }
 
-      const proposalId = (chatResult.data || chatResult).proposal?.proposalId;
-      if (!proposalId) {
-        alert((chatResult.data || chatResult).message || '직무 변경 제안을 만들지 못했습니다.');
-        return;
-      }
-
-      const applyResponse = await fetch(`${API_BASE_URL}/api/ai-roadmaps/chat/proposals/${proposalId}/apply`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const applyResult = await applyResponse.json();
-
-      if (applyResponse.ok) {
-        const data = applyResult.data || applyResult;
-        setRoadmapItems(data.items || []);
-        setSelectedJobId(data.interestJobId ?? jobId);
-      } else {
+      const applyResult = await applyRoadmapProposal(proposalResult.proposalId);
+      if (!applyResult.ok) {
         alert(applyResult.message || '직무 변경 적용에 실패했습니다.');
       }
     } catch (error) {
@@ -544,8 +601,133 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
     ? simTrack1 !== '' && simTrack2 !== '' && simTrack1 !== simTrack2 && simGrade !== '' && simInterestJob !== ''
     : simTrack1 !== '' && simTrack2 !== '' && simTrack1 !== simTrack2 && simGrade !== '';
 
-  // AI Roadmap Chat 입력값 (아직 실제 전송은 안 함, TODO: POST /api/ai-roadmaps/chat 연동)
+  // AI Roadmap Chat: 입력값 + 대화 목록(사용자/봇 메시지, 변경 제안 포함) + 전송 중 여부
   const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatSending, setChatSending] = useState(false);
+
+  // 대화 목록 갱신 공통 헬퍼: id로 메시지를 찾아 일부 필드만 바꾸거나(patch), 새 메시지를 추가한다(append).
+  // 아래 여러 핸들러가 각자 setChatMessages(prev => prev.map(...))를 반복 작성하지 않도록 한 곳에 모았다.
+  const patchChatMessage = (messageId, patch) => {
+    setChatMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, ...patch } : m)));
+  };
+  const appendChatMessage = (message) => {
+    setChatMessages((prev) => [...prev, message]);
+  };
+  const makeBotMessage = (text, extra = {}) => ({
+    id: `bot-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    role: 'bot',
+    text,
+    ...extra,
+  });
+  const makeUserMessage = (text) => ({
+    id: `user-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    role: 'user',
+    text,
+  });
+
+  // POST /api/ai-roadmaps/chat 응답(ChatResponse)을 봇 메시지로 대화 목록에 추가.
+  // requiresConfirmation이 true면 proposal을 같이 붙여서 반영/취소 버튼을 보여준다.
+  const appendChatBotMessage = (chatResult) => {
+    const data = chatResult.data || chatResult;
+    appendChatMessage(makeBotMessage(data.message, {
+      proposal: data.requiresConfirmation ? data.proposal : null,
+      proposalState: data.requiresConfirmation ? 'pending' : null,
+      jobOptions: data.jobOptions || [],
+    }));
+  };
+
+  // 사용자 메시지를 대화 목록에 추가하고 POST /api/ai-roadmaps/chat으로 전송.
+  // extra로 targetJobId 등 ChatRequest의 선택 필드를 추가로 실어 보낼 수 있다(예: 직무 옵션 클릭).
+  const sendChatMessage = async (message, extra = {}) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token || !message.trim() || chatSending) return;
+
+    appendChatMessage(makeUserMessage(message));
+    setChatSending(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message, ...extra }),
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        appendChatBotMessage(result);
+      } else {
+        appendChatMessage(makeBotMessage(result.message || '요청을 처리하지 못했습니다.'));
+      }
+    } catch (error) {
+      console.error('AI 로드맵 챗 API 통신 에러:', error);
+      appendChatMessage(makeBotMessage('채팅 처리 중 오류가 발생했습니다.'));
+    } finally {
+      setChatSending(false);
+    }
+  };
+
+  const handleChatSubmit = () => {
+    if (!chatInput.trim() || chatSending) return;
+    sendChatMessage(chatInput.trim());
+    setChatInput('');
+  };
+
+  // "나에게 어울리는 활동 추천받기" 퀵 버튼: 백엔드 채팅이 지원하는 "우선 활동 안내" 인텐트로 바로 질문을 보낸다.
+  const handleChatSuggestClick = () => {
+    sendChatMessage('지금 가장 먼저 해야 할 활동이 뭐야?');
+  };
+
+  // CHANGE_INTEREST_JOB 제안에서 jobOptions 중 하나를 클릭했을 때: 같은 메시지로 targetJobId를 실어 다시 전송해서
+  // 실제 변경 제안(proposal)을 만든다. "관심 직무 변경"은 인텐트 분류기가 인식하는 고정 문구.
+  const handleChatJobOptionClick = (messageId, jobId) => {
+    patchChatMessage(messageId, { jobOptions: [] });
+    sendChatMessage('관심 직무 변경', { targetJobId: jobId });
+  };
+
+  // 채팅으로 생성된 변경 제안(proposal)을 반영(apply)하거나 취소(cancel)한다.
+  // apply는 handleSelectJob과 공유하는 applyRoadmapProposal 헬퍼를 그대로 쓴다.
+  const handleChatProposalDecision = async (messageId, proposalId, decision) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    patchChatMessage(messageId, { proposalState: 'processing' });
+
+    try {
+      if (decision === 'apply') {
+        const result = await applyRoadmapProposal(proposalId);
+        if (result.ok) {
+          patchChatMessage(messageId, { proposalState: 'applied' });
+          appendChatMessage(makeBotMessage('로드맵에 반영했어요.'));
+        } else {
+          patchChatMessage(messageId, { proposalState: 'pending' });
+          appendChatMessage(makeBotMessage(result.message || '반영에 실패했습니다.'));
+        }
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps/chat/proposals/${proposalId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        patchChatMessage(messageId, { proposalState: 'canceled' });
+        appendChatMessage(makeBotMessage('변경을 취소했어요.'));
+      } else {
+        patchChatMessage(messageId, { proposalState: 'pending' });
+        appendChatMessage(makeBotMessage(result.message || '취소에 실패했습니다.'));
+      }
+    } catch (error) {
+      console.error('로드맵 변경 제안 처리 API 통신 에러:', error);
+      patchChatMessage(messageId, { proposalState: 'pending' });
+      appendChatMessage(makeBotMessage('처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'));
+    }
+  };
 
   return (
     <div className="myRoadmap">
@@ -638,8 +820,72 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                 </div>
               </div>
 
-              <button type="button" className="chatSuggestButton">
-                나에게 어울리는 트랙 추천받기
+              {chatMessages.length > 0 && (
+                <div className="chatMessages">
+                  {chatMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`chatBubbleRow ${msg.role === 'user' ? 'chatBubbleRowUser' : ''}`}
+                    >
+                      {msg.role === 'bot' && <span className="chatAvatar" aria-hidden="true">🤖</span>}
+                      <div className={`chatBubble ${msg.role === 'user' ? 'chatBubbleUser' : ''}`}>
+                        <p className="chatBubbleText">{msg.text}</p>
+
+                        {msg.jobOptions && msg.jobOptions.length > 0 && (
+                          <div className="chatOptionRow">
+                            {msg.jobOptions.map((job) => (
+                              <button
+                                key={job.jobId}
+                                type="button"
+                                className="chatOptionBtn"
+                                disabled={chatSending}
+                                onClick={() => handleChatJobOptionClick(msg.id, job.jobId)}
+                              >
+                                {job.jobName}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {msg.proposal && (
+                          <div className="chatProposalActions">
+                            {msg.proposalState === 'pending' && (
+                              <>
+                                <button
+                                  type="button"
+                                  className="chatProposalBtn chatProposalBtnConfirm"
+                                  onClick={() => handleChatProposalDecision(msg.id, msg.proposal.proposalId, 'apply')}
+                                >
+                                  반영하기
+                                </button>
+                                <button
+                                  type="button"
+                                  className="chatProposalBtn chatProposalBtnCancel"
+                                  onClick={() => handleChatProposalDecision(msg.id, msg.proposal.proposalId, 'cancel')}
+                                >
+                                  취소
+                                </button>
+                              </>
+                            )}
+                            {msg.proposalState === 'processing' && (
+                              <span className="chatProposalStatus">처리 중…</span>
+                            )}
+                            {msg.proposalState === 'applied' && (
+                              <span className="chatProposalStatus">✓ 반영 완료</span>
+                            )}
+                            {msg.proposalState === 'canceled' && (
+                              <span className="chatProposalStatus">취소됨</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button type="button" className="chatSuggestButton" onClick={handleChatSuggestClick} disabled={chatSending}>
+                지금 가장 먼저 할 활동 추천받기
               </button>
 
               <div className="chatInputRow">
@@ -649,8 +895,20 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                   placeholder="궁금한 점을 입력하세요"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleChatSubmit();
+                  }}
+                  disabled={chatSending}
                 />
-                <button type="button" className="chatSendButton" aria-label="전송">➤</button>
+                <button
+                  type="button"
+                  className="chatSendButton"
+                  aria-label="전송"
+                  onClick={handleChatSubmit}
+                  disabled={chatSending || !chatInput.trim()}
+                >
+                  ➤
+                </button>
               </div>
             </section>
           </>
@@ -727,41 +985,54 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
           <>
             {/* --- HSTEP가 추천하는 직무 --- */}
             <section className="recommendedJobs">
-              <h2><span className="hMark">H</span>STEP가 추천 하는 직무</h2>
-              <p className="subtitle">회원님의 트랙과 스펙을 분석해서 추천 직무를 알려드립니다</p>
+              <h2>
+                <img src={mySpecsIcon} alt="" className="hMark" />
+                <span className="hstepText">HSTEP</span>가 추천 하는 직무
+              </h2>
+              <p className="subtitle">
+                트랙 변경 시, 변경되는 활동 및 수업입니다.<br />
+                트랙을 변경하고 싶으시면 마이페이지에서 바꿔주세요.
+              </p>
 
               <div className="jobRankRow">
                 {displayedRecommendedJobs.map((job) => (
-                  <span key={job.rank} className={`jobRankPill ${job.rank === 1 ? 'jobRankPillActive' : ''}`}>
-                    {job.rank}순위 {job.name}
-                  </span>
+                  <div key={job.rank} className="jobRankItem">
+                    <span className={`jobRankBadge ${job.rank === 1 ? 'jobRankBadgeActive' : ''}`}>
+                      {job.rank}순위
+                    </span>
+                    <span className="jobRankName">{job.name}</span>
+                  </div>
                 ))}
               </div>
-            </section>
 
-            {/* --- CTA 배너 --- */}
-            <button
-              type="button"
-              className="ctaBanner"
-              onClick={() => onNavigate && onNavigate('mypageRegistration')}
-            >
-              {memberName}님의 맞춤 로드맵, 지금 바로 만나보세요
-            </button>
+              {/* "OO님의 학년별 추천": GET /api/ai-roadmaps/me의 items(전체 학년/카테고리)에서
+                  학년별 상위 우선순위 활동 최대 2개씩 뽑아서 보여줌. currentGrade와 일치하는 학년 배지만 강조. */}
+              <div className="gradeRecommendBlock">
+                <div className="gradeRecommendHeader">{memberName}님의 학년별 추천</div>
+                <p className="gradeRecommendSubtitle">가장 우선순위로 들어야 하는 수업이에요.</p>
 
-            {/* --- 순위별 추천 트랙 상세 --- */}
-            <section className="bottomGrid">
-              {BOTTOM_RANK_CARDS.map((card) => (
-                <div key={card.rank} className="bottomRankCard">
-                  <span className={`bottomRankBadge ${card.rank === 1 ? 'bottomRankBadgeActive' : ''}`}>
-                    {card.rank}위칸 · {card.track}
-                  </span>
-                  <div className="bottomRankTags">
-                    {card.tags.map((tag) => (
-                      <span key={tag} className="bottomRankTag">{tag}</span>
-                    ))}
-                  </div>
+                <div className="gradeRecommendGrid">
+                  {GRADE_RECOMMEND_ORDER.map((grade) => {
+                    const gradeItems = buildGradeRecommendation(roadmapItems, grade);
+                    const isActiveGrade = memberGrade != null
+                      && TARGET_GRADE_TO_GRADE_LABEL[memberGrade] === grade;
+                    return (
+                      <div key={grade} className="gradeRecommendRow">
+                        <span className={`gradeRecommendBadge ${isActiveGrade ? 'gradeRecommendBadgeActive' : ''}`}>
+                          {grade}
+                        </span>
+                        <ul className="gradeRecommendList">
+                          {gradeItems.length > 0 ? (
+                            gradeItems.map((title) => <li key={title}>{title}</li>)
+                          ) : (
+                            <li className="gradeRecommendEmpty">등록된 활동이 없습니다</li>
+                          )}
+                        </ul>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
+              </div>
             </section>
           </>
         )}

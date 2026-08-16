@@ -510,6 +510,104 @@
     line-height: 1.6;
   }
 
+  .chatBubbleText {
+    margin: 0;
+    white-space: pre-wrap;
+  }
+
+  /* 대화 목록: 사용자가 채팅을 시작하면 안내 말풍선 아래에 이어서 쌓인다 */
+  .chatMessages {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .chatMessages .chatBubbleRow {
+    margin-top: 0;
+  }
+
+  /* 사용자 메시지: 오른쪽 정렬 + 파란색 말풍선 */
+  .chatBubbleRowUser {
+    flex-direction: row-reverse;
+  }
+
+  .chatBubbleUser {
+    flex: 0 1 auto;
+    background: var(--blue);
+    color: #fff;
+  }
+
+  .chatOptionRow {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chatOptionBtn {
+    padding: 8px 14px;
+    border: 1px solid var(--blue);
+    border-radius: 16px;
+    background: #fff;
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--blue-soft);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  .chatProposalActions {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chatProposalBtn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .chatProposalBtnConfirm {
+    background: var(--blue);
+    color: #fff;
+
+    &:hover {
+      background: #0073e6;
+    }
+  }
+
+  .chatProposalBtnCancel {
+    background: #eef1f4;
+    color: var(--text-gray);
+
+    &:hover {
+      background: #e2e6ea;
+    }
+  }
+
+  .chatProposalStatus {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-gray);
+  }
+
   .chatSuggestButton {
     margin-top: 60px;
     padding: 12px 24px;
@@ -523,6 +621,11 @@
 
     &:hover {
       background: #0073e6;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
     }
   }
 
@@ -557,6 +660,15 @@
     background: var(--blue);
     color: #fff;
     cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  .chatInput:disabled {
+    opacity: 0.7;
   }
 
   /* ================= 트랙 변경 시뮬레이션 (공통) ================= */
@@ -637,6 +749,7 @@
   .recommendedJobs {
     /* H60 */
     margin-top: 60px;
+    margin-bottom: 120px;
     text-align: center;
   }
 
@@ -645,114 +758,130 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    color: var(--blue);
+    /* 전역 section h2가 SBAggroL을 강제하므로, "가 추천 하는 직무" 부분은 기본 폰트로 되돌림 */
+    font-family: Pretendard, "Noto Sans KR", Arial, sans-serif;
+    color: #0084FF;
   }
 
   .hMark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: 8px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 16px;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .hstepText {
+    font-family: 'SBAggroL', sans-serif;
+    color: #0084FF;
   }
 
   .jobRankRow {
-    margin-top: 80px;
+    margin-top: 56px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 20px 32px;
   }
 
-  .jobRankPill {
-    padding: 12px 20px;
-    border-radius: 24px;
-    background: #f4f9ff;
-    border: 1px solid #d6e4f7;
-    color: var(--navy);
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  .jobRankPillActive {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
-  }
-
-  /* ================= 등록 후: CTA 배너 ================= */
-  .ctaBanner {
-    /* H120 */
-    margin-top: 120px;
-    display: block;
-    width: 100%;
-    padding: 24px;
-    border: none;
-    border-radius: 16px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background: #0073e6;
-    }
-  }
-
-  /* ================= 등록 후: 순위별 추천 트랙 상세 ================= */
-  .bottomGrid {
-    margin-top: 100px;
-    margin-bottom: 160px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .bottomRankCard {
+  .jobRankItem {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 18px 24px;
-    border-radius: 12px;
-    background: #f4f9ff;
-    flex-wrap: wrap;
+    gap: 12px;
   }
 
-  .bottomRankBadge {
+  .jobRankBadge {
     flex-shrink: 0;
-    padding: 8px 16px;
+    padding: 10px 18px;
+    border-radius: 24px;
+    background: #e6ebf2;
+    color: var(--navy);
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .jobRankBadgeActive {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  .jobRankName {
+    max-width: 160px;
+    text-align: left;
+    color: var(--navy);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /* ================= 등록 후: OO님의 학년별 추천 (recommendedJobs 섹션 하단) ================= */
+  .gradeRecommendBlock {
+    margin-top: 32px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .gradeRecommendHeader {
+    padding: 14px 20px;
+    border-radius: 12px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .gradeRecommendSubtitle {
+    margin: 15px 0 45px;
+    color: #334656;
+    font-size: 13px;
+  }
+
+  .gradeRecommendGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 22px;
+    column-gap: 32px;
+    text-align: left;
+  }
+
+  .gradeRecommendRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .gradeRecommendBadge {
+    flex-shrink: 0;
+    width: 72px;
+    padding: 7px 0;
     border-radius: 20px;
     background: #e6ebf2;
     color: var(--navy);
     font-size: 13px;
     font-weight: 700;
+    text-align: center;
     white-space: nowrap;
   }
 
-  .bottomRankBadgeActive {
+  .gradeRecommendBadgeActive {
     background: var(--blue);
     color: #fff;
   }
 
-  .bottomRankTags {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .bottomRankTag {
-    padding: 8px 14px;
-    border-radius: 16px;
-    background: #fff;
-    border: 1px solid #d6e4f7;
+  .gradeRecommendList {
+    margin: 4px 0 0;
+    padding-left: 18px;
     color: var(--navy);
     font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .gradeRecommendEmpty {
+    color: var(--text-gray);
   }
 
   .simulation:last-of-type {
@@ -828,9 +957,13 @@
       flex-direction: column;
     }
 
-    .bottomRankCard {
-      flex-direction: column;
-      align-items: flex-start;
+    .jobRankRow {
+      justify-content: center;
+    }
+
+    .gradeRecommendGrid {
+      grid-template-columns: 1fr;
+      row-gap: 20px;
     }
   }
 }

@@ -19,6 +19,8 @@ const API_BASE_URL = 'http://localhost:8080';
 //                                                  사용자가 반영/취소를 직접 선택하게 함(handleChatProposalDecision). jobOptions는 클릭 시 targetJobId로 재전송(handleChatJobOptionClick).
 // - GET /api/tracks                             : 연동 완료. 트랙 탭 + 트랙 변경 시뮬레이션 드롭다운(Signup.jsx와 동일 방식).
 // - GET /api/ai-roadmaps/jobs/recommendations   : 연동 완료. AI 추천 분야 / HSTEP가 추천하는 직무 순위.
+// - PATCH /api/ai-roadmaps/items/{id}/complete  : 연동 완료 (toggleRoadmapItemCompletion). 보드 카드의 완료 체크(.completeCheckBtn) 클릭 시 채팅 없이 바로 완료 처리.
+// - PATCH /api/ai-roadmaps/items/{id}/reopen    : 연동 완료 (toggleRoadmapItemCompletion). 완료된 카드를 다시 클릭하면 PENDING으로 되돌림.
 //
 // 미연동(백엔드 자체가 없음) - 트랙 변경 시뮬레이션 섹션 전체:
 //   - "변경 결과" 버튼에 onClick 없음(눌러도 아무 동작 안 함), "관심 직무" select도 옵션이 비어있음(placeholder만 존재).
@@ -67,7 +69,12 @@ function buildBoardColumn(items, category, grade) {
     .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
 
   const toCard = (item) => (item
-    ? { type: PRIORITY_LABELS[item.priority] || item.priority, title: item.title }
+    ? {
+      id: item.aiRoadmapItemId,
+      type: PRIORITY_LABELS[item.priority] || item.priority,
+      title: item.title,
+      status: item.status,
+    }
     : null);
 
   return { row2: toCard(matched[0]), row1: toCard(matched[1]) };
@@ -113,6 +120,8 @@ function RoadmapCourseBoard({
   memberName = '000',
   onNavigate,
   eligibilityMessage = '',
+  onCompleteItem,
+  completingItemId,
 }) {
   return (
     <>
@@ -219,6 +228,17 @@ function RoadmapCourseBoard({
                         <div className="cardRowSlot">
                           {col.row2 && (
                             <div className="courseCard">
+                              {onCompleteItem && (
+                                <button
+                                  type="button"
+                                  className={`completeCheckBtn ${col.row2.status === 'COMPLETED' ? 'completeCheckBtnDone' : ''}`}
+                                  aria-label={col.row2.status === 'COMPLETED' ? '완료 취소' : '완료 처리'}
+                                  disabled={completingItemId != null}
+                                  onClick={() => onCompleteItem(col.row2.id, col.row2.status)}
+                                >
+                                  {completingItemId === col.row2.id ? '…' : (col.row2.status === 'COMPLETED' ? '✓' : '')}
+                                </button>
+                              )}
                               <div className="cardHeader">
                                 <span className="semester">2학기</span>
                                 <span className="divider">|</span>
@@ -231,6 +251,17 @@ function RoadmapCourseBoard({
                         <div className="cardRowSlot">
                           {col.row1 && (
                             <div className="courseCard">
+                              {onCompleteItem && (
+                                <button
+                                  type="button"
+                                  className={`completeCheckBtn ${col.row1.status === 'COMPLETED' ? 'completeCheckBtnDone' : ''}`}
+                                  aria-label={col.row1.status === 'COMPLETED' ? '완료 취소' : '완료 처리'}
+                                  disabled={completingItemId != null}
+                                  onClick={() => onCompleteItem(col.row1.id, col.row1.status)}
+                                >
+                                  {completingItemId === col.row1.id ? '…' : (col.row1.status === 'COMPLETED' ? '✓' : '')}
+                                </button>
+                              )}
                               <div className="cardHeader">
                                 <span className="semester">1학기</span>
                                 <span className="divider">|</span>
@@ -284,6 +315,8 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   const [memberGrade, setMemberGrade] = useState(null);
   // "AI 추천 분야"에서 직무를 클릭해 로드맵 생성 요청 중인 jobId (중복 클릭 방지 + 버튼 로딩 표시용)
   const [selectingJobId, setSelectingJobId] = useState(null);
+  // 보드 카드의 완료 체크(completeRoadmapItem)로 완료 처리 요청 중인 aiRoadmapItemId (중복 클릭 방지 + 버튼 로딩 표시용)
+  const [completingItemId, setCompletingItemId] = useState(null);
   // trackId -> trackName 매핑용, DB의 트랙 전체 목록
   const [trackList, setTrackList] = useState([]);
 
@@ -568,6 +601,38 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
     }
   };
 
+  // 보드 카드의 완료 체크(.completeCheckBtn) 클릭 시 호출. 채팅 없이 PATCH /items/{id}/complete(또는 /reopen)로 바로 상태를 바꾼다.
+  // 이미 COMPLETED인 카드를 다시 누르면 reopen(PENDING으로 되돌리기)을 호출한다.
+  const toggleRoadmapItemCompletion = async (roadmapItemId, currentStatus) => {
+    const token = localStorage.getItem('accessToken');
+    if (!token || completingItemId != null) return;
+
+    const endpoint = currentStatus === 'COMPLETED' ? 'reopen' : 'complete';
+
+    setCompletingItemId(roadmapItemId);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai-roadmaps/items/${roadmapItemId}/${endpoint}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        const updatedItem = result.data || result;
+        setRoadmapItems((prev) => prev.map((item) => (
+          item.aiRoadmapItemId === roadmapItemId ? { ...item, ...updatedItem } : item
+        )));
+      } else {
+        alert(result.message || '상태 변경에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('로드맵 항목 완료 상태 변경 API 통신 에러:', error);
+      alert('처리 중 오류가 발생했습니다.');
+    } finally {
+      setCompletingItemId(null);
+    }
+  };
+
   // roleBanner의 "AI 추천 분야" 직무 목록: 로드맵이 아직 없을 때만 클릭해서 생성할 수 있게 onSelectJob을 넘긴다
   const boardRoleOptions = jobRecommendations.length > 0 ? jobRecommendations : FALLBACK_ROLE_OPTIONS;
 
@@ -806,6 +871,8 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                 getColumn={(category, grade) => buildBoardColumn(roadmapItems, category, grade)}
                 showTrackTabs={false}
                 isRegistered={isRegistered}
+                onCompleteItem={toggleRoadmapItemCompletion}
+                completingItemId={completingItemId}
               />
             </section>
 

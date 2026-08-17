@@ -400,6 +400,7 @@
   }
 
   .courseCard {
+    position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -414,6 +415,45 @@
     &:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 18px rgba(52, 67, 90, 0.12);
+    }
+  }
+
+  // 카드를 클릭 없이 채팅으로만 완료 처리하던 것을, 카드에서 바로 완료 체크할 수 있게 해주는 버튼.
+  // 미완료(빈 원) -> 클릭 시 완료(초록 체크), 완료된 걸 다시 클릭하면 PENDING으로 되돌린다(토글).
+  .completeCheckBtn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid #cbd5e1;
+    background: #fff;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      border-color: var(--blue);
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  .completeCheckBtnDone {
+    border-color: #22c55e;
+    background: #22c55e;
+
+    &:hover:not(:disabled) {
+      border-color: #16a34a;
+      background: #16a34a;
     }
   }
 

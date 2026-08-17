@@ -713,8 +713,18 @@
 
   /* ================= 트랙 변경 시뮬레이션 (공통) ================= */
   .simulation {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
     margin-top: 60px;
+    padding: 56px 24px;
+    background: linear-gradient(180deg, #f4f5f7 0%, #ffffff 100%);
     text-align: center;
+  }
+
+  .simulationInner {
+    max-width: 1080px;
+    margin: 0 auto;
   }
 
   .simulationForm {

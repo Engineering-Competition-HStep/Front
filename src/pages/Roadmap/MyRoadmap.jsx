@@ -656,15 +656,12 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   const [simTrack1, setSimTrack1] = useState('');
   const [simTrack2, setSimTrack2] = useState('');
   const [simGrade, setSimGrade] = useState('');
-  const [simInterestJob, setSimInterestJob] = useState('');
   // 1트랙을 바꿔서 2트랙과 같아지면, 2트랙 선택을 초기화해서 항상 서로 다른 트랙만 선택되게 함
   const handleSimTrack1Change = (value) => {
     setSimTrack1(value);
     if (value !== '' && value === simTrack2) setSimTrack2('');
   };
-  const isSimReady = isRegistered
-    ? simTrack1 !== '' && simTrack2 !== '' && simTrack1 !== simTrack2 && simGrade !== '' && simInterestJob !== ''
-    : simTrack1 !== '' && simTrack2 !== '' && simTrack1 !== simTrack2 && simGrade !== '';
+  const isSimReady = simTrack1 !== '' && simTrack2 !== '' && simTrack1 !== simTrack2 && simGrade !== '';
 
   // AI Roadmap Chat: 입력값 + 대화 목록(사용자/봇 메시지, 변경 제안 포함) + 전송 중 여부
   const [chatInput, setChatInput] = useState('');
@@ -983,6 +980,7 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
 
         {/* --- 트랙 변경 시뮬레이션 (등록 전/후 공통, 필드 개수만 다름) --- */}
         <section className="simulation">
+        <div className="simulationInner">
           <p className="eyebrow">트랙 변경 시뮬레이션</p>
           <h2>Track Change Simulation</h2>
           {isRegistered && (
@@ -1027,12 +1025,6 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
               <option value="3">3학년</option>
               <option value="4">4학년</option>
             </select>
-
-            {isRegistered && (
-              <select className="simSelect" value={simInterestJob} onChange={(e) => setSimInterestJob(e.target.value)}>
-                <option value="" disabled>관심 직무</option>
-              </select>
-            )}
           </div>
 
           {simTrack1 !== '' && simTrack1 === simTrack2 && (
@@ -1046,6 +1038,7 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
           >
             변경 결과
           </button>
+        </div>
         </section>
 
         {isRegistered && (

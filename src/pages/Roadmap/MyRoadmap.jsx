@@ -794,11 +794,6 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
     setChatInput('');
   };
 
-  // "나에게 어울리는 활동 추천받기" 퀵 버튼: 백엔드 채팅이 지원하는 "우선 활동 안내" 인텐트로 바로 질문을 보낸다.
-  const handleChatSuggestClick = () => {
-    sendChatMessage('지금 가장 먼저 해야 할 활동이 뭐야?');
-  };
-
   // CHANGE_INTEREST_JOB 제안에서 jobOptions 중 하나를 클릭했을 때: 같은 메시지로 targetJobId를 실어 다시 전송해서
   // 실제 변경 제안(proposal)을 만든다. "관심 직무 변경"은 인텐트 분류기가 인식하는 고정 문구.
   const handleChatJobOptionClick = (messageId, jobId) => {
@@ -1003,10 +998,6 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
                   ))}
                 </div>
               )}
-
-              <button type="button" className="chatSuggestButton" onClick={handleChatSuggestClick} disabled={chatSending}>
-                지금 가장 먼저 할 활동 추천받기
-              </button>
 
               <div className="chatInputRow">
                 <input

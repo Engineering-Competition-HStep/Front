@@ -17,14 +17,11 @@ const API_BASE_URL = 'http://localhost:8080';
 // - POST /api/ai-roadmaps/chat                  : 연동 완료. "AI 추천 분야" 배너 클릭(handleSelectJob)은 확인 없이 chat -> apply를 바로 이어서 호출.
 //                                                  하단 AI Roadmap Chat 입력창은 ChatResponse의 requiresConfirmation/proposal을 그대로 노출해서
 //                                                  사용자가 반영/취소를 직접 선택하게 함(handleChatProposalDecision). jobOptions는 클릭 시 targetJobId로 재전송(handleChatJobOptionClick).
-// - GET /api/tracks                             : 연동 완료. 트랙 탭 + 트랙 변경 시뮬레이션 드롭다운(Signup.jsx와 동일 방식).
+// - GET /api/tracks                             : 연동 완료. 트랙 탭 드롭다운(Signup.jsx와 동일 방식).
 // - GET /api/ai-roadmaps/jobs/recommendations   : 연동 완료. AI 추천 분야 / HSTEP가 추천하는 직무 순위.
 // - PATCH /api/ai-roadmaps/items/{id}/complete  : 연동 완료 (toggleRoadmapItemCompletion). 보드 카드의 완료 체크(.completeCheckBtn) 클릭 시 채팅 없이 바로 완료 처리.
 // - PATCH /api/ai-roadmaps/items/{id}/reopen    : 연동 완료 (toggleRoadmapItemCompletion). 완료된 카드를 다시 클릭하면 PENDING으로 되돌림.
 //
-// 미연동(백엔드 자체가 없음) - 트랙 변경 시뮬레이션 섹션 전체:
-//   - "변경 결과" 버튼에 onClick 없음(눌러도 아무 동작 안 함), "관심 직무" select도 옵션이 비어있음(placeholder만 존재).
-//   - 백엔드에 시뮬레이션 관련 컨트롤러/서비스가 없어서(grep 결과 0건), API 설계부터 새로 필요.
 
 const ROADMAP_CATEGORIES = ['공모전', '프로젝트', '자격증', '인턴·대외활동'];
 
@@ -74,6 +71,9 @@ function buildBoardColumn(items, category, grade) {
       type: PRIORITY_LABELS[item.priority] || item.priority,
       title: item.title,
       status: item.status,
+      // 카드 클릭 시 옆에 띄우는 상세 팝업(cardPopup)용 필드
+      description: item.description,
+      externalUrl: item.externalUrl,
     }
     : null);
 
@@ -123,6 +123,18 @@ function RoadmapCourseBoard({
   onCompleteItem,
   completingItemId,
 }) {
+  // 카드 클릭 시 옆에 띄우는 상세 팝업: 지금 열려있는 카드의 id (한 번에 하나만 열림)
+  const [openCardId, setOpenCardId] = useState(null);
+
+  // 학년/트랙 탭을 바꾸면 이전 카드 팝업은 자동으로 닫는다.
+  useEffect(() => {
+    setOpenCardId(null);
+  }, [activeGrade, activeTrack]);
+
+  const toggleCardPopup = (cardId) => {
+    setOpenCardId((prev) => (prev === cardId ? null : cardId));
+  };
+
   return (
     <>
       {showTrackTabs && (
@@ -227,14 +239,25 @@ function RoadmapCourseBoard({
                       <div className="cardRows">
                         <div className="cardRowSlot">
                           {col.row2 && (
-                            <div className="courseCard">
+                            <div
+                              className={`courseCard ${openCardId === col.row2.id ? 'courseCardOpen' : ''}`}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => toggleCardPopup(col.row2.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') toggleCardPopup(col.row2.id);
+                              }}
+                            >
                               {onCompleteItem && (
                                 <button
                                   type="button"
                                   className={`completeCheckBtn ${col.row2.status === 'COMPLETED' ? 'completeCheckBtnDone' : ''}`}
                                   aria-label={col.row2.status === 'COMPLETED' ? '완료 취소' : '완료 처리'}
                                   disabled={completingItemId != null}
-                                  onClick={() => onCompleteItem(col.row2.id, col.row2.status)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onCompleteItem(col.row2.id, col.row2.status);
+                                  }}
                                 >
                                   {completingItemId === col.row2.id ? '…' : (col.row2.status === 'COMPLETED' ? '✓' : '')}
                                 </button>
@@ -245,19 +268,34 @@ function RoadmapCourseBoard({
                                 <span className="type">{col.row2.type}</span>
                               </div>
                               <h4 className="courseTitle">{col.row2.title}</h4>
+
+                              {openCardId === col.row2.id && (
+                                <CardDetailPopup card={col.row2} onClose={() => setOpenCardId(null)} />
+                              )}
                             </div>
                           )}
                         </div>
                         <div className="cardRowSlot">
                           {col.row1 && (
-                            <div className="courseCard">
+                            <div
+                              className={`courseCard ${openCardId === col.row1.id ? 'courseCardOpen' : ''}`}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => toggleCardPopup(col.row1.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') toggleCardPopup(col.row1.id);
+                              }}
+                            >
                               {onCompleteItem && (
                                 <button
                                   type="button"
                                   className={`completeCheckBtn ${col.row1.status === 'COMPLETED' ? 'completeCheckBtnDone' : ''}`}
                                   aria-label={col.row1.status === 'COMPLETED' ? '완료 취소' : '완료 처리'}
                                   disabled={completingItemId != null}
-                                  onClick={() => onCompleteItem(col.row1.id, col.row1.status)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onCompleteItem(col.row1.id, col.row1.status);
+                                  }}
                                 >
                                   {completingItemId === col.row1.id ? '…' : (col.row1.status === 'COMPLETED' ? '✓' : '')}
                                 </button>
@@ -268,6 +306,10 @@ function RoadmapCourseBoard({
                                 <span className="type">{col.row1.type}</span>
                               </div>
                               <h4 className="courseTitle">{col.row1.title}</h4>
+
+                              {openCardId === col.row1.id && (
+                                <CardDetailPopup card={col.row1} onClose={() => setOpenCardId(null)} />
+                              )}
                             </div>
                           )}
                         </div>
@@ -288,6 +330,31 @@ function RoadmapCourseBoard({
         </div>
       </div>
     </>
+  );
+}
+
+// 카드 클릭 시 옆에 뜨는 상세 팝업
+function CardDetailPopup({ card, onClose }) {
+  return (
+    <div className="cardPopup" onClick={(e) => e.stopPropagation()}>
+      <p className="cardPopupTitle">{card.title}</p>
+      <p className="cardPopupBody">
+        {card.description || '아직 등록된 상세 설명이 없어요.'}
+      </p>
+      {card.externalUrl && (
+        <a
+          href={card.externalUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="cardPopupLink"
+        >
+          관련 링크 바로가기
+        </a>
+      )}
+      <button type="button" className="cardPopupCloseBtn" onClick={onClose}>
+        닫기
+      </button>
+    </div>
   );
 }
 
@@ -652,17 +719,6 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   }, [currentTrackNames, boardTrack]);
   const boardTrackTabs = currentTrackNames.length > 0 ? currentTrackNames : ['트랙 미등록'];
 
-  // 트랙 변경 시뮬레이션 선택값 (트랙은 Signup.jsx와 동일하게 백엔드 trackId를 값으로 사용)
-  const [simTrack1, setSimTrack1] = useState('');
-  const [simTrack2, setSimTrack2] = useState('');
-  const [simGrade, setSimGrade] = useState('');
-  // 1트랙을 바꿔서 2트랙과 같아지면, 2트랙 선택을 초기화해서 항상 서로 다른 트랙만 선택되게 함
-  const handleSimTrack1Change = (value) => {
-    setSimTrack1(value);
-    if (value !== '' && value === simTrack2) setSimTrack2('');
-  };
-  const isSimReady = simTrack1 !== '' && simTrack2 !== '' && simTrack1 !== simTrack2 && simGrade !== '';
-
   // AI Roadmap Chat: 입력값 + 대화 목록(사용자/봇 메시지, 변경 제안 포함) + 전송 중 여부
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState([]);
@@ -977,69 +1033,6 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
             </section>
           </>
         )}
-
-        {/* --- 트랙 변경 시뮬레이션 (등록 전/후 공통, 필드 개수만 다름) --- */}
-        <section className="simulation">
-        <div className="simulationInner">
-          <p className="eyebrow">트랙 변경 시뮬레이션</p>
-          <h2>Track Change Simulation</h2>
-          {isRegistered && (
-            <p className="subtitle">관심있는 트랙을 선택해서 결과를 시뮬레이션해보세요</p>
-          )}
-
-          <div className={`simulationForm ${isRegistered ? 'simulationFormGrid' : ''}`}>
-            <select
-              className="simSelect"
-              value={simTrack1}
-              onChange={(e) => handleSimTrack1Change(e.target.value)}
-            >
-              <option value="" disabled>1트랙</option>
-              {trackList.map((track) => (
-                <option key={track.trackId} value={track.trackId}>
-                  {track.trackName}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="simSelect"
-              value={simTrack2}
-              onChange={(e) => setSimTrack2(e.target.value)}
-            >
-              <option value="" disabled>2트랙</option>
-              {trackList.map((track) => (
-                <option
-                  key={track.trackId}
-                  value={track.trackId}
-                  disabled={String(track.trackId) === simTrack1}
-                >
-                  {track.trackName}
-                </option>
-              ))}
-            </select>
-
-            <select className={`simSelect ${!isRegistered ? 'simSelectGrade' : ''}`} value={simGrade} onChange={(e) => setSimGrade(e.target.value)}>
-              <option value="" disabled>학년</option>
-              <option value="1">1학년</option>
-              <option value="2">2학년</option>
-              <option value="3">3학년</option>
-              <option value="4">4학년</option>
-            </select>
-          </div>
-
-          {simTrack1 !== '' && simTrack1 === simTrack2 && (
-            <p className="simulationError">1트랙과 2트랙은 서로 다르게 선택해주세요.</p>
-          )}
-
-          <button
-            type="button"
-            className={`simulationButton ${isSimReady ? 'simulationButtonActive' : ''}`}
-            disabled={!isSimReady}
-          >
-            변경 결과
-          </button>
-        </div>
-        </section>
 
         {isRegistered && (
           <>

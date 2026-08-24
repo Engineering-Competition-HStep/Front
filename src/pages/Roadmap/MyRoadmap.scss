@@ -369,9 +369,29 @@
   }
 
   .columnsGrid {
+    position: relative;
     flex: 1;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .columnsGridEmpty .roadmapColumn {
+    border-right: none;
+  }
+
+  .columnsEmptyMessage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 34px; // .bottomBadge 높이만큼 남겨서 카테고리 라벨 줄과 안 겹치게 함
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 15px;
+    font-weight: 500;
   }
 
   .roadmapColumn {

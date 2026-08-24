@@ -23,7 +23,7 @@ const API_BASE_URL = 'http://localhost:8080';
 // - PATCH /api/ai-roadmaps/items/{id}/reopen    : 연동 완료 (toggleRoadmapItemCompletion). 완료된 카드를 다시 클릭하면 PENDING으로 되돌림.
 //
 
-const ROADMAP_CATEGORIES = ['공모전', '프로젝트', '자격증', '인턴·대외활동'];
+const ROADMAP_CATEGORIES = ['학습·수업', '프로젝트', '자격·인증', '실무 경험'];
 
 // --- 로드맵 보드(트랙 탭 + 좌측 학년 사이드바 + 인력 양성 유형 배너 + 우측 4열 과목 카드) ---
 // MainPage.jsx의 "Roadmap" 섹션(.roadmap-panel) 구조를 그대로 가져와서 MyRoadmap 전용 데이터로 채운 버전입니다.
@@ -45,10 +45,10 @@ const GRADE_RECOMMEND_ORDER = ['1학년', '3학년', '2학년', '4학년', '취�
 
 // FE 카테고리 라벨 -> 백엔드 AiRoadmapStandardItem.Category
 const CATEGORY_TO_BACKEND = {
-  공모전: 'CONTEST',
+  '학습·수업': 'CONTEST',
   프로젝트: 'PROJECT',
-  자격증: 'CERTIFICATE',
-  '인턴·대외활동': 'INTERNSHIP',
+  '자격·인증': 'CERTIFICATE',
+  '실무 경험': 'INTERNSHIP',
 };
 
 // 백엔드 priority(HIGH/MEDIUM/LOW) -> 카드에 보여줄 한글 라벨
@@ -134,6 +134,17 @@ function RoadmapCourseBoard({
   const toggleCardPopup = (cardId) => {
     setOpenCardId((prev) => (prev === cardId ? null : cardId));
   };
+
+  // 취준생은 "학기" 개념이 없어서(휴학/졸업 상태), 1학기/2학기 대신 상반기/하반기로 표시
+  const isJobSeekerGrade = activeGrade === '취준생';
+  const row2SemesterLabel = isJobSeekerGrade ? '하반기' : '2학기';
+  const row1SemesterLabel = isJobSeekerGrade ? '상반기' : '1학기';
+
+  // 지금 선택된 학년에 4개 카테고리 전부 카드가 하나도 없으면 안내 문구 대체
+  const hasAnyCardForGrade = categories.some((category) => {
+    const col = getColumn(category, activeGrade);
+    return Boolean(col.row2 || col.row1);
+  });
 
   return (
     <>
@@ -231,7 +242,10 @@ function RoadmapCourseBoard({
             // [등록 상태] isRegistered가 true일 때 보여줄 기존 로드맵/시뮬레이션 화면
             <div className="roadmapContent">
               {/* 우측 4열 과목/활동 카드 (2학기/1학기 고정 슬롯) */}
-              <div className="columnsGrid">
+              <div className={`columnsGrid ${hasAnyCardForGrade ? '' : 'columnsGridEmpty'}`}>
+                {!hasAnyCardForGrade && (
+                  <p className="columnsEmptyMessage">아직은 추천할게 없는 시기에요.</p>
+                )}
                 {categories.map((category) => {
                   const col = getColumn(category, activeGrade);
                   return (
@@ -263,7 +277,7 @@ function RoadmapCourseBoard({
                                 </button>
                               )}
                               <div className="cardHeader">
-                                <span className="semester">2학기</span>
+                                <span className="semester">{row2SemesterLabel}</span>
                                 <span className="divider">|</span>
                                 <span className="type">{col.row2.type}</span>
                               </div>
@@ -301,7 +315,7 @@ function RoadmapCourseBoard({
                                 </button>
                               )}
                               <div className="cardHeader">
-                                <span className="semester">1학기</span>
+                                <span className="semester">{row1SemesterLabel}</span>
                                 <span className="divider">|</span>
                                 <span className="type">{col.row1.type}</span>
                               </div>

@@ -6,7 +6,6 @@ import Footer from '../../components/Footer/Footer.jsx';
 
 import myRoadMap_icon from '../../assets/myRoadMap_icon.svg';
 import Home_work from '../../assets/Home_work.svg';
-import mySpecsIcon from '../../assets/mypage_mySpecs.svg';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -85,19 +84,11 @@ function getEmptyBoardColumn() {
   return { row2: null, row1: null };
 }
 
-// "OO님의 학년별 추천"에 쓸, 해당 학년의 우선순위 상위 활동 최대 2개(카테고리 구분 없이 전체 중에서).
-const ITEM_PRIORITY_ORDER = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 function buildGradeRecommendation(items, gradeLabel) {
-  const targetGrade = GRADE_TO_TARGET_GRADE[gradeLabel];
-
-  return (items || [])
-    .filter((item) => item.targetGrade === targetGrade && item.status !== 'HIDDEN')
-    .sort((a, b) => {
-      const priorityDiff = (ITEM_PRIORITY_ORDER[a.priority] ?? 3) - (ITEM_PRIORITY_ORDER[b.priority] ?? 3);
-      return priorityDiff !== 0 ? priorityDiff : (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
-    })
-    .slice(0, 2)
-    .map((item) => item.title);
+  return ROADMAP_CATEGORIES.flatMap((category) => {
+    const { row2, row1 } = buildBoardColumn(items, category, gradeLabel);
+    return [row2, row1].filter(Boolean);
+  }).map((card) => card.title);
 }
 
 // MainPage.jsx의 .roadmap-panel(트랙 탭 + 파란 학년 사이드바 + 인력 양성 유형 배너 + 4열 과목 카드)을
@@ -371,12 +362,6 @@ function CardDetailPopup({ card, onClose }) {
     </div>
   );
 }
-
-const RECOMMENDED_JOBS = [
-  { rank: 1, name: '부동산 UX 디자이너' },
-  { rank: 2, name: '부동산 플랫폼 서비스 기획자' },
-  { rank: 3, name: '부동산 디자이너' },
-];
 
 function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   // 로그인한 사용자 이름: 부모가 직접 내려주면 그 값을 쓰고,
@@ -717,11 +702,6 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
   // roleBanner의 "AI 추천 분야" 직무 목록: 로드맵이 아직 없을 때만 클릭해서 생성할 수 있게 onSelectJob을 넘긴다
   const boardRoleOptions = jobRecommendations.length > 0 ? jobRecommendations : FALLBACK_ROLE_OPTIONS;
 
-  // "HSTEP가 추천하는 직무" 섹션
-  const displayedRecommendedJobs = jobRecommendations.length > 0
-    ? jobRecommendations.map((job, index) => ({ rank: index + 1, name: job.jobName }))
-    : RECOMMENDED_JOBS;
-
   // 로드맵 보드(등록 후 화면)에서 선택된 트랙 탭 / 학년
   const [boardTrack, setBoardTrack] = useState(currentTrackNames[0] || '트랙 미등록');
   const [boardGrade, setBoardGrade] = useState(ROADMAP_GRADES[0]);
@@ -1041,30 +1021,8 @@ function MyRoadmap({ onNavigate, memberName: memberNameProp }) {
 
         {isRegistered && (
           <>
-            {/* --- HSTEP가 추천하는 직무 --- */}
             <section className="recommendedJobs">
-              <h2>
-                <img src={mySpecsIcon} alt="" className="hMark" />
-                <span className="hstepText">HSTEP</span>가 추천 하는 직무
-              </h2>
-              <p className="subtitle">
-                트랙 변경 시, 변경되는 활동 및 수업입니다.<br />
-                트랙을 변경하고 싶으시면 마이페이지에서 바꿔주세요.
-              </p>
-
-              <div className="jobRankRow">
-                {displayedRecommendedJobs.map((job) => (
-                  <div key={job.rank} className="jobRankItem">
-                    <span className={`jobRankBadge ${job.rank === 1 ? 'jobRankBadgeActive' : ''}`}>
-                      {job.rank}순위
-                    </span>
-                    <span className="jobRankName">{job.name}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* "OO님의 학년별 추천": GET /api/ai-roadmaps/me의 items(전체 학년/카테고리)에서
-                  학년별 상위 우선순위 활동 최대 2개씩 뽑아서 보여줌. currentGrade와 일치하는 학년 배지만 강조. */}
+              {/* OO님의 학년별 추천 */}
               <div className="gradeRecommendBlock">
                 <div className="gradeRecommendHeader">{memberName}님의 학년별 추천</div>
                 <p className="gradeRecommendSubtitle">가장 우선순위로 들어야 하는 수업이에요.</p>

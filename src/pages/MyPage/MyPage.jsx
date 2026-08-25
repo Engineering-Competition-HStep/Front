@@ -172,6 +172,12 @@ export default function MyPage({
     volunteers.length > 0 ||
     activities.length > 0;
 
+  // 로그아웃: 저장된 토큰을 지우고 로그인 화면으로 이동
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    onNavigate && onNavigate('login');
+  };
+
   // 어떤 방식의 메뉴 클릭이 들어와도 안전하게 이동시키는 통합 핸들러 함수 추가
   const handleMenuNavigation = (menu) => {
     if (menu === 'main' || menu === 'home') {
@@ -322,19 +328,17 @@ export default function MyPage({
 
             <button
               className={styles.bookmarkBtn}
-              onClick={() => handleMenuNavigation('externalJobs')}
+              onClick={handleLogout}
             >
               <div className={styles.bookmarkInner}>
-                {/* 북마크 아이콘 */}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" color="#555">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                {/* 로그아웃 아이콘 */}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
-                찜한 기업 공고
+                로그아웃
               </div>
-              {/* 화살표 아이콘 */}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
             </button>
           </div>
         </aside>

@@ -632,7 +632,7 @@
   /* ================= 등록 후: AI Roadmap Chat ================= */
   .aiChatSection {
     margin-top: 50px;
-    margin-bottom: 190px;
+    margin-bottom: 70px;
     text-align: center;
   }
 
@@ -822,6 +822,12 @@
     /* H60 */
     margin-top: 60px;
     margin-bottom: 120px;
+    padding: 10px 20px 60px;
+    /* 부모(.myRoadmapMain)의 max-width: 1080px 제한을 벗어나 뷰포트 양 끝까지 배경을 채우는 풀블리드 처리 */
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #f4f7f9 0%, #ffffff 100%);
     text-align: center;
   }
 

@@ -1,278 +1,358 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './AiChat.scss';
 
-// 공통 로고 및 아이콘
-import notice_logo from '../../assets/notice_logo.svg';
-import notice_search from '../../assets/notice_search.svg';
-import notice_menu from '../../assets/notice_menu.svg';
+import Header from '../../components/Header/Header.jsx';
+import aichatBot from '../../assets/aichat_bot.svg';
+import aichatLogo from '../../assets/aichat_logo.svg';
+import aichatHistoryIcon from '../../assets/aichat_search.svg';
+import aichatHeader from '../../assets/aichat_header.svg';
+import aichatSend from '../../assets/aichat_send.svg';
+import aichatRegisterArrow from '../../assets/aichat_register_arrow.svg';
 
-// 챗봇 전용 에셋
-import aichat_bot from '../../assets/aichat_bot.svg';
-import aichat_logo from '../../assets/aichat_logo.svg';
-import aichat_search from '../../assets/aichat_search.svg';
-import aichat_header from '../../assets/aichat_header.svg';
+import {
+  getAccessToken,
+  getChatMessages,
+  getChatRooms,
+  getMyMember,
+  getProfileCompleteness,
+  sendChatMessage,
+  startChatRoom,
+} from '../../services/hstepApi.js';
 
-const promptRows = [
-  ['내 트랙 취업 분석', '내 스펙 분석', '추천 직무', '추천 자격증'],
-  ['추천 공모전', '평균평점 경쟁력', '토익 필요없는 회사']
+const PROMPT_ROWS = [
+  ['내 트랙 취업 분석', '추천 직무', '추천 자격증'],
+  ['추천 공모전', '평균평점 경쟁력', '토익 필요없는 회사'],
 ];
 
-const getSimulatedBotResponse = (query) => {
-  if (query.includes('트랙') || query.includes('취업')) {
-    return '000 학우님의 트랙(부동산/IT공학 등)을 분석한 결과, IT 서비스 기획 및 프론트엔드 개발 직무로의 진출이 가장 유리합니다! 최근 3개년 선배들의 취업 데이터 기준 합격률 85% 구간이에요.';
-  } else if (query.includes('스펙') || query.includes('평점') || query.includes('경쟁력')) {
-    return '현재 입력된 학점과 활동 내역을 종합한 결과, 실무 프로젝트 경험이 매우 돋보입니다! 다만 대기업 공채 지원을 위해서는 정보처리기사 자격증 취득을 추가로 추천드려요.';
-  } else if (query.includes('직무') || query.includes('자격증') || query.includes('공모전')) {
-    return '학우님의 트랙에 꼭 맞는 추천 자격증은 [SQLD], [ADsP], [정보처리기사] 입니다. 이번 방학 기간 동안 한성대 교내 빅데이터 공모전에 도전해보는 건 어떨까요?';
-  } else if (query.includes('토익') || query.includes('회사') || query.includes('어학')) {
-    return '최근 IT 및 Tech 계열 기업(카카오, 토스, 네이버 등)은 토익 점수 대신 코딩 테스트와 깃허브 포트폴리오를 100% 반영하는 추세입니다. 실무 프로젝트 역량에 집중해보세요!';
-  } else {
-    return `"${query}"에 대한 분석을 완료했습니다!\n한성대학교 AI 챗봇이 학우님의 성공적인 취업 로드맵을 위해 맞춤 기업 5곳을 뽑아두었어요. 마이페이지에서 상세 보고서를 확인해보세요.`;
+const UNSUPPORTED_RESPONSE = '죄송해요.\n현재 해당 상담은 지원하지 않는 기능이에요.\n현재는 취업, 진로, 공고, 자격증, 로드맵 관련 상담을 이용하실 수 있어요!';
+
+function getScenario(query) {
+  if (query === '추천 직무' || query === '토익 필요없는 회사') return 'RECOMMENDED_JOB';
+  if (PROMPT_ROWS.flat().includes(query)) return 'TRACK_CAREER_ANALYSIS';
+  if (/트랙|취업|진로|공고|자격증|로드맵|평점|토익|직무/.test(query)) return 'TRACK_CAREER_ANALYSIS';
+  return null;
+}
+
+function getOfflineResponse(query) {
+  if (/직무|회사|토익/.test(query)) {
+    return '입력한 트랙과 스펙을 기준으로 관련 직무와 기업을 분석했어요. 로컬 백엔드를 실행하고 로그인하면 개인 정보가 반영된 상세 답변을 확인할 수 있어요.';
   }
-};
+  if (/자격증|공모전|평점/.test(query)) {
+    return '현재 스펙을 보완할 수 있는 활동을 분석했어요. 로컬 백엔드 연결 후에는 등록한 학점·자격증·수상 내역을 기준으로 맞춤 추천을 제공해요.';
+  }
+  return '트랙과 개인 스펙을 바탕으로 취업 방향을 분석했어요. 로컬 백엔드가 연결되면 저장된 정보를 기준으로 더 구체적인 결과를 제공해요.';
+}
 
-// 어떤 형태의 이동 props가 내려와도 안전하게 처리하도록 확대 수용
-function AiChat({ 
-  onNavigate, 
-  onNavigateToMain, 
-  onNavigateToMyPage, 
-  onNavigateToExternalJobs, 
-  onNavigateToAiChat 
+function buildWelcomeMessage(name) {
+  return `환영합니다, ${name} 학우님!\nHSTEP AI 챗봇이에요.\n원하시는 질문을 선택해보세요.`;
+}
+
+function historyLabel(dateValue) {
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return '최근';
+
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const days = Math.max(0, Math.round((todayStart - dateStart) / 86400000));
+
+  if (days === 0) return '오늘';
+  if (days === 1) return '어제';
+  return `${days}일 전`;
+}
+
+function AiChat({
+  onNavigate,
+  onNavigateToMain,
+  onNavigateToMyPage,
+  onNavigateToAiChat,
 }) {
-  const [isRegistered, setIsRegistered] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [userName, setUserName] = useState('000');
+  const [history, setHistory] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [currentRoomId, setCurrentRoomId] = useState(null);
   const [input, setInput] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const chatLogRef = useRef(null);
 
-  // 어떤 방식의 메뉴 클릭이 들어와도 안전하게 이동시키는 통합 핸들러 함수 추가
   const handleMenuNavigation = (menu) => {
     if (menu === 'main' || menu === 'home') {
-      onNavigateToMain ? onNavigateToMain() : onNavigate && onNavigate('main');
-    } else if (menu === 'jobs' || menu === 'externalJobs') {
-      onNavigateToExternalJobs ? onNavigateToExternalJobs() : onNavigate && onNavigate('externalJobs');
+      onNavigateToMain ? onNavigateToMain() : onNavigate?.('main');
     } else if (menu === 'aichat' || menu === 'ai-chat') {
-      onNavigateToAiChat ? onNavigateToAiChat() : onNavigate && onNavigate('aiChat');
+      onNavigateToAiChat ? onNavigateToAiChat() : onNavigate?.('aiChat');
     } else if (menu === 'mypage') {
-      onNavigateToMyPage ? onNavigateToMyPage() : onNavigate && onNavigate('mypage');
+      onNavigateToMyPage ? onNavigateToMyPage() : onNavigate?.('mypage');
     } else {
-      onNavigate && onNavigate(menu);
+      onNavigate?.(menu);
     }
   };
 
-  // 브라우저 로컬 스토리지 기반 최근 검색어 관리 (몇 일 전 자동 계산)
-  const [history, setHistory] = useState(() => {
-    const saved = localStorage.getItem('hstep_aichat_history');
-    if (saved) return JSON.parse(saved);
-    return [
-      { id: 1, text: '시각디자인 관련 취업 공고', timestamp: Date.now() - 7 * 24 * 60 * 60 * 1000 },
-      { id: 2, text: 'IT 공과대학이 하면 좋을 공모전', timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000 },
-      { id: 3, text: '내 트랙 취업 분석', timestamp: Date.now() - 1 * 24 * 60 * 60 * 1000 },
-    ];
-  });
+  useEffect(() => {
+    let cancelled = false;
 
-  const [messages, setMessages] = useState([
-    { sender: 'bot', text: '환영합니다, 000 학우님!\nHSTEP AI 챗봇이에요.\n등록된 스펙을 기반으로 취업을 도와드릴게요.' }
-  ]);
+    const bootstrapChat = async () => {
+      if (!getAccessToken()) {
+        if (!cancelled) setProfileLoading(false);
+        return;
+      }
+
+      try {
+        const completeness = await getProfileCompleteness();
+        if (cancelled) return;
+
+        setIsRegistered(Boolean(completeness?.completed));
+
+        const [memberResult, roomsResult] = await Promise.allSettled([
+          getMyMember(),
+          getChatRooms(),
+        ]);
+        if (cancelled) return;
+
+        const member = memberResult.status === 'fulfilled' ? memberResult.value : null;
+        const rooms = roomsResult.status === 'fulfilled' ? roomsResult.value : [];
+        const nextName = member?.name || '000';
+
+        setUserName(nextName);
+        setMessages(completeness?.completed ? [{ sender: 'bot', text: buildWelcomeMessage(nextName) }] : []);
+        setHistory(Array.isArray(rooms) ? rooms.map((room) => ({
+          id: room.chatRoomId,
+          text: room.title,
+          timestamp: room.updatedAt || room.createdAt,
+          remote: true,
+        })) : []);
+      } catch {
+        if (!cancelled) {
+          setIsRegistered(false);
+          setMessages([]);
+          setHistory([]);
+        }
+      } finally {
+        if (!cancelled) setProfileLoading(false);
+      }
+    };
+
+    bootstrapChat();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('hstep_aichat_history', JSON.stringify(history));
-  }, [history]);
+    if (!chatLogRef.current) return;
+    chatLogRef.current.scrollTo({ top: chatLogRef.current.scrollHeight, behavior: 'smooth' });
+  }, [messages, isSending]);
 
-  const triggerChat = (userText) => {
-    if (!userText.trim()) return;
-
-    const newMessages = [...messages, { sender: 'user', text: userText }];
-    setMessages(newMessages);
-
-    // 검색 시 현재 시간(timestamp)을 저장하여 몇 일 전인지 자동 계산되게 함
-    const newHistoryItem = { id: Date.now(), text: userText, timestamp: Date.now() };
-    setHistory((prev) => [newHistoryItem, ...prev.filter((h) => h.text !== userText)]);
-
-    setTimeout(() => {
-      const botReply = getSimulatedBotResponse(userText);
-      setMessages((prev) => [...prev, { sender: 'bot', text: botReply }]);
-    }, 600);
-  };
-
-  const handleChipClick = (text) => triggerChat(text);
-  const handleSend = () => { triggerChat(input); setInput(''); };
-
-  // 날짜 차이를 계산하여 '오늘', '어제', 'N일 전'으로 그룹화
-  const getGroupedHistory = () => {
-    const groups = {};
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-
-    history.forEach((item) => {
-      const itemDate = new Date(item.timestamp);
-      const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate()).getTime();
-      const diffDays = Math.round((today - itemDay) / (1000 * 60 * 60 * 24));
-
-      let label = diffDays === 0 ? '오늘' : diffDays === 1 ? '어제' : `${diffDays}일 전`;
-      if (!groups[label]) groups[label] = [];
-      groups[label].push(item);
-    });
+  const groupedHistory = useMemo(() => history.reduce((groups, item) => {
+    const label = historyLabel(item.timestamp);
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(item);
     return groups;
+  }, {}), [history]);
+
+  const refreshHistory = async () => {
+    try {
+      const rooms = await getChatRooms();
+      if (!Array.isArray(rooms)) return;
+      setHistory(rooms.map((room) => ({
+        id: room.chatRoomId,
+        text: room.title,
+        timestamp: room.updatedAt || room.createdAt,
+        remote: true,
+      })));
+    } catch {
+      // 대화는 유지하고 기록 목록만 다음 연결 시 갱신합니다.
+    }
   };
 
-  const groupedHistory = getGroupedHistory();
+  const submitQuery = async (query, { startNewRoom = false } = {}) => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery || isSending || !isRegistered) return;
+
+    setMessages((current) => [...current, { sender: 'user', text: trimmedQuery }]);
+    setIsSending(true);
+
+    const scenario = getScenario(trimmedQuery);
+    if (!scenario) {
+      window.setTimeout(() => {
+        setMessages((current) => [...current, { sender: 'bot', text: UNSUPPORTED_RESPONSE }]);
+        setIsSending(false);
+      }, 320);
+      return;
+    }
+
+    try {
+      let roomId = startNewRoom ? null : currentRoomId;
+      let reply;
+
+      if (!roomId) {
+        const started = await startChatRoom(scenario);
+        if (!started?.started) {
+          setIsRegistered(false);
+          setMessages([]);
+          return;
+        }
+
+        roomId = started.chatRoomId;
+        setCurrentRoomId(roomId);
+
+        const scenarioTitle = scenario === 'RECOMMENDED_JOB' ? '추천 직무' : '내 트랙 취업 분석';
+        if (trimmedQuery === scenarioTitle) {
+          reply = started.firstMessage;
+        } else {
+          reply = await sendChatMessage(roomId, trimmedQuery);
+        }
+      } else {
+        reply = await sendChatMessage(roomId, trimmedQuery);
+      }
+
+      setMessages((current) => [...current, {
+        sender: 'bot',
+        text: reply?.content || getOfflineResponse(trimmedQuery),
+      }]);
+      refreshHistory();
+    } catch {
+      setMessages((current) => [...current, { sender: 'bot', text: getOfflineResponse(trimmedQuery) }]);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleHistoryClick = async (item) => {
+    if (!item.remote || isSending) return;
+
+    setIsSending(true);
+    try {
+      const remoteMessages = await getChatMessages(item.id);
+      const visibleMessages = (Array.isArray(remoteMessages) ? remoteMessages : [])
+        .filter((message) => !(message.role === 'USER' && message.content?.startsWith('[학생 정보]')))
+        .map((message) => ({
+          sender: message.role === 'USER' ? 'user' : 'bot',
+          text: message.content,
+        }));
+
+      if (visibleMessages[0]?.sender !== 'user') {
+        visibleMessages.unshift({ sender: 'user', text: item.text });
+      }
+
+      setCurrentRoomId(item.id);
+      setMessages(visibleMessages.length ? visibleMessages : [{ sender: 'bot', text: buildWelcomeMessage(userName) }]);
+    } catch {
+      setMessages([{ sender: 'bot', text: '대화 기록을 불러오지 못했어요. 잠시 후 다시 선택해주세요.' }]);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const query = input;
+    setInput('');
+    submitQuery(query);
+  };
 
   return (
     <div className="ai-chat-page">
-      <header style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '80px', 
-        backgroundColor: 'transparent',
-        zIndex: 9999,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 40px',
-        boxSizing: 'border-box'
-      }}>
-        <div 
-          onClick={() => handleMenuNavigation('main')}
-          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', width: '150px' }}
-        >
-          <img src={notice_logo} alt="HSTEP 로고" style={{ height: '24px', width: 'auto', display: 'block' }} />
-        </div>
-        
-        <nav style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: '15px' }}>
-          <a href="#home" onClick={(e) => { e.preventDefault(); handleMenuNavigation('main'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>메인홈</a>
-          
-          {/* 나의 로드맵 클릭 시 정상 이동하도록 이벤트 연결 */}
-          <a href="#roadmap" onClick={(e) => { e.preventDefault(); handleMenuNavigation('roadmap'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
-          
-          {/* 공고 추천 이동 안전하게 연결 */}
-          <a href="#jobs" onClick={(e) => { e.preventDefault(); handleMenuNavigation('externalJobs'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>공고 추천</a>
-          
-          <a 
-            href="#ai-chat" 
-            onClick={(e) => { e.preventDefault(); handleMenuNavigation('aiChat'); }}
-            style={{ color: '#0084FF', fontWeight: '600', textDecoration: 'none', borderBottom: '2px solid #0084FF', paddingBottom: '4px' }}
-          >
-            AI채팅
-          </a>
-          
-          <a href="#mypage" onClick={(e) => { e.preventDefault(); handleMenuNavigation('mypage'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>마이페이지</a>
-          
-          {/* 문의 클릭 시 정상 이동하도록 이벤트 연결 */}
-          <a href="#contact" onClick={(e) => { e.preventDefault(); handleMenuNavigation('inquiry'); }} style={{ color: '#333333', textDecoration: 'none', opacity: 0.9 }}>문의</a>
-        </nav>
-
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', width: '150px', justifyContent: 'flex-end' }}>
-          <img src={notice_search} alt="검색" style={{ cursor: 'pointer', width: '24px', height: '24px' }} />
-          <img src={notice_menu} alt="메뉴" style={{ cursor: 'pointer', width: '24px', height: '24px' }} />
-        </div>
-      </header>
+      <Header
+        activeMenu="aichat"
+        theme="light"
+        onMenuClick={handleMenuNavigation}
+      />
 
       <div className="chat-layout">
-        {/* 1. 좌측 사이드바 */}
         <aside className="chat-sidebar">
-          <div className="sidebar-header">
-            <h3>최근 검색</h3>
-          </div>
-          
+          <div className="sidebar-header"><h2>최근 검색</h2></div>
           <div className="history-section">
             {!isRegistered || history.length === 0 ? (
               <p className="empty-history">아직 검색기록이 없어요.</p>
             ) : (
               Object.entries(groupedHistory).map(([label, items]) => (
-                <div key={label} className="history-group">
-                  {/* 날짜 라벨 (이 밑으로 SCSS에서 선이 그어짐.) */}
-                  <div className="date-label-wrapper">
-                    <p className="date-label">{label}</p>
-                  </div>
-                  <ul className="history-list">
+                <section className="history-group" key={label}>
+                  <h3>{label}</h3>
+                  <ul>
                     {items.map((item) => (
-                      <li key={item.id} className="history-item" onClick={() => triggerChat(item.text)}>
-                        <img src={aichat_search} alt="" className="search-icon" />
-                        <span className="text">{item.text}</span>
+                      <li key={item.id}>
+                        <button type="button" onClick={() => handleHistoryClick(item)}>
+                          <img src={aichatHistoryIcon} alt="" />
+                          <span>{item.text}</span>
+                        </button>
                       </li>
                     ))}
                   </ul>
-                </div>
+                </section>
               ))
             )}
           </div>
         </aside>
 
-        {/* 2. 우측 메인 채팅 영역 */}
         <main className="chat-main">
-          <div className="main-header">
-            <div className="title-area">
-              <img src={aichat_header} alt="HSTEP AI Chat" className="header-title-img" />
-            </div>
-            <button 
-              className="dev-toggle-btn" 
-              onClick={() => setIsRegistered(!isRegistered)}
-              title="클릭하여 미등록/등록 화면을 전환해보세요!"
-            >
-              🔄 테스트: {isRegistered ? '스펙 등록됨 (2번)' : '스펙 미등록 (1번)'}
-            </button>
-          </div>
+          <div className="chat-title"><img src={aichatHeader} alt="HSTEP AI Chat" /></div>
 
-          <div className="chat-log">
-            <div className="background-watermark">
-              <img src={aichat_logo} alt="배경 로고" />
-            </div>
+          <div className="chat-stage">
+            <img className="background-watermark" src={aichatLogo} alt="" aria-hidden="true" />
 
-            {!isRegistered ? (
-              <div className="unregistered-flow">
-                <div className="message-row bot">
-                  <div className="bot-avatar-wrapper"><img src={aichat_bot} alt="챗봇" /></div>
-                  <div className="message-bubble">
-                    <p className="greet-text">안녕하세요, 000 학우님!<br />HSTEP AI 챗봇이에요.</p>
-                    <p className="desc-text">
-                      맞춤형 취업 상담을 이용하려면 마이페이지에서 <strong className="highlight-blue">학점과 개인 스펙을 먼저 등록</strong>해주세요.<br />
-                      등록이 완료되면 000님의 트랙과 스펙을 기반으로 최적의 취업 정보를 제공할게요!
-                    </p>
+            <div className="chat-log" ref={chatLogRef} aria-live="polite">
+              {!profileLoading && !isRegistered && (
+                <div className="unregistered-flow">
+                  <div className="message-row bot">
+                    <img className="bot-avatar" src={aichatBot} alt="HSTEP 챗봇" />
+                    <div className="message-bubble registration-bubble">
+                      <p>안녕하세요, {userName} 학우님!<br />HSTEP AI 챗봇이에요.</p>
+                      <p>
+                        맞춤형 취업 상담을 이용하려면 마이페이지에서 <strong>학점과 개인 스펙을 먼저 등록</strong>해주세요.<br />
+                        등록이 완료되면 {userName}님의 트랙과 스펙을 기반으로 최적의 취업 정보를 제공할게요!
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="action-row">
-                  <button className="goto-register-btn" onClick={() => handleMenuNavigation('mypageRegistration')}>
-                    마이페이지에서 정보 등록하러 가기 <span>→</span>
+                  <button className="goto-register-button" type="button" onClick={() => handleMenuNavigation('mypage')}>
+                    마이페이지에서 정보 등록하러 가기
+                    <img src={aichatRegisterArrow} alt="" />
                   </button>
                 </div>
-              </div>
-            ) : (
-              <div className="registered-flow">
-                {messages.map((msg, idx) => (
-                  <div key={idx} className={`message-row ${msg.sender}`}>
-                    {msg.sender === 'bot' && (
-                      <div className="bot-avatar-wrapper"><img src={aichat_bot} alt="챗봇" /></div>
-                    )}
-                    <div className="message-bubble">{msg.text}</div>
-                  </div>
-                ))}
+              )}
 
-                <div className="prompt-suggestions">
-                  {promptRows.map((row, rIdx) => (
-                    <div key={rIdx} className="prompt-row">
-                      {row.map((chip, cIdx) => (
-                        <button key={cIdx} className="prompt-chip" onClick={() => handleChipClick(chip)}>
-                          {chip}
-                        </button>
-                      ))}
+              {!profileLoading && isRegistered && (
+                <div className="registered-flow">
+                  {messages.map((message, index) => (
+                    <div className={`message-row ${message.sender}`} key={`${message.sender}-${index}`}>
+                      {message.sender === 'bot' && <img className="bot-avatar" src={aichatBot} alt="HSTEP 챗봇" />}
+                      <div className="message-bubble">{message.text}</div>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-          </div>
 
-          <div className="input-section">
-            <div className="input-box">
+                  {isSending && (
+                    <div className="message-row bot pending-message">
+                      <img className="bot-avatar" src={aichatBot} alt="" />
+                      <div className="message-bubble"><span /><span /><span /></div>
+                    </div>
+                  )}
+
+                  <div className="prompt-suggestions" aria-label="추천 질문">
+                    {PROMPT_ROWS.map((row, rowIndex) => (
+                      <div className="prompt-row" key={rowIndex}>
+                        {row.map((prompt) => (
+                          <button type="button" key={prompt} onClick={() => submitQuery(prompt, { startNewRoom: true })} disabled={isSending}>
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <form className="chat-input-form" onSubmit={handleSubmit}>
               <input
                 type="text"
-                placeholder="궁금한점을 입력하세요."
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                onChange={(event) => setInput(event.target.value)}
+                placeholder="궁금한점을 입력하세요."
+                aria-label="챗봇에게 질문하기"
               />
-              <button className="send-btn" onClick={handleSend} aria-label="메시지 전송">↑</button>
-            </div>
+              <button type="submit" disabled={!input.trim() || isSending || !isRegistered} aria-label="메시지 전송">
+                <img src={aichatSend} alt="" />
+              </button>
+            </form>
           </div>
         </main>
       </div>

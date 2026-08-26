@@ -7,7 +7,12 @@ import notice_search from '../../assets/notice_search.svg';
 import notice_menu from '../../assets/notice_menu.svg';
 
 export default function Header({ activeMenu, theme = 'light', onMenuClick }) {
-  const headerClass = `${styles.header} ${theme === 'transparent' ? styles.themeTransparent : styles.themeLight}`;
+  const themeClass = theme === 'transparent'
+    ? styles.themeTransparent
+    : theme === 'blue'
+      ? styles.themeBlue
+      : styles.themeLight;
+  const headerClass = `${styles.header} ${themeClass}`;
 
   return (
     <header className={headerClass}>
@@ -35,14 +40,6 @@ export default function Header({ activeMenu, theme = 'light', onMenuClick }) {
           onClick={(e) => { e.preventDefault(); onMenuClick && onMenuClick('roadmap'); }}
         >
           나의 로드맵
-        </a>
-        
-        <a 
-          href="#jobs"
-          className={`${styles.navLink} ${activeMenu === 'recommend' || activeMenu === 'jobs' || activeMenu === 'externalJobs' ? styles.activeLink : ''}`}
-          onClick={(e) => { e.preventDefault(); onMenuClick && onMenuClick('externalJobs'); }}
-        >
-          공고 추천
         </a>
         
         <a 

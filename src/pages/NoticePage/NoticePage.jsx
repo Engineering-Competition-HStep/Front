@@ -31,7 +31,6 @@ function NoticePage({
   onNavigate,
   onNavigateToMain, 
   onNavigateToMyPage, 
-  onNavigateToExternalJobs, 
   onNavigateToAiChat 
 }) {
   const [searchInput, setSearchInput] = useState("");
@@ -40,8 +39,6 @@ function NoticePage({
   const handleMenuNavigation = (menu) => {
     if (menu === 'main' || menu === 'home') {
       onNavigateToMain ? onNavigateToMain() : onNavigate && onNavigate('main');
-    } else if (menu === 'jobs' || menu === 'externalJobs') {
-      onNavigateToExternalJobs ? onNavigateToExternalJobs() : onNavigate && onNavigate('externalJobs');
     } else if (menu === 'aichat' || menu === 'ai-chat') {
       onNavigateToAiChat ? onNavigateToAiChat() : onNavigate && onNavigate('aichat');
     } else if (menu === 'mypage') {
@@ -118,15 +115,6 @@ function NoticePage({
             style={{ color: '#333333', textDecoration: 'none' }}
           >
             나의 로드맵
-          </a>
-          
-          {/* 공고 추천 이동 정상 연결 */}
-          <a 
-            href="#jobs" 
-            onClick={(e) => { e.preventDefault(); handleMenuNavigation('externalJobs'); }}
-            style={{ color: '#333333', textDecoration: 'none' }}
-          >
-            공고 추천
           </a>
           
           {/* AI채팅 클릭 시 정상적으로 이동하도록 연결! */}

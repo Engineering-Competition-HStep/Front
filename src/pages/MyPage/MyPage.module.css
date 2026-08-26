@@ -264,7 +264,7 @@
   cursor: not-allowed;
 }
 
-.bookmarkBtn {
+.accountActionBtn {
   width: 100%;
   background-color: #EBF2F8;
   border: none;
@@ -279,11 +279,11 @@
   transition: background-color 0.2s;
 }
 
-.bookmarkBtn:hover {
+.accountActionBtn:hover {
   background-color: #e0edf7;
 }
 
-.bookmarkInner {
+.accountActionInner {
   display: flex;
   align-items: center;
   gap: 8px;

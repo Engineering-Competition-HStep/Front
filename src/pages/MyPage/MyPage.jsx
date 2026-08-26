@@ -17,7 +17,6 @@ export default function MyPage({
   onNavigate,
   onNavigateToMain,
   onNavigateToNotice,
-  onNavigateToExternalJobs,
   onNavigateToAiChat
 }) {
   // 로그인한 사용자 정보 (학번/학년/전체평균 등)
@@ -182,8 +181,6 @@ export default function MyPage({
   const handleMenuNavigation = (menu) => {
     if (menu === 'main' || menu === 'home') {
       onNavigateToMain ? onNavigateToMain() : onNavigate && onNavigate('main');
-    } else if (menu === 'jobs' || menu === 'externalJobs') {
-      onNavigateToExternalJobs ? onNavigateToExternalJobs() : onNavigate && onNavigate('externalJobs');
     } else if (menu === 'aichat' || menu === 'ai-chat') {
       onNavigateToAiChat ? onNavigateToAiChat() : onNavigate && onNavigate('aichat');
     } else if (menu === 'notice') {
@@ -327,10 +324,10 @@ export default function MyPage({
             </div>
 
             <button
-              className={styles.bookmarkBtn}
+              className={styles.accountActionBtn}
               onClick={handleLogout}
             >
-              <div className={styles.bookmarkInner}>
+              <div className={styles.accountActionInner}>
                 {/* 로그아웃 아이콘 */}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

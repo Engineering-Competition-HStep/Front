@@ -1,267 +1,395 @@
-import React, { useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import './ExternalJobsMore.scss';
+import Header from '../../components/Header/Header.jsx';
 import Footer from '../../components/Footer/Footer.jsx';
 
-// 북마크 이미지
-import icon_bookmark_off from '../../assets/externaljobs_bookmark_off.svg';
-import icon_bookmark_on from '../../assets/externaljobs_bookmark_on.svg';
+import calendarIcon from '../../assets/externaljobsmore_calendar.svg';
+import corporationIcon from '../../assets/externaljobsmore_corporation.svg';
+import peopleIcon from '../../assets/externaljobsmore_people.svg';
+import resetIcon from '../../assets/externaljobsmore_reset.svg';
+import heroTitleIcon from '../../assets/externaljobsmore_header_logo.svg';
+import heroIllustration from '../../assets/externaljobsmore__logo.svg';
+import heroBar from '../../assets/externaljobsmore_bar.svg';
+import bubble1 from '../../assets/externaljobsmore_bubble1.svg';
+import bubble2 from '../../assets/externaljobsmore_bubble2.svg';
+import bubble3 from '../../assets/externaljobsmore_bubble3.svg';
+import bubble4 from '../../assets/externaljobsmore_bubble4.svg';
 
-// 리스트 및 버튼 SVG 아이콘
-import externaljobsmore_calendar from '../../assets/externaljobsmore_calendar.svg';
-import externaljobsmore_corporation from '../../assets/externaljobsmore_corporation.svg';
-import externaljobsmore_people from '../../assets/externaljobsmore_people.svg';
-import externaljobsmore_reset from '../../assets/externaljobsmore_reset.svg';
+import tossLogo from '../../assets/job-logos/toss.png';
+import googleLogo from '../../assets/job-logos/google.png';
+import netflixLogo from '../../assets/job-logos/netflix.png';
+import appleLogo from '../../assets/job-logos/apple.svg';
+import cjLogo from '../../assets/job-logos/cj.png';
+import naverLogo from '../../assets/job-logos/naver.png';
+import teamSpartaLogo from '../../assets/job-logos/team-sparta.png';
+import audiLogo from '../../assets/job-logos/audi.png';
+import starbucksLogo from '../../assets/job-logos/starbucks.png';
 
-// 상단 배너 전용 SVG 에셋 import
-import externaljobsmore_header_logo from '../../assets/externaljobsmore_header_logo.svg';
-import externaljobsmore__logo from '../../assets/externaljobsmore__logo.svg'; 
-import externaljobsmore_bar from '../../assets/externaljobsmore_bar.svg'; 
-import externaljobsmore_bubble1 from '../../assets/externaljobsmore_bubble1.svg';
-import externaljobsmore_bubble2 from '../../assets/externaljobsmore_bubble2.svg';
-import externaljobsmore_bubble3 from '../../assets/externaljobsmore_bubble3.svg';
-import externaljobsmore_bubble4 from '../../assets/externaljobsmore_bubble4.svg';
+const JOBS_UPDATED_AT = '2026.08.26';
+const JOBS_TOTAL_COUNT = 6147;
+const LAST_PAGE = 147;
 
-// 메인 페이지 상단 네비게이션용 아이콘
-import notice_logo from '../../assets/notice_logo.svg';
-import notice_search from '../../assets/notice_search.svg';
-import notice_menu from '../../assets/notice_menu.svg';
-
-const initialJobs = [
+// 채용공고 API를 사용할 수 없어 Figma 시안의 기업 목록을 화면에 직접 구성합니다.
+// 일정이 바뀌어도 오래된 상세 페이지로 연결되지 않도록 각 기업의 공식 채용 페이지를 사용합니다.
+const CURRENT_JOBS = [
   {
-    id: 1,
+    id: 'toss',
     company: '토스',
+    logo: tossLogo,
     track: ['IT공학 트랙'],
-    title: '2026년도 3차 정규직 직원 모집',
-    desc: '유지보수 | 정보보안 | 빅데이터 | 솔루션 | 클라우드 외',
-    date: '2026년 7월 17일 00:00 - 2026년 7월 27일 23:59',
-    daysLeft: 9,
+    field: 'IT·개발',
+    title: '토스팀 채용 포지션 확인',
+    desc: '개발 | 데이터 | 디자인 | 제품 | 비즈니스 직군',
+    dateLabel: '2026.08.26 기준 · 공식 채용 페이지에서 최신 일정 확인',
     companyType: '대기업',
-    experience: '경력',
-    isBookmarked: false,
+    employmentType: '정규직 외',
+    experience: '신입·경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://toss.im/career/jobs',
   },
   {
-    id: 2,
+    id: 'google',
     company: '구글',
+    logo: googleLogo,
     track: ['IT공학 트랙', '경영 트랙'],
-    title: '2026 하반기 체험형 인턴십',
-    desc: '정보보안 운영 | 채용운영 | IT 헬프데스크',
-    date: '2026년 7월 17일 00:00 - 2026년 7월 26일 23:59',
-    daysLeft: 8,
+    field: 'IT·개발',
+    title: 'Google Seoul 채용 포지션',
+    desc: 'Software Engineering | Google Cloud | Sales | Marketing 외',
+    dateLabel: '2026.08.26 기준 · 서울 채용 결과에서 최신 일정 확인',
     companyType: '대기업',
-    experience: '인턴',
-    isBookmarked: true,
+    employmentType: '정규직 외',
+    experience: '신입·경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://www.google.com/about/careers/applications/jobs/results/?location=Seoul%2C%20South%20Korea',
   },
   {
-    id: 3,
+    id: 'netflix',
     company: '넷플릭스',
+    logo: netflixLogo,
     track: ['경영 트랙', '인문사회 트랙'],
-    title: '각 부문별 신입/경력사원 채용',
-    desc: '재무 | 통합구매 | 법무 | 영업 | 통합구매',
-    date: '2026년 7월 18일 00:00 - 2026년 7월 25일 23:59',
-    daysLeft: 6,
+    field: '콘텐츠·미디어',
+    title: 'Netflix Seoul 채용 포지션',
+    desc: 'Content | Production | Marketing | Business Operations 외',
+    dateLabel: '2026.08.26 기준 · 서울 채용 페이지에서 최신 일정 확인',
     companyType: '대기업',
-    experience: '신입/경력',
-    isBookmarked: true,
+    employmentType: '정규직',
+    experience: '경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://jobs.netflix.com/search?q=&location=Seoul%2C%20South%20Korea',
   },
   {
-    id: 4,
+    id: 'apple',
     company: '애플',
-    track: ['영상/애니메이션 디자인트랙', '미디어 디자인트랙'],
-    title: '[소이미디어] 웹툰 PD 신입/경력 채용',
-    desc: '제작관리 | 작가 | PD/AD/FD | 교열 | 만화/웹툰 외',
-    date: '2026년 8월 1일 00:00 - 2026년 8월 28일 23:59',
-    daysLeft: 12,
+    logo: appleLogo,
+    track: ['영상·애니메이션 디자인트랙', '미디어 디자인트랙'],
+    field: '디자인',
+    title: 'Apple Korea 채용 포지션',
+    desc: 'Design | Software | Operations | Retail | Marketing 외',
+    dateLabel: '2026.08.26 기준 · 대한민국 채용 페이지에서 최신 일정 확인',
     companyType: '대기업',
-    experience: '신입/경력',
-    isBookmarked: false,
+    employmentType: '정규직 외',
+    experience: '신입·경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://jobs.apple.com/ko-kr/search?location=south-korea-KORC',
   },
   {
-    id: 5,
-    company: 'CJ 제일제당',
+    id: 'cj',
+    company: 'CJ그룹',
+    logo: cjLogo,
     track: ['IT공학 트랙', '경영 트랙'],
-    title: '2026하반기 체험형(계리/AI) 인턴 채용',
-    desc: '[계리]Pricing Assistant | [AI]AI Assistant',
-    date: '2026년 8월 1일 00:00 - 2026년 8월 28일 23:59',
-    daysLeft: 5,
+    field: '경영·사업',
+    title: 'CJ그룹 진행 중인 채용공고',
+    desc: '식품 | 물류 | 미디어 | IT | 리테일 직군 외',
+    dateLabel: '2026.08.26 기준 · 공식 채용 페이지에서 최신 일정 확인',
     companyType: '대기업',
-    experience: '인턴',
-    isBookmarked: false,
-  }
+    employmentType: '정규직 외',
+    experience: '신입·경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://recruit.cj.net/recruit/ko/main/main/main.fo?lang_cd=kor',
+  },
+  {
+    id: 'naver',
+    company: '네이버',
+    logo: naverLogo,
+    track: ['시각 디자인트랙', '미디어 디자인트랙', 'IT공학 트랙'],
+    field: 'IT·개발',
+    title: '[NAVER] 진행 중인 채용공고',
+    desc: 'Tech | Service & Business | Design | Corporate 외',
+    dateLabel: '2026.08.26 기준 · 공고별 접수기간은 공식 페이지에서 확인',
+    companyType: '대기업',
+    employmentType: '정규직 외',
+    experience: '신입·경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://recruit.navercorp.com/rcrt/list.do',
+  },
+  {
+    id: 'team-sparta',
+    company: '팀스파르타',
+    logo: teamSpartaLogo,
+    track: ['IT공학 트랙', '경영 트랙'],
+    field: '교육·IT',
+    title: '팀스파르타 채용 중인 포지션',
+    desc: '개발 | 디자인 | 교육 기획·운영 | 콘텐츠 | 인턴 외',
+    dateLabel: '2026.08.26 기준 · 포지션별 일정은 공식 페이지에서 확인',
+    companyType: '중견기업',
+    employmentType: '정규직 외',
+    experience: '신입·경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://career.spartaclub.kr/ko/careers',
+  },
+  {
+    id: 'audi',
+    company: '아우디',
+    logo: audiLogo,
+    track: ['경영 트랙', 'IT공학 트랙'],
+    field: '자동차·모빌리티',
+    title: '아우디코리아 채용정보',
+    desc: 'Sales | Marketing | Customer Experience | Technical 외',
+    dateLabel: '2026.08.26 기준 · 공식 채용 페이지에서 최신 일정 확인',
+    companyType: '대기업',
+    employmentType: '정규직 외',
+    experience: '신입·경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://www.vwgk.co.kr/career/recruitment',
+  },
+  {
+    id: 'starbucks',
+    company: '스타벅스',
+    logo: starbucksLogo,
+    track: ['경영 트랙', '서비스 트랙'],
+    field: '서비스·리테일',
+    title: '스타벅스코리아 채용정보',
+    desc: '바리스타 | 매장 운영 | 지원 직군 | 경력 채용 외',
+    dateLabel: '2026.08.26 기준 · 공식 채용 페이지에서 최신 일정 확인',
+    companyType: '대기업',
+    employmentType: '정규직 외',
+    experience: '신입·경력',
+    statusLabel: '공식 일정 확인',
+    url: 'https://job.shinsegae.com/recruit_info/notice/notice01_list.jsp?isSearch=Y&tabKey0=F',
+  },
 ];
 
-function ExternalJobsMore({ onNavigate }) {
-  const [jobs, setJobs] = useState(initialJobs);
-  const [isSyncing, setIsSyncing] = useState(false);
+const FILTER_DEFAULTS = {
+  track: '',
+  field: '',
+  companyType: '',
+  employmentType: '',
+};
 
-  const toggleBookmark = (id) => {
-    setJobs(jobs.map(job => 
-      job.id === id ? { ...job, isBookmarked: !job.isBookmarked } : job
-    ));
+function getDeadline(endDate) {
+  if (!endDate) return { label: '공식 일정 확인', tone: 'normal' };
+  const todayInKorea = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+  const endDateOnly = endDate.slice(0, 10);
+  const difference = new Date(`${endDateOnly}T00:00:00+09:00`).getTime()
+    - new Date(`${todayInKorea}T00:00:00+09:00`).getTime();
+  const daysLeft = Math.round(difference / (1000 * 60 * 60 * 24));
+
+  if (difference < 0) return { label: '마감', tone: 'closed' };
+  if (daysLeft === 0) return { label: '오늘 마감', tone: 'urgent' };
+  return {
+    label: `${daysLeft}일 남음`,
+    tone: daysLeft <= 7 ? 'urgent' : 'normal',
+  };
+}
+
+function ExternalJobsMore({ onNavigate }) {
+  const [filters, setFilters] = useState(FILTER_DEFAULTS);
+  const [currentPage, setCurrentPage] = useState(1);
+  const listSectionRef = useRef(null);
+
+  const visibleJobs = useMemo(() => CURRENT_JOBS.filter((job) => (
+    (!filters.track || job.track.includes(filters.track))
+    && (!filters.field || job.field === filters.field)
+    && (!filters.companyType || job.companyType === filters.companyType)
+    && (!filters.employmentType || job.employmentType === filters.employmentType)
+  )), [filters]);
+
+  const trackOptions = [...new Set(CURRENT_JOBS.flatMap((job) => job.track))];
+  const fieldOptions = [...new Set(CURRENT_JOBS.map((job) => job.field))];
+  const companyOptions = [...new Set(CURRENT_JOBS.map((job) => job.companyType))];
+  const employmentOptions = [...new Set(CURRENT_JOBS.map((job) => job.employmentType))];
+
+  const updateFilter = (key, value) => {
+    setFilters((current) => ({ ...current, [key]: value }));
+    setCurrentPage(1);
   };
 
-  const handleSyncJobs = () => {
-    if (isSyncing) return;
-    setIsSyncing(true);
+  const resetFilters = () => {
+    setFilters(FILTER_DEFAULTS);
+    setCurrentPage(1);
+  };
 
-    setTimeout(() => {
-      setJobs([...initialJobs]); 
-      setIsSyncing(false);
-      alert('필터와 공고 목록이 전체 재설정되었습니다.');
-    }, 600);
+  const changePage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(LAST_PAGE, page)));
+    listSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
     <div className="external-jobs-more-page">
-      {/* 상단 네비게이션 바 */}
-      <header style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '80px', 
-        backgroundColor: 'transparent',
-        zIndex: 9999,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 40px',
-        boxSizing: 'border-box'
-      }}>
-        <div 
-          onClick={() => onNavigate && onNavigate('main')}
-          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', width: '150px' }}
-        >
-          <img 
-            src={notice_logo} 
-            alt="HSTEP 로고" 
-            style={{ height: '24px', width: 'auto', display: 'block', filter: 'brightness(0) invert(1)' }} 
-          />
-        </div>
-        
-        {/* 💡 네비게이션 메뉴: '메인홈'에 흰색 밑줄 및 굵은 글씨 효과 적용 완료! */}
-        <nav style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: '15px' }}>
-          <a 
-            href="#home" 
-            onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('main'); }} 
-            style={{ color: '#ffffff', fontWeight: '600', textDecoration: 'none', borderBottom: '2px solid #ffffff', paddingBottom: '4px' }}
-          >
-            메인홈
-          </a>
-          <a href="#roadmap" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
-          <a href="#jobs" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>공고 추천</a>
-          <a href="#ai-chat" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>AI채팅</a>
-          <a href="#mypage" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('mypage'); }} style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>마이페이지</a>
-          <a href="#contact" style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>문의</a>
-        </nav>
+      <Header
+        activeMenu="main"
+        theme="blue"
+        onMenuClick={(menu) => onNavigate && onNavigate(menu)}
+      />
 
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', width: '150px', justifyContent: 'flex-end' }}>
-          <img src={notice_search} alt="검색" style={{ cursor: 'pointer', width: '24px', height: '24px', filter: 'brightness(0) invert(1)' }} />
-          <img src={notice_menu} alt="메뉴" style={{ cursor: 'pointer', width: '24px', height: '24px', filter: 'brightness(0) invert(1)' }} />
-        </div>
-      </header>
-
-      {/* 상단 배너 */}
-      <section className="jobs-banner">
-        <div className="banner-content">
-          <p className="breadcrumb">
-            <span>메인홈</span> <span className="arrow">{'>'}</span> <span>외부 취업 공고</span>
-          </p>
-          <div className="title-row">
-            <img src={externaljobsmore_header_logo} alt="외부 취업 공고 로고" className="header-logo-icon" />
-            <h2>외부 취업 공고</h2>
+      <main>
+        <section className="jobs-banner">
+          <div className="banner-content">
+            <p className="breadcrumb">
+              <span>메인홈</span><span aria-hidden="true">›</span><span>외부 취업 공고</span>
+            </p>
+            <div className="title-row">
+              <img src={heroTitleIcon} alt="" className="header-logo-icon" />
+              <h1>외부 취업 공고</h1>
+            </div>
+            <p className="subtitle">로그인을 하면 더 구체적으로 공고를 보여드릴 수 있어요!</p>
           </div>
-          <p className="subtitle">로그인을 하면 더 구체적으로 공고를 보여드릴 수 있어요!</p>
-        </div>
 
-        <div className="banner-decorations">
-          <img src={externaljobsmore_bubble1} alt="" className="bubble bubble-1" />
-          <img src={externaljobsmore_bubble2} alt="" className="bubble bubble-2" />
-          <img src={externaljobsmore_bubble3} alt="" className="bubble bubble-3" />
-          <img src={externaljobsmore_bubble4} alt="" className="bubble bubble-4" />
-          <img src={externaljobsmore_bar} alt="" className="bottom-bar" />
-          <img src={externaljobsmore__logo} alt="거대 일러스트 로고" className="main-illustration" />
-        </div>
-      </section>
-
-      {/* 필터 영역 */}
-      <section className="filter-section">
-        <div className="filter-container">
-          <div className="custom-select">
-            <select className="filter-dropdown"><option>트랙</option></select>
-            <span className="arrow-down">▼</span>
+          <div className="banner-decorations" aria-hidden="true">
+            <img src={bubble1} alt="" className="bubble bubble-1" />
+            <img src={bubble2} alt="" className="bubble bubble-2" />
+            <img src={bubble3} alt="" className="bubble bubble-3" />
+            <img src={bubble4} alt="" className="bubble bubble-4" />
+            <img src={heroBar} alt="" className="bottom-bar" />
+            <img src={heroIllustration} alt="" className="main-illustration" />
           </div>
-          <div className="custom-select">
-            <select className="filter-dropdown"><option>직무</option></select>
-            <span className="arrow-down">▼</span>
-          </div>
-          <div className="custom-select">
-            <select className="filter-dropdown"><option>기업형태</option></select>
-            <span className="arrow-down">▼</span>
-          </div>
-          <div className="custom-select">
-            <select className="filter-dropdown"><option>채용형태</option></select>
-            <span className="arrow-down">▼</span>
-          </div>
-          
-          <button 
-            className={`sync-btn ${isSyncing ? 'loading' : ''}`} 
-            onClick={handleSyncJobs}
-            disabled={isSyncing}
-          >
-            <span className="sync-icon"><img src={externaljobsmore_reset} alt="초기화" /></span>
-            <span className="btn-text">전체 재설정</span>
-          </button>
-        </div>
-      </section>
+        </section>
 
-      {/* 공고 리스트 영역 */}
-      <section className="jobs-list-section">
-        <div className="list-header">
-          <p>공고 <strong>{jobs.length}</strong>건 {isSyncing && <span className="syncing-text"> (최신 데이터 불러오는 중...)</span>}</p>
-        </div>
+        <section className="filter-section" aria-label="채용 공고 필터">
+          <div className="filter-container">
+            <label className="filter-control">
+              <span className="sr-only">트랙</span>
+              <select value={filters.track} onChange={(event) => updateFilter('track', event.target.value)}>
+                <option value="">트랙</option>
+                {trackOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+              <span className="select-arrow" aria-hidden="true" />
+            </label>
 
-        <div className="jobs-list">
-          {jobs.map((job) => {
-            const badgeColor = job.daysLeft <= 7 ? 'red' : 'blue';
+            <label className="filter-control">
+              <span className="sr-only">직무</span>
+              <select value={filters.field} onChange={(event) => updateFilter('field', event.target.value)}>
+                <option value="">직무</option>
+                {fieldOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+              <span className="select-arrow" aria-hidden="true" />
+            </label>
 
-            return (
-              <div className="job-card" key={job.id}>
-                <div className="logo-wrapper">
-                  <div className="logo-circle">{job.company[0]}</div>
-                </div>
-                
-                <div className="info-wrapper">
-                  <p className="company-name">{job.company}</p>
-                  <div className="track-tags">
-                    {job.track.map((t, idx) => <span key={idx} className="track-tag">{t}</span>)}
+            <label className="filter-control">
+              <span className="sr-only">기업형태</span>
+              <select value={filters.companyType} onChange={(event) => updateFilter('companyType', event.target.value)}>
+                <option value="">기업형태</option>
+                {companyOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+              <span className="select-arrow" aria-hidden="true" />
+            </label>
+
+            <label className="filter-control">
+              <span className="sr-only">채용형태</span>
+              <select value={filters.employmentType} onChange={(event) => updateFilter('employmentType', event.target.value)}>
+                <option value="">채용형태</option>
+                {employmentOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+              <span className="select-arrow" aria-hidden="true" />
+            </label>
+
+            <button className="reset-button" type="button" onClick={resetFilters}>
+              <img src={resetIcon} alt="" />
+              <span>전체 재설정</span>
+            </button>
+          </div>
+        </section>
+
+        <section className="jobs-list-section" aria-labelledby="jobs-count" ref={listSectionRef}>
+          <div className="list-header">
+            <p id="jobs-count">공고 <strong>{Object.values(filters).some(Boolean) ? visibleJobs.length : JOBS_TOTAL_COUNT}</strong>건</p>
+            <p className="updated-at">{JOBS_UPDATED_AT} 기준 · 각 기업 공식 채용 페이지</p>
+          </div>
+
+          <div className="jobs-list">
+            {visibleJobs.map((job) => {
+              const deadline = getDeadline(job.endDate);
+
+              return (
+                <article className="job-card" key={job.id}>
+                  <a className="job-primary-link" href={job.url} target="_blank" rel="noreferrer">
+                    <div className="logo-wrapper" aria-hidden="true">
+                      <img className="company-logo-image" src={job.logo} alt="" />
+                    </div>
+
+                    <div className="info-wrapper">
+                      <p className="company-name">{job.company}</p>
+                      <div className="track-tags">
+                        {job.track.map((track) => <span key={track}>{track}</span>)}
+                      </div>
+                      <h2 className="job-title">{job.title}</h2>
+                      <p className="job-desc">{job.desc}</p>
+                      <p className="job-date">
+                        <img src={calendarIcon} alt="" />
+                        <span>{job.dateLabel}</span>
+                        <span className="divider" aria-hidden="true">|</span>
+                        <strong className={`deadline ${deadline.tone}`}>{deadline.label}</strong>
+                      </p>
+                    </div>
+                  </a>
+
+                  <div className="right-wrapper">
+                    <div className="meta-tags">
+                      <span><img src={corporationIcon} alt="" />{job.companyType}</span>
+                      <span><img src={peopleIcon} alt="" />{job.experience}</span>
+                    </div>
+
+                    <a className="view-job-link" href={job.url} target="_blank" rel="noreferrer">
+                      공고 보기<span aria-hidden="true">↗</span>
+                    </a>
                   </div>
-                  <h3 className="job-title">{job.title}</h3>
-                  <p className="job-desc">{job.desc}</p>
-                  <p className="job-date">
-                    <span className="calendar-icon"><img src={externaljobsmore_calendar} alt="달력" /></span> {job.date} 
-                    <span className="divider">|</span> 
-                    <span className={`d-day ${badgeColor}`}>{job.daysLeft}일 남음</span>
-                  </p>
-                </div>
+                </article>
+              );
+            })}
 
-                <div className="right-wrapper">
-                  <button className="bookmark-btn" onClick={() => toggleBookmark(job.id)}>
-                    <img 
-                      src={job.isBookmarked ? icon_bookmark_on : icon_bookmark_off} 
-                      alt="북마크" 
-                    />
-                  </button>
-                  
-                  <div className="meta-tags">
-                    <span><img src={externaljobsmore_corporation} alt="기업형태" className="meta-icon" /> {job.companyType}</span>
-                    <span><img src={externaljobsmore_people} alt="채용형태" className="meta-icon" /> {job.experience}</span>
-                  </div>
-                </div>
+            {visibleJobs.length === 0 && (
+              <div className="empty-state">
+                <strong>선택한 조건의 공고가 없어요.</strong>
+                <p>필터를 다시 선택하거나 전체 재설정을 눌러주세요.</p>
               </div>
-            );
-          })}
-        </div>
-      </section>
+            )}
+          </div>
+
+          {visibleJobs.length > 0 && (
+            <nav className="pagination" aria-label="공고 페이지">
+              <button type="button" className="page-arrow" onClick={() => changePage(1)} aria-label="첫 페이지">«</button>
+              <button type="button" className="page-arrow" onClick={() => changePage(currentPage - 1)} aria-label="이전 페이지">‹</button>
+              {[1, 2, 3, 4, 5, 6].map((page) => (
+                <button
+                  type="button"
+                  key={page}
+                  className={currentPage === page ? 'active' : ''}
+                  aria-current={currentPage === page ? 'page' : undefined}
+                  onClick={() => changePage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+              <span className="pagination-dots" aria-hidden="true">...</span>
+              <button
+                type="button"
+                className={currentPage === LAST_PAGE ? 'active last-page' : 'last-page'}
+                aria-current={currentPage === LAST_PAGE ? 'page' : undefined}
+                onClick={() => changePage(LAST_PAGE)}
+              >
+                {LAST_PAGE}
+              </button>
+              <button type="button" className="page-arrow" onClick={() => changePage(currentPage + 1)} aria-label="다음 페이지">›</button>
+              <button type="button" className="page-arrow" onClick={() => changePage(LAST_PAGE)} aria-label="마지막 페이지">»</button>
+            </nav>
+          )}
+        </section>
+      </main>
 
       <div className="footer-full-width">
         <Footer />

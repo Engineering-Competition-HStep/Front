@@ -5,10 +5,14 @@ import Footer from '../../components/Footer/Footer.jsx';
 import hero_img from '../../assets/externaljobs_logo.svg';
 import hstep_text_logo from '../../assets/externaljobs_hstep_logo.svg';
 import notice_logo from '../../assets/notice_logo.svg';
-import icon_bookmark_off from '../../assets/externaljobs_bookmark_off.svg';
-import icon_bookmark_on from '../../assets/externaljobs_bookmark_on.svg';
 import notice_search from "../../assets/notice_search.svg";
 import notice_menu from "../../assets/notice_menu.svg";
+import tossLogo from '../../assets/job-logos/toss.png';
+import gooksundangLogo from '../../assets/Home_gooksundang.png';
+import starbucksLogo from '../../assets/job-logos/starbucks.png';
+import teamSpartaLogo from '../../assets/job-logos/team-sparta.png';
+import appleLogo from '../../assets/job-logos/apple.svg';
+import naverLogo from '../../assets/job-logos/naver.png';
 
 // 1. 가장 추천하는 공고 데이터 (기간, 연봉 데이터 추가)
 const initialTopJobs = [
@@ -18,10 +22,9 @@ const initialTopJobs = [
     company: '토스',
     role: 'UX/UI 디자이너',
     tags: ['시각디자인트랙', 'UI프로젝트 3개', '평균평점 3.82', 'Figma 가능'],
-    isBookmarked: false,
-    logoText: 'Toss',
-    logoColor: '#3182F6',
-    period: '2026년 6월 30일 00:00\n~2026년 7월 13일 23:59',
+    logo: tossLogo,
+    url: 'https://toss.im/career/jobs',
+    period: '공식 채용 페이지에서 최신 일정 확인',
     salary: '4,500 ~ 5,000'
   },
   {
@@ -30,10 +33,9 @@ const initialTopJobs = [
     company: '국순당',
     role: '마케팅 디자이너',
     tags: ['시각디자인트랙', 'UI프로젝트 3개', '평균평점 3.82', 'Figma 가능'],
-    isBookmarked: false,
-    logoText: '국순당',
-    logoColor: '#000000',
-    period: '2026년 7월 1일 00:00\n~2026년 7월 20일 23:59',
+    logo: gooksundangLogo,
+    url: 'https://www.ksdb.co.kr/recruit/recruit.asp',
+    period: '공식 채용 페이지에서 최신 일정 확인',
     salary: '3,800 ~ 4,200'
   },
   {
@@ -42,10 +44,9 @@ const initialTopJobs = [
     company: '스타벅스',
     role: '모션그래픽 디자이너',
     tags: ['미디어디자인트랙', 'UI프로젝트 3개', '평균평점 3.82', 'Figma 가능'],
-    isBookmarked: true,
-    logoText: '★',
-    logoColor: '#00704A',
-    period: '2026년 7월 5일 00:00\n~2026년 7월 25일 23:59',
+    logo: starbucksLogo,
+    url: 'https://job.shinsegae.com/recruit_info/notice/notice01_list.jsp?isSearch=Y&tabKey0=F',
+    period: '공식 채용 페이지에서 최신 일정 확인',
     salary: '회사 내규에 따름'
   }
 ];
@@ -58,10 +59,9 @@ const initialOtherJobs = [
     company: '팀스파르타',
     role: 'UX/UI 디자이너',
     tags: ['Figma 가능', 'UI프로젝트 3개'],
-    isBookmarked: false,
-    logoText: 'TEAM',
-    logoColor: '#E8344E',
-    period: '상시 채용',
+    logo: teamSpartaLogo,
+    url: 'https://career.spartaclub.kr/ko/careers',
+    period: '포지션별 채용 일정 확인',
     salary: '4,000 ~ 4,500'
   },
   {
@@ -70,10 +70,9 @@ const initialOtherJobs = [
     company: '애플',
     role: '시각 디자이너',
     tags: ['시각디자인트랙', '평균평점 3.82'],
-    isBookmarked: false,
-    logoText: '',
-    logoColor: '#000000',
-    period: '2026년 7월 10일 00:00\n~2026년 7월 31일 23:59',
+    logo: appleLogo,
+    url: 'https://jobs.apple.com/ko-kr/search?location=south-korea-KORC',
+    period: '대한민국 채용 페이지에서 최신 일정 확인',
     salary: '업계 최고 수준'
   },
   {
@@ -82,53 +81,31 @@ const initialOtherJobs = [
     company: '네이버',
     role: '포토 디자이너',
     tags: ['시각디자인트랙', '일러스트 가능'],
-    isBookmarked: false,
-    logoText: 'N',
-    logoColor: '#03C75A',
-    period: '2026년 7월 15일 00:00\n~2026년 8월 15일 23:59',
+    logo: naverLogo,
+    url: 'https://recruit.navercorp.com/rcrt/list.do',
+    period: '공고별 접수기간은 공식 페이지에서 확인',
     salary: '회사 내규에 따름'
   }
 ];
 
 // 💡 [수정] 괄호 안에 onNavigateToAiChat props를 명시적으로 추가했습니다!
 function ExternalJobs({ onNavigate, onNavigateToAiChat }) {
-  const [topJobs, setTopJobs] = useState(initialTopJobs);
-  const [otherJobs, setOtherJobs] = useState(initialOtherJobs);
-  
   // 현재 펼쳐진 카드의 ID를 저장하는 상태 (null이면 아무것도 안 펼쳐짐)
   const [expandedCardId, setExpandedCardId] = useState(null);
 
-  const toggleTopBookmark = (id) => {
-    setTopJobs(topJobs.map(job => 
-      job.id === id ? { ...job, isBookmarked: !job.isBookmarked } : job
-    ));
-  };
-
-  const toggleOtherBookmark = (id) => {
-    setOtherJobs(otherJobs.map(job => 
-      job.id === id ? { ...job, isBookmarked: !job.isBookmarked } : job
-    ));
-  };
-
   // 공통 카드 렌더링 함수
-  const renderJobCard = (job, toggleBookmarkFunc) => {
+  const renderJobCard = (job) => {
     const isExpanded = expandedCardId === job.id;
 
     return (
       <div className={`recommend-card ${isExpanded ? 'expanded' : ''}`} key={job.id}>
         <div className="card-header">
           <span className="match-rate">적합도 {job.matchRate}%</span>
-          <button className="bookmark-btn" onClick={(e) => {
-            e.stopPropagation(); // 북마크 누를 때 카드가 열리거나 닫히지 않도록 방지
-            toggleBookmarkFunc(job.id);
-          }}>
-            <img src={job.isBookmarked ? icon_bookmark_on : icon_bookmark_off} alt="북마크" />
-          </button>
         </div>
         
         <div className="card-body">
-          <div className="company-logo" style={{ color: job.logoColor }}>
-            {job.logoText}
+          <div className="company-logo">
+            <img src={job.logo} alt={`${job.company} 로고`} />
           </div>
           <h3 className="company-name">{job.company}</h3>
           <p className="company-role">{job.role}</p>
@@ -155,7 +132,7 @@ function ExternalJobs({ onNavigate, onNavigateToAiChat }) {
               <span className="info-value">{job.salary}</span>
             </div>
 
-            <button className="apply-btn">채용공고 보러가기</button>
+            <a className="apply-btn" href={job.url} target="_blank" rel="noreferrer">채용공고 보러가기</a>
             <button className="close-btn" onClick={() => setExpandedCardId(null)}>닫기</button>
           </div>
         ) : (
@@ -221,7 +198,7 @@ function ExternalJobs({ onNavigate, onNavigateToAiChat }) {
 
         <section className="cards-section">
           <div className="cards-grid">
-            {topJobs.map(job => renderJobCard(job, toggleTopBookmark))}
+            {initialTopJobs.map(job => renderJobCard(job))}
           </div>
         </section>
 
@@ -232,12 +209,17 @@ function ExternalJobs({ onNavigate, onNavigateToAiChat }) {
 
         <section className="cards-section">
           <div className="cards-grid">
-            {otherJobs.map(job => renderJobCard(job, toggleOtherBookmark))}
+            {initialOtherJobs.map(job => renderJobCard(job))}
           </div>
         </section>
 
         <div className="more-btn-wrapper">
-          <button className="more-btn">다른 공고도 보러 가기 →</button>
+          <button
+            className="more-btn"
+            onClick={() => onNavigate && onNavigate('externalJobsMore')}
+          >
+            다른 공고도 보러 가기 →
+          </button>
         </div>
       </div>
 

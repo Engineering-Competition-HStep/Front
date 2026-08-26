@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "./MainPage.scss"; 
+import { getAccessToken, getLatestNotices, getMyRoadmaps } from '../../services/hstepApi.js';
 
 // 기존 아이콘 및 배경 이미지
 import Home_logo from "../../assets/Home_logo.svg";
@@ -8,22 +9,12 @@ import Home_header_image from "../../assets/Home_header_image.svg";
 import Home_search from "../../assets/Home_search.svg";
 import Home_mypage from "../../assets/Home_mypage.svg";
 import HSTEP_logo from "../../assets/HSTEP_logo.svg";
-import Home_advertise from "../../assets/Home_advertise.svg";
 import Home_roadmap from "../../assets/Home_roadmap.svg";
 import Home_notice from "../../assets/Home_notice.svg";
 import Home_rectangle from "../../assets/Home_rectangle.svg";
 
 // 로드맵 인력 양성 유형 아이콘
 import Home_work from "../../assets/Home_work.svg";
-
-// 취업 공고 회사 로고 및 화살표 이미지
-import Home_gooksundang from "../../assets/Home_gooksundang.png";
-import Home_adidas_logo from "../../assets/Home_adidas_logo.png";
-import Home_toss_logo from "../../assets/Home_toss_logo.png";
-import Home_hyndai_logo from "../../assets/Home_hyndai_logo.svg";
-import Home_cj_logo from "../../assets/Home_cj_logo.png";
-import Home_left from "../../assets/Home_left.png";
-import Home_right from "../../assets/Home_right.png";
 
 // 상단 메뉴바, 하단 푸터 컴포넌트
 import Footer from '../../components/Footer/Footer.jsx';
@@ -32,14 +23,6 @@ import Footer from '../../components/Footer/Footer.jsx';
 import notice_logo from "../../assets/notice_logo.svg";
 import notice_search from "../../assets/notice_search.svg";
 import notice_menu from "../../assets/notice_menu.svg";
-
-const jobs = [
-  ["국순당", Home_gooksundang, ["지식정보문화트랙 추천"], "청년 직무 아카데미 교육생 모집", "~11월 24일 23:59"],
-  ["아디다스", Home_adidas_logo, ["정보시스템/AI트랙 추천"], "[신입/경력] 각 부문 인재채용", "~2월 9일 23:59"],
-  ["토스", Home_toss_logo, ["행정트랙 추천"], "[신입/경력] 각 부문 인재채용", "~7월 14일 23:59"],
-  ["현대 오토에버", Home_hyndai_logo, ["사이버보안/AI트랙 추천", "글로벌비즈니스트랙 추천"], "9월 인재모집", "~9월 2일 23:59"],
-  ["CJ 제일제당", Home_cj_logo, ["기업경영트랙 추천"], "2026년 3분기 신입 및 경력사원 채용", "~8월 13일 23:59"],
-];
 
 const notices = [
   ["2026학년도 2학기 교차 전부(과) 선발 안내 (7.13~7.17)", "2026-07-06"],
@@ -80,22 +63,62 @@ function makeGradeColumns(cols) {
   return [0, 1, 2, 3].map((i) => cols[i] || { row2: null, row1: null });
 }
 
+function transformServerRoadmaps(roadmaps) {
+  if (!Array.isArray(roadmaps) || roadmaps.length === 0) return null;
+
+  return roadmaps.reduce((catalog, roadmap) => {
+    const items = Array.isArray(roadmap.items) ? roadmap.items : [];
+    const categories = [...new Set(
+      [...items]
+        .sort((a, b) => (a.itemOrder || 0) - (b.itemOrder || 0))
+        .map((item) => item.category)
+        .filter(Boolean)
+    )].slice(0, 4);
+
+    while (categories.length < 4) categories.push(`추천 역량 ${categories.length + 1}`);
+
+    const grades = {};
+    [1, 2, 3, 4].forEach((grade) => {
+      grades[`${grade}학년`] = makeGradeColumns(categories.map((category) => {
+        const itemFor = (semester) => items.find((item) => (
+          item.grade === grade
+          && item.semester === semester
+          && item.category === category
+        ));
+        const row1Item = itemFor(1);
+        const row2Item = itemFor(2);
+        const toCourse = (item) => item ? {
+          type: item.levelLabel || item.level || '추천',
+          title: item.title,
+        } : null;
+
+        return { row2: toCourse(row2Item), row1: toCourse(row1Item) };
+      }));
+    });
+
+    catalog[roadmap.trackName] = {
+      roles: roadmap.title || `${roadmap.trackName} 추천 로드맵`,
+      categories: categories.map((name, index) => ({ name, isHighlight: index === categories.length - 1 })),
+      grades,
+    };
+    return catalog;
+  }, {});
+}
+
 function MainPage({ 
   onNavigate,
   onNavigateToMyPage, 
   onNavigateToNotice, 
-  onNavigateToExternalJobs, 
-  onNavigateToExternalJobsMore, 
   onNavigateToAiChat 
 }) {
   const [track, setTrack] = useState("미디어디자인 트랙");
   const [selectedGrade, setSelectedGrade] = useState("4학년");
   
-  const scrollRef = useRef(null);
   const [serverNotices, setServerNotices] = useState([]);
+  const [serverRoadmapData, setServerRoadmapData] = useState(null);
 
   // ✨ 1~4학년 데이터: 컬럼별 row2(2학기) / row1(1학기) 고정 슬롯 구조
-  const roadmapData = {
+  const fallbackRoadmapData = {
     "미디어디자인 트랙": {
       roles: "미디어커뮤니케이션 디자이너    |    영상광고 디자이너",
       categories: [
@@ -169,26 +192,35 @@ function MainPage({
     }
   };
 
-  const currentRoadmap = roadmapData[track] || roadmapData["미디어디자인 트랙"];
+  const roadmapData = serverRoadmapData || fallbackRoadmapData;
+  const roadmapTracks = Object.keys(roadmapData);
+  const currentRoadmap = roadmapData[track] || roadmapData[roadmapTracks[0]];
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/notices/latest?size=4')
-      .then((res) => {
-        if (!res.ok) throw new Error(`서버 에러 상태 코드: ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        if (data && data.length > 0) setServerNotices(data);
-      })
-      .catch((err) => {
-        console.error("최신 공지사항 불러오기 실패 (더미 데이터로 대체합니다):", err);
-      });
+    if (!getAccessToken()) return;
+
+    let cancelled = false;
+    Promise.allSettled([getMyRoadmaps(), getLatestNotices(4)]).then(([roadmapsResult, noticesResult]) => {
+      if (cancelled) return;
+
+      if (roadmapsResult.status === 'fulfilled') {
+        const transformed = transformServerRoadmaps(roadmapsResult.value);
+        if (transformed && Object.keys(transformed).length > 0) {
+          setServerRoadmapData(transformed);
+          setTrack((current) => transformed[current] ? current : Object.keys(transformed)[0]);
+        }
+      }
+
+      if (noticesResult.status === 'fulfilled' && Array.isArray(noticesResult.value) && noticesResult.value.length > 0) {
+        setServerNotices(noticesResult.value);
+      }
+    });
+
+    return () => { cancelled = true; };
   }, []);
 
   const handleMenuNavigation = (menu) => {
-    if (menu === 'jobs' || menu === 'externalJobs') {
-      onNavigateToExternalJobs ? onNavigateToExternalJobs() : onNavigate && onNavigate('externalJobs');
-    } else if (menu === 'aichat' || menu === 'ai-chat') {
+    if (menu === 'aichat' || menu === 'ai-chat') {
       onNavigateToAiChat ? onNavigateToAiChat() : onNavigate && onNavigate('aichat');
     } else if (menu === 'mypage') {
       onNavigateToMyPage ? onNavigateToMyPage() : onNavigate && onNavigate('mypage');
@@ -196,16 +228,6 @@ function MainPage({
       onNavigateToNotice ? onNavigateToNotice() : onNavigate && onNavigate('notice');
     } else {
       onNavigate && onNavigate(menu);
-    }
-  };
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = 300;
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth"
-      });
     }
   };
 
@@ -224,7 +246,6 @@ function MainPage({
         <nav style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: '15px' }}>
           <a href="#home" onClick={(e) => { e.preventDefault(); handleMenuNavigation('main'); }} style={{ color: '#ffffff', fontWeight: '600', textDecoration: 'none', borderBottom: '2px solid #ffffff', paddingBottom: '4px' }}>메인홈</a>
           <a href="#roadmap" onClick={(e) => { e.preventDefault(); handleMenuNavigation('roadmap'); }} style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>나의 로드맵</a>
-          <a href="#jobs" onClick={(e) => { e.preventDefault(); handleMenuNavigation('externalJobs'); }} style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>공고 추천</a>
           <a href="#ai-chat" onClick={(e) => { e.preventDefault(); handleMenuNavigation('aichat'); }} style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>AI채팅</a>
           <a href="#mypage" onClick={(e) => { e.preventDefault(); handleMenuNavigation('mypage'); }} style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>마이페이지</a>
           <a href="#contact" onClick={(e) => { e.preventDefault(); handleMenuNavigation('contact'); }} style={{ color: '#ffffff', textDecoration: 'none', opacity: 0.9 }}>문의</a>
@@ -252,44 +273,6 @@ function MainPage({
         <img src={Home_header_image} alt="로드맵 일러스트" className="hero-art-img" />
       </section>
 
-      {/* 외부 취업 공고 영역 */}
-      <section className="jobs-section" id="jobs">
-        <div className="container">
-          <SectionTitle 
-            icon={Home_advertise} 
-            title="외부 취업 공고" 
-            description="나에게 맞는 다양한 취업 공고를 만나보세요." 
-            action="+ 취업공고 더 보러가기" 
-            onActionClick={() => onNavigateToExternalJobsMore ? onNavigateToExternalJobsMore() : handleMenuNavigation('externalJobs')}
-          />
-        </div>
-        <div className="carousel-wrapper">
-          <div className="blur-edge blur-left">
-            <button className="nav-arrow left-arrow" onClick={() => scroll("left")} aria-label="이전 공고 보기">
-              <img src={Home_left} alt="이전 화살표" />
-            </button>
-          </div>
-          
-          <div className="job-strip" ref={scrollRef}>
-            {jobs.map(([company, logoSrc, tags, title, deadline]) => (
-              <article className="job-card" key={company}>
-                <div className="logo"><img src={logoSrc} alt={`${company} 로고`} /></div>
-                <h3 className="company">{company}</h3>
-                <div className="tags">{tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>
-                <p className="job-title">{title}</p>
-                <div className="deadline"><span>{deadline}</span><span>→</span></div>
-              </article>
-            ))}
-          </div>
-
-          <div className="blur-edge blur-right">
-            <button className="nav-arrow right-arrow" onClick={() => scroll("right")} aria-label="다음 공고 보기">
-              <img src={Home_right} alt="다음 화살표" />
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* 로드맵 영역 */}
       <section className="roadmap-wrapper" id="roadmap">
         <div className="container">
@@ -304,20 +287,16 @@ function MainPage({
         <div className="roadmap-panel">
           <div className="container">
             <div className="roadmap-tabs">
-              <button 
-                type="button" 
-                className={`tab-btn ${track === "미디어디자인 트랙" ? "active" : ""}`} 
-                onClick={() => setTrack("미디어디자인 트랙")}
-              >
-                미디어디자인 트랙
-              </button>
-              <button 
-                type="button" 
-                className={`tab-btn ${track === "지식정보문화 트랙" ? "active" : ""}`} 
-                onClick={() => setTrack("지식정보문화 트랙")}
-              >
-                지식정보문화 트랙
-              </button>
+              {roadmapTracks.map((trackName) => (
+                <button
+                  key={trackName}
+                  type="button"
+                  className={`tab-btn ${track === trackName ? "active" : ""}`}
+                  onClick={() => setTrack(trackName)}
+                >
+                  {trackName}
+                </button>
+              ))}
             </div>
 
             <div className="roadmap-main-board">

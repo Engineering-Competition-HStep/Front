@@ -45,9 +45,11 @@ function Signup({ onBackToLogin }) {
 
   // 이메일 상태
   const [email, setEmail] = useState('');
-  const [emailChecking, setEmailChecking] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+  // 인증 메일을 발송한 이메일 주소 (현재 email과 일치해야 인증된 것으로 간주)
+  const [sentEmail, setSentEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [emailNotice, setEmailNotice] = useState('');
 
   // 학번 중복확인 상태
   const [studentIdChecking, setStudentIdChecking] = useState(false);
@@ -135,43 +137,49 @@ function Signup({ onBackToLogin }) {
     setCurrentStep(2);
   };
 
-  // 이메일 형식 확인 (실제 인증메일 발송 API가 아직 없어, 학교 이메일 형식 + 중복 여부만 확인합니다)
-  const handleVerifyEmail = async () => {
+  // 인증 메일 발송 (백엔드가 학교 이메일함으로 인증 링크를 보내고, 사용자가 그 링크를 클릭해야 인증이 완료됩니다)
+  const handleSendVerificationEmail = async () => {
     setEmailError('');
-    setEmailVerified(false);
+    setEmailNotice('');
 
-    if (!HANSUNG_EMAIL_PATTERN.test(email.trim())) {
+    const trimmedEmail = email.trim();
+    if (!HANSUNG_EMAIL_PATTERN.test(trimmedEmail)) {
       setEmailError('한성대학교 이메일(@hansung.ac.kr)만 사용할 수 있습니다.');
       return;
     }
 
-    setEmailChecking(true);
+    setEmailSending(true);
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/auth/check/email?email=${encodeURIComponent(email.trim())}`
-      );
+      const response = await fetch(`${API_BASE_URL}/api/auth/email-verifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmedEmail }),
+      });
       const result = await response.json();
 
       if (response.ok) {
-        setEmailVerified(true);
+        setSentEmail(trimmedEmail);
+        setEmailNotice('인증 메일을 발송했습니다. 학교 메일함에서 인증 링크를 클릭한 후 아래 "다음으로" 버튼을 눌러주세요.');
       } else {
-        setEmailError(result.message || '이미 사용 중인 이메일입니다.');
+        setSentEmail('');
+        setEmailError(result.message || '인증 메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.');
       }
     } catch (error) {
-      console.error('이메일 중복확인 실패:', error);
+      console.error('인증 메일 발송 실패:', error);
+      setSentEmail('');
       setEmailError('서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.');
     } finally {
-      setEmailChecking(false);
+      setEmailSending(false);
     }
   };
 
-  // 2단계 제출: 실제 회원가입 API 호출
+  // 2단계 제출: 실제 회원가입 API 호출 (인증 링크를 클릭했는지는 서버가 최종 검증합니다)
   const handleStep2Submit = async (e) => {
     e.preventDefault();
     setSignupError('');
 
-    if (!emailVerified) {
-      setEmailError('이메일 확인을 먼저 진행해주세요.');
+    if (sentEmail === '' || sentEmail !== email.trim()) {
+      setEmailError('인증 메일을 먼저 발송해주세요.');
       return;
     }
 
@@ -424,25 +432,30 @@ function Signup({ onBackToLogin }) {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    setEmailVerified(false);
+                    setSentEmail('');
                     setEmailError('');
+                    setEmailNotice('');
                   }}
                   className={styles.emailInput}
                 />
                 <button
                   type="button"
                   className={styles.verifyButton}
-                  onClick={handleVerifyEmail}
-                  disabled={emailChecking || email.trim().length === 0}
+                  onClick={handleSendVerificationEmail}
+                  disabled={emailSending || email.trim().length === 0}
                 >
-                  {emailChecking ? '확인 중...' : emailVerified ? '확인 완료' : '이메일 확인'}
+                  {emailSending
+                    ? '발송 중...'
+                    : sentEmail !== '' && sentEmail === email.trim()
+                    ? '인증 메일 재전송'
+                    : '인증 메일 보내기'}
                 </button>
               </div>
               {emailError && (
                 <span style={{ color: 'red', fontSize: '12px', marginTop: '4px', display: 'block' }}>{emailError}</span>
               )}
-              {emailVerified && !emailError && (
-                <span style={{ color: '#0084FF', fontSize: '12px', marginTop: '4px', display: 'block' }}>사용 가능한 학교 이메일입니다.</span>
+              {emailNotice && !emailError && (
+                <span style={{ color: '#0084FF', fontSize: '12px', marginTop: '4px', display: 'block' }}>{emailNotice}</span>
               )}
             </div>
 

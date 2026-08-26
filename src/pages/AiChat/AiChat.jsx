@@ -10,14 +10,21 @@ import aichatSend from '../../assets/aichat_send.svg';
 import aichatRegisterArrow from '../../assets/aichat_register_arrow.svg';
 
 import {
+  getActivities,
   getAccessToken,
+  getAwards,
+  getCertificates,
   getChatMessages,
   getChatRooms,
+  getGradeGpas,
   getMyMember,
   getProfileCompleteness,
+  getTracks,
+  getVolunteers,
   sendChatMessage,
   startChatRoom,
 } from '../../services/hstepApi.js';
+import { buildLocalAnalysis, resolveLocalAnalysisPrompt } from './chatLocalAnalysis.js';
 
 const PROMPT_ROWS = [
   ['내 트랙 취업 분석', '추천 직무', '추천 자격증'],
@@ -27,9 +34,9 @@ const PROMPT_ROWS = [
 const UNSUPPORTED_RESPONSE = '죄송해요.\n현재 해당 상담은 지원하지 않는 기능이에요.\n현재는 취업, 진로, 공고, 자격증, 로드맵 관련 상담을 이용하실 수 있어요!';
 
 function getScenario(query) {
-  if (query === '추천 직무' || query === '토익 필요없는 회사') return 'RECOMMENDED_JOB';
-  if (PROMPT_ROWS.flat().includes(query)) return 'TRACK_CAREER_ANALYSIS';
-  if (/트랙|취업|진로|공고|자격증|로드맵|평점|토익|직무/.test(query)) return 'TRACK_CAREER_ANALYSIS';
+  if (query === '추천 직무') return 'RECOMMENDED_JOB';
+  if (query === '내 트랙 취업 분석') return 'TRACK_CAREER_ANALYSIS';
+  if (/트랙|취업|진로|공고|로드맵/.test(query)) return 'TRACK_CAREER_ANALYSIS';
   return null;
 }
 
@@ -45,6 +52,30 @@ function getOfflineResponse(query) {
 
 function buildWelcomeMessage(name) {
   return `환영합니다, ${name} 학우님!\nHSTEP AI 챗봇이에요.\n원하시는 질문을 선택해보세요.`;
+}
+
+function buildPreviewTrackAnalysis(gpa) {
+  return `000 학우님의 미디어디자인 트랙과 등록된 학점 정보를 분석했어요.\n\n• 학점: 1~4학년 평균 ${gpa} / 4.5\n• 개인 스펙: 자격증·수상·봉사·대외활동 미등록\n• 추천 직무: UI/UX 디자이너, 콘텐츠 디자이너, 모션그래픽 디자이너\n\n현재 학점은 기본 지원 요건을 충족하는 수준이에요. 다만 등록된 개인 스펙이 없어 프로젝트와 포트폴리오 경쟁력까지는 분석하기 어려워요. 다음 단계로 전공 프로젝트 2~3개를 포트폴리오로 정리하고, 관심 직무에 맞는 자격증이나 공모전 경험을 추가하는 것을 추천해요.`;
+}
+
+const PREVIEW_PARAMS = new URLSearchParams(window.location.search);
+const CHAT_PREVIEW = import.meta.env.DEV ? PREVIEW_PARAMS.get('chatPreview') : null;
+const IS_REGISTERED_PREVIEW = ['registered', 'track-analysis'].includes(CHAT_PREVIEW);
+
+const EMPTY_LOCAL_PROFILE = {
+  name: '000',
+  grade: null,
+  overallGpa: null,
+  trackNames: [],
+  gpas: [],
+  certificates: [],
+  awards: [],
+  volunteers: [],
+  activities: [],
+};
+
+function settledValue(result, fallback) {
+  return result?.status === 'fulfilled' ? result.value : fallback;
 }
 
 function historyLabel(dateValue) {
@@ -73,6 +104,7 @@ function AiChat({
   const [history, setHistory] = useState([]);
   const [messages, setMessages] = useState([]);
   const [currentRoomId, setCurrentRoomId] = useState(null);
+  const [localProfile, setLocalProfile] = useState(EMPTY_LOCAL_PROFILE);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const chatLogRef = useRef(null);
@@ -93,6 +125,40 @@ function AiChat({
     let cancelled = false;
 
     const bootstrapChat = async () => {
+      if (IS_REGISTERED_PREVIEW) {
+        const previewName = '000';
+        const previewGpa = PREVIEW_PARAMS.get('gpa') || '3.5';
+        const now = Date.now();
+
+        setLocalProfile({
+          ...EMPTY_LOCAL_PROFILE,
+          name: previewName,
+          grade: 4,
+          overallGpa: Number(previewGpa),
+          trackNames: ['미디어디자인트랙'],
+          gpas: [1, 2, 3, 4].map((grade) => ({ grade, gpa: Number(previewGpa) })),
+        });
+
+        setIsRegistered(true);
+        setUserName(previewName);
+        const previewMessages = [{ sender: 'bot', text: buildWelcomeMessage(previewName) }];
+        if (CHAT_PREVIEW === 'track-analysis') {
+          previewMessages.push(
+            { sender: 'user', text: '내 트랙 취업 분석' },
+            { sender: 'bot', text: buildPreviewTrackAnalysis(previewGpa) },
+          );
+        }
+
+        setMessages(previewMessages);
+        setHistory([
+          { id: 'preview-1', text: '내 트랙 취업 분석', timestamp: now },
+          { id: 'preview-2', text: '추천 직무', timestamp: now - 86400000 },
+          { id: 'preview-3', text: '추천 자격증', timestamp: now - 259200000 },
+        ]);
+        setProfileLoading(false);
+        return;
+      }
+
       if (!getAccessToken()) {
         if (!cancelled) setProfileLoading(false);
         return;
@@ -102,20 +168,60 @@ function AiChat({
         const completeness = await getProfileCompleteness();
         if (cancelled) return;
 
-        setIsRegistered(Boolean(completeness?.completed));
+        // 백엔드 AI 로드맵과 동일하게 트랙 + (학점 또는 스펙) 조건이면
+        // 프론트 분석 기능을 이용할 수 있도록 합니다.
+        const canUseFrontendAnalysis = Boolean(
+          completeness?.trackCompleted
+          && (completeness?.gradeCompleted || completeness?.specCompleted)
+        );
+        setIsRegistered(canUseFrontendAnalysis);
 
-        const [memberResult, roomsResult] = await Promise.allSettled([
+        const [
+          memberResult,
+          roomsResult,
+          tracksResult,
+          gpasResult,
+          certificatesResult,
+          awardsResult,
+          volunteersResult,
+          activitiesResult,
+        ] = await Promise.allSettled([
           getMyMember(),
           getChatRooms(),
+          getTracks(),
+          getGradeGpas(),
+          getCertificates(),
+          getAwards(),
+          getVolunteers(),
+          getActivities(),
         ]);
         if (cancelled) return;
 
-        const member = memberResult.status === 'fulfilled' ? memberResult.value : null;
-        const rooms = roomsResult.status === 'fulfilled' ? roomsResult.value : [];
+        const member = settledValue(memberResult, null);
+        const rooms = settledValue(roomsResult, []);
+        const tracks = settledValue(tracksResult, []);
+        const trackNameById = new Map((Array.isArray(tracks) ? tracks : []).map((track) => [
+          Number(track.trackId),
+          track.trackName,
+        ]));
         const nextName = member?.name || '000';
 
+        setLocalProfile({
+          name: nextName,
+          grade: member?.grade ?? null,
+          overallGpa: member?.gpa ?? null,
+          trackNames: (member?.trackIds || [])
+            .map((trackId) => trackNameById.get(Number(trackId)))
+            .filter(Boolean),
+          gpas: settledValue(gpasResult, []),
+          certificates: settledValue(certificatesResult, []),
+          awards: settledValue(awardsResult, []),
+          volunteers: settledValue(volunteersResult, []),
+          activities: settledValue(activitiesResult, []),
+        });
+
         setUserName(nextName);
-        setMessages(completeness?.completed ? [{ sender: 'bot', text: buildWelcomeMessage(nextName) }] : []);
+        setMessages(canUseFrontendAnalysis ? [{ sender: 'bot', text: buildWelcomeMessage(nextName) }] : []);
         setHistory(Array.isArray(rooms) ? rooms.map((room) => ({
           id: room.chatRoomId,
           text: room.title,
@@ -171,6 +277,23 @@ function AiChat({
     setMessages((current) => [...current, { sender: 'user', text: trimmedQuery }]);
     setIsSending(true);
 
+    const localPrompt = resolveLocalAnalysisPrompt(trimmedQuery);
+    if (localPrompt) {
+      const response = buildLocalAnalysis(localPrompt, localProfile);
+      window.setTimeout(() => {
+        setMessages((current) => [...current, { sender: 'bot', text: response }]);
+        setHistory((current) => [{
+          id: `local-${Date.now()}`,
+          text: localPrompt,
+          timestamp: Date.now(),
+          remote: false,
+          response,
+        }, ...current.filter((item) => item.text !== localPrompt)]);
+        setIsSending(false);
+      }, 260);
+      return;
+    }
+
     const scenario = getScenario(trimmedQuery);
     if (!scenario) {
       window.setTimeout(() => {
@@ -187,9 +310,7 @@ function AiChat({
       if (!roomId) {
         const started = await startChatRoom(scenario);
         if (!started?.started) {
-          setIsRegistered(false);
-          setMessages([]);
-          return;
+          throw new Error('백엔드 상담 시작 조건을 충족하지 못했습니다.');
         }
 
         roomId = started.chatRoomId;
@@ -218,7 +339,19 @@ function AiChat({
   };
 
   const handleHistoryClick = async (item) => {
-    if (!item.remote || isSending) return;
+    if (isSending) return;
+
+    if (!item.remote) {
+      const localPrompt = resolveLocalAnalysisPrompt(item.text);
+      if (!localPrompt) return;
+      const response = item.response || buildLocalAnalysis(localPrompt, localProfile);
+      setCurrentRoomId(null);
+      setMessages([
+        { sender: 'user', text: localPrompt },
+        { sender: 'bot', text: response },
+      ]);
+      return;
+    }
 
     setIsSending(true);
     try {

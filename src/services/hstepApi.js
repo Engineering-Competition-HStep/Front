@@ -62,6 +62,12 @@ export async function login(userId, password) {
 export const getMyMember = () => request('/api/members/me').then((response) => response?.data || response);
 export const getProfileCompleteness = () => request('/api/profile/completeness');
 export const getMyRoadmaps = () => request('/api/roadmaps/base');
+export const getTracks = () => request('/api/tracks', { auth: false }).then((response) => response?.data || response);
+export const getGradeGpas = () => request('/api/profile/grade-gpa').then((response) => response?.data || response);
+export const getCertificates = () => request('/api/profile/certificates').then((response) => response?.data || response);
+export const getAwards = () => request('/api/profile/awards').then((response) => response?.data || response);
+export const getVolunteers = () => request('/api/profile/volunteers').then((response) => response?.data || response);
+export const getActivities = () => request('/api/profile/activities').then((response) => response?.data || response);
 
 export const getChatRooms = () => request('/api/chat/rooms');
 export const getChatMessages = (chatRoomId) => request(`/api/chat/rooms/${chatRoomId}/messages`);

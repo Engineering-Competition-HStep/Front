@@ -174,7 +174,7 @@ function Login( {onNavigateToFindPassword, onNavigateToSignup, onLoginSuccess} )
             onClick={onNavigateToFindPassword}
             style={{ cursor: 'pointer', textDecoration: 'underline' }}
           >
-            비밀번호를 잊으셨나요?
+            비밀번호 변경
           </span>
         </div>
 
